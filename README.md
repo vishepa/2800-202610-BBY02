@@ -1,13 +1,17 @@
-# Food Accessibility Heatmap
+# React + Vite
 
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Overview
+Currently, two official plugins are available:
 
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
----
+## React Compiler
 
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## Features
+## Expanding the ESLint configuration
 
 - 
 - 
@@ -19,10 +23,12 @@
 
 ## Technologies Used
 
-- **Frontend**: HTML, CSS, JavaScript
-- **Build Tool**:
-- **Backend**:
-- **Database**: 
+- **Frontend**: React, Tailwind CSS, React Router
+- **Build Tool**: Vite
+- **Mapping**: MapLibre GL JS, deck.gl, Turf.js, MapTiler (basemap tiles)
+- **Backend**: Node.js, Express, pg (node-postgres), Joi, jsonwebtoken
+- **Database**: PostgreSQL with PostGIS (hosted on Supabase)
+- **Auth**: Supabase Auth (JWT verified in Express middleware)
 
 ---
 
@@ -32,9 +38,13 @@
 To run the application locally:
 
 1.  **Clone** the repository.
-2.  **Install dependencies** by running `npm install` in the project root directory.
-3.  **Start the development server** by running the command: `npm run dev`.
-4.  Open your browser and visit the local address shown in your terminal (usually `http://localhost:5173` or similar).
+2.  **Install frontend dependencies** by running `npm install` in the project root.
+3.  **Install backend dependencies** by running `npm install` inside the `server/` directory.
+4.  **Set up environment variables**:
+    - Copy `.env.example` to `.env` in the project root and fill in the values.
+    - Copy `server/.env.example` to `server/.env` and fill in the values.
+5.  **Start the development servers** by running `npm run dev` from the project root. This starts the Vite frontend (`http://localhost:5173`) and the Express backend (`http://localhost:3000`) together.
+6.  Open your browser and visit `http://localhost:5173`.
 
 Once the application is running:
 
