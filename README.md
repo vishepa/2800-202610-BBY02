@@ -1,79 +1,16 @@
-# Food Accessibility Heatmap
+# React + Vite
 
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Overview
+Currently, two official plugins are available:
 
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
----
+## React Compiler
 
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-## Features
+## Expanding the ESLint configuration
 
-- 
-- 
-- 
-- 
-
----
-
-
-## Technologies Used
-
-- **Frontend**: HTML, CSS, JavaScript
-- **Build Tool**:
-- **Backend**:
-- **Database**: 
-
----
-
-
-## Usage
-
-To run the application locally:
-
-1.  **Clone** the repository.
-2.  **Install dependencies** by running `npm install` in the project root directory.
-3.  **Start the development server** by running the command: `npm run dev`.
-4.  Open your browser and visit the local address shown in your terminal (usually `http://localhost:5173` or similar).
-
-Once the application is running:
-
-
----
-
-
-## Project Structure
-
-```
-
-├── 
-
-
-Team Name: BBY-02
-Team Members: 
-- Vish Epa
-- Carlos Fonseca
-- Megan Chow
-- Halie Anastasia
-- Adam Olszewski
-## More details to come
-TBA
-
-
-## Acknowledgments
-
----
-
-
-## Limitations and Future Work
-### Limitations
-
-### Future Work
-
-
----
-
-
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
