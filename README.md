@@ -46,9 +46,34 @@ Once the application is running:
 
 ```
 
-├── 
+├── server/
+│   ├── app.js                          # Express entry point
+│   ├── databaseConnection.js
+│   └── routes/                         # Database queries
+│       ├── foodAssets.js
+│       ├── vulnerabilityScores.js
+│       ├── transitStops.js
+│       └── simulation.js
+|
+└── src/
+    ├── main.jsx                        # Mounts React app onto HTML page
+    ├── App.jsx                         # Top-level component for overall layout
+    ├── lib/
+    │   ├── api.js                      # Interface for api calls
+    │   └── scoring.js                  # Turf.js simulation previews
+    ├── components/
+    │   ├── Map.jsx                     
+    │   ├── Sidebar.jsx
+    │   └── SimulationToolbar.jsx
+    └── layers/
+        ├── FoodAssetLayer.js
+        ├── VulnerabilityLayer.js
+        ├── AffordabilityLayer.js
+        └── TransitLayer.js
+ 
+```
 
-
+## Team Information
 Team Name: BBY-02
 Team Members: 
 - Vish Epa
