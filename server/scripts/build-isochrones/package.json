@@ -1,0 +1,14 @@
+{
+  "name": "build-isochrones",
+  "version": "1.0.0",
+  "description": "Fetch walking isochrones from local ORS for all transit stops and food assets",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "p-limit": "^3.1.0",
+    "pg": "^8.20.0"
+  }
+}
