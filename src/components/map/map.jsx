@@ -6,7 +6,9 @@ import {
     MIN_ZOOM,
     MAX_ZOOM,
     MAP_STYLE
-} from '../constants/mapDefaults';
+} from '../../constants/mapDefaults';
+
+import { TestMarker } from './testMarker'; // TODO: Remove once real food asset markers are wired up (Halie's deck.gl work).
 
 
 
@@ -44,6 +46,7 @@ export function Map() {
                         position="top-right" 
                         style={{ marginTop: '50px'}}
                     />
+                    <TestMarker /> {/* TODO: Remove once real food asset markers are wired up (Halie's deck.gl work). */}   
                 </MapLibre>
                         
             </div>

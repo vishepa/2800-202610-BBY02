@@ -1,6 +1,6 @@
 import { useState } from "react";
-import Map from "./components/Map";
-import SimulationToolbar from "./components/SimulationToolbar";
+import Map from "./components/map/map";
+import SimulationToolbar from "./components/simulationToolbar";
 
 {/* this is the app JSX, it will contain the main application structure */}
 export default function App() {
