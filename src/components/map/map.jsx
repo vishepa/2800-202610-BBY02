@@ -9,10 +9,17 @@ import {
     MAP_STYLE
 } from '../../constants/mapDefaults';
 
-import { TestMarker } from './testMarker'; // TODO: Remove once real food asset markers are wired up (Halie's deck.gl work).
+// import { TestMarker } from './testMarker'; // TODO: Remove once real food asset markers are wired up (Halie's deck.gl work).
 
+import { useMemo } from 'react';
+import DeckGLOverlay  from './DeckGLOverlay';
+import { getTestLayer } from '../../layers/TestLayer';
 
 export function Map({ active, setActive }) {
+    const layers = useMemo(() => [
+        getTestLayer()
+    ], []);
+
   return (
     <div className="w-full h-full flex flex-col">
       <div className="w-full h-16 bg-white shadow-md flex items-center px-6 z-10">
@@ -38,7 +45,9 @@ export function Map({ active, setActive }) {
                         position="top-right" 
                         style={{ marginTop: '50px'}}
                     />
-                    <TestMarker /> {/* TODO: Remove once real food asset markers are wired up (Halie's deck.gl work). */}   
+                    {/* <TestMarker /> TODO: Remove once real food asset markers are wired up (Halie's deck.gl work).    */}
+
+                    <DeckGLOverlay layers = {layers} interleaved />
                 </MapLibre>
                         
             </div>
