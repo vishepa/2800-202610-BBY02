@@ -1,15 +1,12 @@
 import { useState } from "react";
 
-function MapSimButton() {
-  const [active, setActive] = useState("map");
-
+function MapSimButton({ active, setActive }) {
   return (
     <div className="fixed top-16 left-1/2 -translate-x-1/2 z-10">
       <div className="relative flex w-40 bg-gray-200 rounded-b-xl p-1 shadow-md">
         
-        {/* Sliding pill */}
         <div
-          className="absolute top-1 bottom-1 left-1 w-[calc(50%-0.25rem)] bg-white rounded-full shadow transition-all duration-300 ease-in-out"
+          className="absolute top-1 bottom-1 w-[calc(50%-0.25rem)] bg-white rounded-full shadow transition-all duration-300"
           style={{
             left: active === "sim" ? "50%" : "0.25rem",
           }}
@@ -17,7 +14,7 @@ function MapSimButton() {
 
         <button
           onClick={() => setActive("map")}
-          className={`relative z-10 w-1/2 py-1 text-sm font-medium ${
+          className={`relative z-10 w-1/2 py-1 ${
             active === "map" ? "text-black" : "text-gray-500"
           }`}
         >
@@ -26,7 +23,7 @@ function MapSimButton() {
 
         <button
           onClick={() => setActive("sim")}
-          className={`relative z-10 w-1/2 py-1 text-sm font-medium ${
+          className={`relative z-10 w-1/2 py-1 ${
             active === "sim" ? "text-black" : "text-gray-500"
           }`}
         >
