@@ -13,7 +13,7 @@ import {
 
 import { useMemo } from 'react';
 import DeckGLOverlay  from './DeckGLOverlay';
-import { getTestLayer } from './TestLayer';
+import { getTestLayer } from '../../layers/TestLayer';
 
 export function Map({ active, setActive }) {
     const layers = useMemo(() => [
