@@ -14,10 +14,10 @@ export function Map() {
                 <button className="text-black px-4 py-2 rounded cursor-pointer">Sim</button>
             </div>
 
-            {/* Filters button should be attached to the header.*/}
+            {/* Filters button should be attached to the header.
             <div className="fixed right-0 top-16 flex items-center px-6 z-10 cursor-pointer bg-white shadow-md rounded-bl-lg h-10">
                 <span className="text-gray-500">filters</span>
-            </div>
+            </div> */}
 
             {/* Map content */}
             <div className="flex-1 bg-gray-300 flex items-center justify-center">

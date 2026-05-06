@@ -1,8 +1,10 @@
 import { useState } from "react";
 import Map from "./components/Map";
 import SimulationToolbar from "./components/SimulationToolbar";
+import { FilterSpecification } from "maplibre-gl";
+import FilterDropdown from "./components/FilterDropdown";
 
-{/* this is the app JSX, it will contain the main application structure */}
+{/* this is the app JSX, it will contain the main application structure */ }
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -22,6 +24,10 @@ export default function App() {
         <SimulationToolbar />
       </div>
 
+
+      <div className="fixed right-0 top-16 flex items-center px-6 z-10 cursor-pointer bg-white shadow-md rounded-bl-lg h-10">
+        <FilterDropdown />
+      </div>
 
       {/* Toggle button sticks to the edge of the sidebar */}
       <button
