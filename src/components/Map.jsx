@@ -40,7 +40,10 @@ export function Map() {
                     minZoom={MIN_ZOOM}
                     maxZoom={MAX_ZOOM}
                 >
-                    <NavigationControl position="top-right" />
+                    <NavigationControl
+                        position="top-right" 
+                        style={{ marginTop: '50px'}}
+                    />
                 </MapLibre>
                         
             </div>
