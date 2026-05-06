@@ -11,14 +11,31 @@ import {
 
 // import { TestMarker } from './testMarker'; // TODO: Remove once real food asset markers are wired up (Halie's deck.gl work).
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import DeckGLOverlay  from './DeckGLOverlay';
 import { getTestLayer } from '../../layers/TestLayer';
+import { getFoodAssetLayer } from '../../layers/foodAssetLayer';
+import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
+
+import FoodTypeFilter from "../FoodTypeFilter";
 
 export function Map({ active, setActive }) {
+
+    const { data: foodData } = useFoodAssets();
+    const [foodLayerVisible, setFoodLayerVisible] = useState(true);
+    const [activeFoodTypes, setActiveFoodTypes] = useState(null); // null means "all types" 
+
+
     const layers = useMemo(() => [
-        getTestLayer()
-    ], []);
+        getTestLayer(),
+        getFoodAssetLayer({
+            data: foodData,
+            visible: foodLayerVisible,
+            activeTypes: activeFoodTypes,
+            onHover: ({ object, x, y }) => {/* sidebar update - add later */},
+            onClick: ({ object }) => console.log('Clicked on food asset:', object),
+        }),
+    ], [foodData, foodLayerVisible, activeFoodTypes]);
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -31,7 +48,15 @@ export function Map({ active, setActive }) {
             {/* Filters button should be attached to the header.*/}
             <div className="fixed right-0 top-16 flex items-center px-6 z-10 cursor-pointer bg-white shadow-md rounded-bl-lg h-10">
                 <span className="text-gray-500">filters</span>
+
             </div>
+                <div>
+                    <FoodTypeFilter
+                        activeTypes={activeFoodTypes}
+                        onChange={setActiveFoodTypes}
+                    />
+
+                </div>
 
             {/* Map content */}
             <div className="flex-1 relative">
@@ -47,7 +72,7 @@ export function Map({ active, setActive }) {
                     />
                     {/* <TestMarker /> TODO: Remove once real food asset markers are wired up (Halie's deck.gl work).    */}
 
-                    <DeckGLOverlay layers = {layers} interleaved />
+                    <DeckGLOverlay layers = {layers} />
                 </MapLibre>
                         
             </div>
