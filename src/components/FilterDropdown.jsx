@@ -30,7 +30,7 @@ const FilterDropdown = () => {
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-2 px-4 h-10 bg-white rounded-lg text-sm cursor-pointer"
+        className="flex items-center gap-2 px-4 h-10 bg-white rounded-bl-xl text-sm cursor-pointer"
       >
         {selected}
         <svg
@@ -44,7 +44,7 @@ const FilterDropdown = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute top-[calc(100%-0px)] -right-6 min-w-[180px] bg-white rounded-b-xl rounded-tl-xl overflow-hidden z-50">
+        <div className="absolute top-[calc(100%-0px)] right-0 min-w-[180px] bg-white rounded-b-xl rounded-tl-xl overflow-hidden z-50">
           <ul className="p-1">
             {options.map((opt) => (
               <li key={opt}>

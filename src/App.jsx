@@ -7,7 +7,7 @@ import FilterDropdown from "./components/FilterDropdown";
 {/* this is the app JSX, it will contain the main application structure */ }
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [active, setActive] = useState("map"); 
+  const [active, setActive] = useState("map");
 
   return (
     <div className="relative w-full h-screen">
@@ -19,7 +19,7 @@ export default function App() {
 
       {/* Sidebar */}
       <div className={`absolute top-0 left-0 h-full w-75 z-10 bg-white shadow-lg transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        <SimulationToolbar active={active} /> 
+        <SimulationToolbar active={active} />
       </div>
 
       {/* Toggle sidebar */}
@@ -29,6 +29,10 @@ export default function App() {
       >
         {sidebarOpen ? "<" : ">"}
       </button>
+
+      <div className="absolute top-16 right-0 z-30">
+        <FilterDropdown />
+      </div>
     </div>
   );
 }

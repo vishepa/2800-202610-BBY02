@@ -7,7 +7,7 @@ export function Map({ active, setActive }) {
         <h1 className="text-xl font-bold text-gray-700">JohnMap</h1>
       </div>
 
-      <MapSimButton active={active} setActive={setActive} /> {/* 👈 */}
+      <MapSimButton active={active} setActive={setActive} />
 
       <div className="flex-1 bg-gray-300 flex items-center justify-center">
         <span className="text-gray-500">Map goes here</span>

@@ -63,7 +63,7 @@ export function SimulationToolbar({ active }) {
     } else {
         return (
             <div className="p-4">
-                <h2 className="text-xl font-bold mb-4">Simulation Toolbar</h2>
+                <h2 className="text-xl font-bold mb-4">Map Data Display</h2>
                 <p>see a bunch of stats when hovering over map</p>
             </div>
         );
