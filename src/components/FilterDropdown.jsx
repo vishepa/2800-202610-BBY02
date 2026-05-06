@@ -23,7 +23,7 @@ const FilterDropdown = () => {
     return () => document.removeEventListener("keydown", handler)
   }, [])
 
-  const options = ["Filter 1", "Filter 2", "Filter 3"]
+  const options = ["Filter 1", "Filter 2", "Filter 3","Filter 4","Filter 5 ","Filter 6"]
 
   return (
     <div ref={rootRef} className="relative inline-block">
