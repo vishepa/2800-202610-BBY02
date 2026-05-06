@@ -1,8 +1,15 @@
-require('dotenv').config();
-const express = require('express');
+import 'dotenv/config'
+import express from 'express'
+import foodAssets from './routes/foodAssets.js'
 
 const app = express();
 app.use(express.json());
+
+
+app.use('/api/food-assets', foodAssets);
+// app.use('/api/vulnerability-scores', vulnerabilityScores);
+// app.use('/api/transit-stops', transitStops);
+// app.use('/api/simulation', simulation);
 
 app.get('/api/test', (req, res) => {
   res.json({ status: 'ok' });
