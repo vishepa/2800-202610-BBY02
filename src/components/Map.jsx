@@ -1,3 +1,16 @@
+import 'maplibre-gl/dist/maplibre-gl.css';
+import MapLibre, { NavigationControl } from 'react-map-gl/maplibre';
+import {
+    VANCOUVER_CENTER,
+    DEFAULT_ZOOM,
+    MIN_ZOOM,
+    MAX_ZOOM,
+    MAP_STYLE
+} from '../constants/mapDefaults';
+
+
+
+
 export function Map() {
     return (
         <div className="w-full h-full flex flex-col">
@@ -20,8 +33,16 @@ export function Map() {
             </div>
 
             {/* Map content */}
-            <div className="flex-1 bg-gray-300 flex items-center justify-center">
-                <span className="text-gray-500">Map goes here</span>
+            <div className="flex-1 relative">
+                <MapLibre
+                    initialViewState={{ ...VANCOUVER_CENTER, zoom: DEFAULT_ZOOM }}
+                    mapStyle={MAP_STYLE}
+                    minZoom={MIN_ZOOM}
+                    maxZoom={MAX_ZOOM}
+                >
+                    <NavigationControl position="top-right" />
+                </MapLibre>
+                        
             </div>
 
         </div>
