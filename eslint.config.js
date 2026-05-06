@@ -6,6 +6,16 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
   globalIgnores(['dist']),
+
+  // Node (server) files
+  {
+    files: ['server/**/*.js'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
+  
+  // Browser (react) files  
   {
     files: ['**/*.{js,jsx}'],
     extends: [
@@ -19,3 +29,4 @@ export default defineConfig([
     },
   },
 ])
+
