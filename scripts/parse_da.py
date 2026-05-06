@@ -26,6 +26,7 @@ VANCOUVER_CSD_DGUID = "2021A00055915022"
 # =============================================================================
 # CHARACTERISTIC IDs TO EXTRACT
 # Set to None to keep all 2631 characteristics.
+# All IDs verified against 98-401-X2021006_English_meta.txt
 # =============================================================================
 # --- Population ---
 #   1   Population, 2021
@@ -50,8 +51,8 @@ VANCOUVER_CSD_DGUID = "2021A00055915022"
 #   43    Semi-detached house
 #   44    Row house
 #   45    Apartment or flat in a duplex
-#   46    Apartment in a building < 5 storeys
-#   47    Apartment in a building >= 5 storeys
+#   46    Apartment in a building that has fewer than five storeys
+#   47    Apartment in a building that has five or more storeys
 #
 # --- Household size ---
 #   50  Total - Private households by household size
@@ -64,129 +65,145 @@ VANCOUVER_CSD_DGUID = "2021A00055915022"
 #   59    Married or living common-law
 #   66    Not married and not living common-law
 #
-# --- Income (individual, 2020) ---
-#   111 Total - Income statistics (pop 15+)
-#   113   Median total income among recipients ($)
-#   115   Median after-tax income among recipients ($)
-#   119   Median employment income among recipients ($)
+# --- Income (individual, 2020) - 100% data ---
+#   111 Total - Income statistics (pop 15+) [note: individual stats, 100% data]
+#   113   Median total income in 2020 among recipients ($)
+#   115   Median after-tax income in 2020 among recipients ($)
+#   119   Median employment income in 2020 among recipients ($)
 #
-# --- Household income ---
-#   131 Total - Household total income groups
-#   143 Median total income of households ($)
-#   144 Average total income of households ($)
-#   145 Median after-tax income of households ($)
-#   146 Average after-tax income of households ($)
+# --- Household income - 100% data ---
+#   242 Total - Income statistics for private households
+#   243   Median total income of household in 2020 ($)
+#   244   Median after-tax income of household in 2020 ($)
+#
+# --- Household income - 25% sample data ---
+#   251 Total - Income statistics for private households
+#   252   Average total income of household in 2020 ($)
+#   253   Average after-tax income of household in 2020 ($)
+#
+# --- Household total income groups ---
+#   260 Total - Household total income groups in 2020
 #
 # --- Low income ---
-#   261 Prevalence of low income based on LICO-AT (%)
-#   264 Prevalence of low income based on LIM-AT (%)
+#   345 Prevalence of low income based on LIM-AT (%)
+#   360 Prevalence of low income based on LICO-AT (%)
+#
+# --- Mother tongue ---
+#   393 Total - Mother tongue
+#   396   English
+#   397   French
+#   398   Non-official languages
 #
 # --- Immigration & citizenship ---
-#   1340 Total - Citizenship
-#   1341   Canadian citizens
-#   1344 Total - Immigrant status and period of immigration
-#   1345   Non-immigrants
-#   1346   Immigrants
-#   1359   Non-permanent residents
+#   1527 Total - Immigrant status and period of immigration
+#   1528   Non-immigrants
+#   1529   Immigrants
+#   1537   Non-permanent residents
 #
 # --- Visible minority ---
-#   1360 Total - Visible minority
-#   1361   Total visible minority population
-#   1362     South Asian
-#   1363     Chinese
-#   1364     Black
-#   1365     Filipino
-#   1366     Arab
-#   1367     Latin American
-#   1368     Southeast Asian
-#   1369     West Asian
-#   1370     Korean
-#   1371     Japanese
-#   1372     Visible minority, n.i.e.
-#   1373     Multiple visible minorities
-#   1374   Not a visible minority
+#   1683 Total - Visible minority
+#   1684   Total visible minority population
+#   1685     South Asian
+#   1686     Chinese
+#   1687     Black
+#   1688     Filipino
+#   1689     Arab
+#   1690     Latin American
+#   1691     Southeast Asian
+#   1692     West Asian
+#   1693     Korean
+#   1694     Japanese
+#   1695     Visible minority, n.i.e.
+#   1696     Multiple visible minorities
+#   1697   Not a visible minority
 #
 # --- Indigenous identity ---
-#   1375 Total - Indigenous identity
-#   1376   First Nations (North American Indian)
-#   1377   Métis
-#   1378   Inuk (Inuit)
-#
-# --- Mother tongue / language ---
-#   1454 Total - Mother tongue
-#   1455   English
-#   1456   French
-#   1457   Non-official languages
+#   1402 Total - Indigenous identity
+#   1403   Indigenous identity
+#   1405     First Nations (North American Indian)
+#   1406     Métis
+#   1407     Inuk (Inuit)
+#   1410   Non-Indigenous identity
 #
 # --- Housing tenure ---
-#   1727 Total - Private households by tenure
-#   1728   Owner
-#   1729   Renter
-#   1730   Band housing
+#   1414 Total - Private households by tenure
+#   1415   Owner
+#   1416   Renter
+#   1417   Dwelling provided by the local government, First Nation or Indian band
 #
 # --- Shelter cost ---
-#   1731 Total - Private households by shelter-cost-to-income ratio
-#   1733   Spending 30% or more of income on shelter costs
+#   1465 Total - Owner and tenant households by shelter-cost-to-income ratio
+#   1466   Spending less than 30% of income on shelter costs
+#   1467   Spending 30% or more of income on shelter costs
+#
+# --- Education (15+) ---
+#   1998 Total - Highest certificate, diploma or degree (15+)
+#   1999   No certificate, diploma or degree
+#   2000   High (secondary) school diploma or equivalency certificate
+#   2001   Postsecondary certificate, diploma or degree
+#   2003     Apprenticeship or trades certificate or diploma
+#   2006     College, CEGEP or other non-university certificate or diploma
+#   2008     Bachelor's degree or higher
+#   2009       Bachelor's degree
+#   2010       University certificate or diploma above bachelor level
+#   2011       Degree in medicine, dentistry, veterinary medicine or optometry
+#   2012       Master's degree
+#   2013       Earned doctorate
 #
 # --- Education (25-64) ---
-#   1986 Total - Highest certificate, diploma or degree (25-64)
-#   1987   No certificate, diploma or degree
-#   1988   Secondary (high) school diploma or equivalency certificate
-#   1993   Postsecondary certificate, diploma or degree
-#   1994     Apprenticeship or trades certificate or diploma
-#   1996     College, CEGEP or other non-university certificate or diploma
-#   1998     University certificate, diploma or degree at bachelor level or above
-#   1999       Bachelor's degree
-#   2000       University certificate or diploma above bachelor level
-#   2001       Degree in medicine, dentistry, veterinary medicine or optometry
-#   2002       Master's degree
-#   2003       Earned doctorate
+#   2014 Total - Highest certificate, diploma or degree (25-64)
+#   2015   No certificate, diploma or degree
+#   2017   Postsecondary certificate, diploma or degree
+#   2025     Bachelor's degree
+#   2028     Master's degree
+#   2029     Earned doctorate
 #
 # --- Labour force (15+) ---
-#   2004 Total - Labour force status (15+)
-#   2005   Employed
-#   2006   Unemployed
-#   2007   Not in the labour force
-#   2008 Participation rate (%)
-#   2009 Employment rate (%)
-#   2010 Unemployment rate (%)
+#   2223 Total - Population aged 15 years and over by labour force status
+#   2224   In the labour force
+#   2225     Employed
+#   2226     Unemployed
+#   2227   Not in the labour force
+#   2228 Participation rate
+#   2229 Employment rate
+#   2230 Unemployment rate
 #
 # --- Commuting ---
-#   2396 Total - Main mode of commuting
-#   2397   Car, truck, van - as a driver
-#   2398   Car, truck, van - as a passenger
-#   2399   Public transit
-#   2400   Walked
-#   2401   Bicycle
-#   2402   Other method
+#   2603 Total - Main mode of commuting
+#   2605   Car, truck or van - as a driver
+#   2606   Car, truck or van - as a passenger
+#   2607   Public transit
+#   2608   Walked
+#   2609   Bicycle
+#   2610   Other method
  
 CHARACTERISTIC_IDS = [
     # Population
     1, 2, 3, 4, 5, 6, 7,
     # Age
     9, 13, 24, 40,
-    # # Dwelling type
-    # 42, 43, 44, 45, 46, 47,
     # Household size
     57,
-    # Income
-    113, 143, 145,
+    # Income (individual, 100% data)
+    113, 115,
+    # Household income (100% data)
+    243, 244,
     # Low income
-    264,
+    345, 360,
     # Immigration
-    1346, 1359,
+    1529, 1537,
     # Visible minority
-    1361,
+    1684,
     # Housing tenure
-    1728, 1729,
+    1415, 1416,
     # Shelter cost
-    1733,
-    # Education
-    1987, 1999, 2003,
+    1467,
+    # Education (25-64)
+    2015, 2025, 2029,
     # Labour
-    2009, 2010,
+    2229, 2230,
     # Commuting
-    2603
+    2603, 2605, 2606, 2607, 2608, 2609, 2610
 ]
  
 # Set to None to extract everything:
@@ -287,4 +304,3 @@ if __name__ == "__main__":
  
     da_dguids = get_vancouver_da_dguids(geo_starting_row, VANCOUVER_CSD_DGUID)
     filter_census_csv(census_csv, da_dguids, output_csv, CHARACTERISTIC_IDS)
- 
