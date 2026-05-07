@@ -23,7 +23,7 @@ export function Map({ active, setActive }) {
 
     const { data: foodData } = useFoodAssets();
     const [foodLayerVisible, setFoodLayerVisible] = useState(true);
-    const [activeFoodTypes, setActiveFoodTypes] = useState(null); // null means "all types" 
+    const [activeFoodCategories, setActiveFoodCategories] = useState(null); // null means "all types" 
 
 
     const layers = useMemo(() => [
@@ -31,11 +31,11 @@ export function Map({ active, setActive }) {
         getFoodAssetLayer({
             data: foodData,
             visible: foodLayerVisible,
-            activeTypes: activeFoodTypes,
+            activeCategories: activeFoodCategories,
             onHover: ({ object, x, y }) => {/* sidebar update - add later */},
             onClick: ({ object }) => console.log('Clicked on food asset:', object),
         }),
-    ], [foodData, foodLayerVisible, activeFoodTypes]);
+    ], [foodData, foodLayerVisible, activeFoodCategories]);
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -50,14 +50,21 @@ export function Map({ active, setActive }) {
                 <span className="text-gray-500">filters</span>
 
             </div>
-                <div>
+            {/* DELETE THIS GANG, JUST HERE FOR TESTING */}
+                <div className="absolute top-16 right-32 z-10 space-y-2">
+                    <button
+                        onClick={() => setFoodLayerVisible(v => !v)}
+                        className="bg-white shadow-md rounded px-3 py-2"
+                    >
+                        {foodLayerVisible ? 'Hide food assets' : 'Show food assets'}
+                    </button>
                     <FoodTypeFilter
-                        activeTypes={activeFoodTypes}
-                        onChange={setActiveFoodTypes}
+                        activeCategories={activeFoodCategories}
+                        onChange={setActiveFoodCategories}
                     />
 
                 </div>
-
+            
             {/* Map content */}
             <div className="flex-1 relative">
                 <MapLibre

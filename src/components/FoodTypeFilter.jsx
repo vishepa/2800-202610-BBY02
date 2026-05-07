@@ -1,18 +1,18 @@
 import { FOOD_CATEGORIES } from "../constants/foodCategories";
 
-export default function FoodTypeFilter({ activeTypes, onChange }) {
+export default function FoodTypeFilter({ activeCategories, onChange }) {
 
     // null = all selected; otherwiste it's an explicit array
-    const isActive = (id) => activeTypes === null || activeTypes.includes(id);
+    const isActive = (id) => activeCategories === null || activeCategories.includes(id);
 
     const toggle = (id) => {
-        if (activeTypes === null) {
+        if (activeCategories === null) {
             // first toggle from "all" - uncheck this one
-            onChange(FOOD_CATEGORIES.filter(c => c.id !== id).map(c => c.id)).map(c => c.id);
-        } else if (activeTypes.includes(id)) {
-            onChange(activeTypes.filter(t => t !== id));
+            onChange(FOOD_CATEGORIES.filter(c => c.id !== id).map(c => c.id));
+        } else if (activeCategories.includes(id)) {
+            onChange(activeCategories.filter(t => t !== id));
         } else {
-            const next = [...activeTypes, id];
+            const next = [...activeCategories, id];
             // if everything is selected, collapse back to "all selected" state (null)
             onChange(next.length === FOOD_CATEGORIES.length ? null : next);
         }

@@ -24,7 +24,8 @@ router.get('/', async (req, res) => {
     ) AS geojson
     FROM food_assets
     WHERE
-      ($1::text[] IS NULL OR category = ANY($1::text[]))
+      geom IS NOT NULL
+      AND ($1::text[] IS NULL OR category = ANY($1::text[]))
       AND ($2::text IS NULL OR name ILIKE '%' || $2 || '%')
   `, [categories ?? null, search ?? null])
 
