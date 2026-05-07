@@ -11,16 +11,31 @@ import {
 
 // import { TestMarker } from './testMarker'; // TODO: Remove once real food asset markers are wired up (Halie's deck.gl work).
 
-import { useMemo } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import DeckGLOverlay  from './DeckGLOverlay';
 import { getTestLayer } from '../../layers/TestLayer';
-import { getDisseminationAreaLayer } from "../../layers/DisseminationAreaLayer.js";
+import { getDisseminationAreaLayer } from '../../layers/DisseminationAreaLayer.js';
+import {LayerPopup} from './popups/LayerPopup';
+// import TestMarker from "testMarker";
 
 export function Map({ active, setActive }) {
-    const layers = useMemo(() => [
+    
+    // Selected state for the popups
+    const [selected, setSelected] = useState(null);
+
+    // Function to handle the click event for the popups
+    const handleClick = useCallback((info, layerId) => {
+        //info: the object deck.gl passes to onClick
+        //  info.object: the GeoJSON feature that was clicked
+        //  info.coordinate: [long, lat] of the click
+        console.log("LeftClick working");
+        setSelected({object: info.object, coordinate:info.coordinate, layerId});
+    }, []); 
+
+    const LAYERS = useMemo(() => [
         getTestLayer(),
-        getDisseminationAreaLayer(),
-    ], []);
+        getDisseminationAreaLayer(info => handleClick(info, 'dissemination-areas')),
+    ], [handleClick]);
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -47,9 +62,15 @@ export function Map({ active, setActive }) {
                         position="top-right" 
                         style={{ marginTop: '50px'}}
                     />
-                    {/* <TestMarker /> TODO: Remove once real food asset markers are wired up (Halie's deck.gl work).    */}
+                     {/* TODO: Remove once real food asset markers are wired up (Halie's deck.gl work).   */}
+                    {/* {<TestMarker /> } */}
+                    <DeckGLOverlay layers = {LAYERS} interleaved />
+                
+                <LayerPopup id='layer-popup'
+                    selected={selected}
+                    onClose={() => setSelected(null)}
+                />
 
-                    <DeckGLOverlay layers = {layers} interleaved />
                 </MapLibre>
                         
             </div>

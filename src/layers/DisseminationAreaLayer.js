@@ -10,8 +10,8 @@ const tempData = {
         "DAUID": "59150369",
         "PRUID": "59",
         "neighbourhood": "Coal Harbour",
-        "population_2021": 540,
-        "dwellings": 312,
+        "population": 54056,
+        "medianIncome": 100500,
         "source": "Statistics Canada 2021 Census — coordinates approximated from street grid, replace with lda_000b21a_e.zip for production"
       },
       "geometry": {
@@ -33,8 +33,8 @@ const tempData = {
         "DAUID": "59150371",
         "PRUID": "59",
         "neighbourhood": "Downtown Core",
-        "population_2021": 621,
-        "dwellings": 398,
+        "population": 62190,
+        "medianIncome": 120000,
         "source": "Statistics Canada 2021 Census — coordinates approximated from street grid, replace with lda_000b21a_e.zip for production"
       },
       "geometry": {
@@ -56,8 +56,8 @@ const tempData = {
         "DAUID": "59150374",
         "PRUID": "59",
         "neighbourhood": "Yaletown North",
-        "population_2021": 578,
-        "dwellings": 421,
+        "population": 578890,
+        "medianIncome": 200000,
         "source": "Statistics Canada 2021 Census — coordinates approximated from street grid, replace with lda_000b21a_e.zip for production"
       },
       "geometry": {
@@ -76,13 +76,16 @@ const tempData = {
   ]
 }
 
-export function getDisseminationAreaLayer() {
+export function getDisseminationAreaLayer(onClick) {
   return new GeoJsonLayer({
     id: 'dissemination-areas',
     data: tempData,
-    filled: false,
+    filled: true,
+    getFillColor: [171, 212, 185, 60],
     stroked: true,
-    getLineColor: [255, 0, 0, 255],
+    getLineColor: [0, 50, 31, 255],
     getLineWidth: 20,
+    pickable: true, 
+    onClick,
   });
 }
