@@ -14,11 +14,21 @@ import {
 import { useMemo, useState, useCallback } from 'react';
 import DeckGLOverlay  from './DeckGLOverlay';
 import { getTestLayer } from '../../layers/TestLayer';
+import { getFoodAssetLayer } from '../../layers/foodAssetLayer';
+import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
+
+import FoodTypeFilter from "../FoodTypeFilter";
 import { getDisseminationAreaLayer } from '../../layers/DisseminationAreaLayer.js';
 import {LayerPopup} from './popups/LayerPopup';
 // import TestMarker from "testMarker";
 
 export function Map({ active, setActive }) {
+
+    const { data: foodData } = useFoodAssets();
+    const [foodLayerVisible, setFoodLayerVisible] = useState(true);
+    const [activeFoodCategories, setActiveFoodCategories] = useState(null); // null means "all types" 
+
+
     
     // Selected state for the popups
     const [selected, setSelected] = useState(null);
@@ -35,7 +45,14 @@ export function Map({ active, setActive }) {
     const LAYERS = useMemo(() => [
         getTestLayer(),
         getDisseminationAreaLayer(info => handleClick(info, 'dissemination-areas')),
-    ], [handleClick]);
+        getFoodAssetLayer({
+            data: foodData,
+            visible: foodLayerVisible,
+            activeCategories: activeFoodCategories,
+            onHover: ({ object, x, y }) => {/* sidebar update - add later */},
+            onClick: ({ object }) => console.log('Clicked on food asset:', object),
+        }),
+    ], [foodData, foodLayerVisible, activeFoodCategorieshandleClick]);
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -48,8 +65,23 @@ export function Map({ active, setActive }) {
             {/* Filters button should be attached to the header.*/}
             <div className="fixed right-0 top-16 flex items-center px-6 z-10 cursor-pointer bg-white shadow-md rounded-bl-lg h-10">
                 <span className="text-gray-500">filters</span>
-            </div>
 
+            </div>
+            {/* DELETE THIS GANG, JUST HERE FOR TESTING */}
+                <div className="absolute top-16 right-32 z-10 space-y-2">
+                    <button
+                        onClick={() => setFoodLayerVisible(v => !v)}
+                        className="bg-white shadow-md rounded px-3 py-2"
+                    >
+                        {foodLayerVisible ? 'Hide food assets' : 'Show food assets'}
+                    </button>
+                    <FoodTypeFilter
+                        activeCategories={activeFoodCategories}
+                        onChange={setActiveFoodCategories}
+                    />
+
+                </div>
+            
             {/* Map content */}
             <div className="flex-1 relative">
                 <MapLibre
@@ -62,8 +94,7 @@ export function Map({ active, setActive }) {
                         position="top-right" 
                         style={{ marginTop: '50px'}}
                     />
-                     {/* TODO: Remove once real food asset markers are wired up (Halie's deck.gl work).   */}
-                    {/* {<TestMarker /> } */}
+                    
                     <DeckGLOverlay layers = {LAYERS} interleaved />
                 
                 <LayerPopup id='layer-popup'
