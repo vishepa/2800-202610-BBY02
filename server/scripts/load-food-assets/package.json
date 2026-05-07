@@ -1,0 +1,14 @@
+{
+  "name": "load-food-assets",
+  "version": "1.0.0",
+  "description": "Load Vancouver Food Asset Map CSV into food_assets table with Nominatim geocoding",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "csv-parse": "^5.6.0",
+    "dotenv": "^17.4.2",
+    "pg": "^8.20.0"
+  }
+}

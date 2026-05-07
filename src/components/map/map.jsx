@@ -8,10 +8,51 @@ import {
     MAX_ZOOM,
     MAP_STYLE
 } from '../../constants/mapDefaults';
-import { TestMarker } from './testMarker';
+// import { TestMarker } from './testMarker';
 import { useScreenWidth } from '../widthHelper';
+import { useMemo, useState, useCallback } from 'react';
+import DeckGLOverlay  from './DeckGLOverlay';
+import { getTestLayer } from '../../layers/TestLayer';
+import { getFoodAssetLayer } from '../../layers/foodAssetLayer';
+import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
+
+import FoodTypeFilter from "../FoodTypeFilter";
+import { getDisseminationAreaLayer } from '../../layers/DisseminationAreaLayer.js';
+import {LayerPopup} from './popups/LayerPopup';
+// import TestMarker from "testMarker";
 
 export function Map({ active, setActive }) {
+
+    const { data: foodData } = useFoodAssets();
+    const [foodLayerVisible, setFoodLayerVisible] = useState(true);
+    const [activeFoodCategories, setActiveFoodCategories] = useState(null); // null means "all types" 
+
+
+    
+    // Selected state for the popups
+    const [selected, setSelected] = useState(null);
+
+    // Function to handle the click event for the popups
+    const handleClick = useCallback((info, layerId) => {
+        //info: the object deck.gl passes to onClick
+        //  info.object: the GeoJSON feature that was clicked
+        //  info.coordinate: [long, lat] of the click
+        console.log("LeftClick working");
+        setSelected({object: info.object, coordinate:info.coordinate, layerId});
+    }, []); 
+
+    const LAYERS = useMemo(() => [
+        getTestLayer(),
+        getDisseminationAreaLayer(info => handleClick(info, 'dissemination-areas')),
+        getFoodAssetLayer({
+            data: foodData,
+            visible: foodLayerVisible,
+            activeCategories: activeFoodCategories,
+            onHover: ({ object, x, y }) => {/* sidebar update - add later */},
+            onClick: ({ object }) => console.log('Clicked on food asset:', object),
+        }),
+    ], [foodData, foodLayerVisible, activeFoodCategories]);
+
     const width = useScreenWidth();
     const isDesktop = width >= 760;
 
@@ -44,7 +85,14 @@ export function Map({ active, setActive }) {
                         position="top-right"
                         style={{ marginTop: '50px' }}
                     />
-                    <TestMarker />
+                    
+                    <DeckGLOverlay layers = {LAYERS} interleaved />
+                
+                <LayerPopup id='layer-popup'
+                    selected={selected}
+                    onClose={() => setSelected(null)}
+                />
+
                 </MapLibre>
             </div>
         </div>

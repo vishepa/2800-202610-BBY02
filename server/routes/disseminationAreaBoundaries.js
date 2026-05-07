@@ -4,7 +4,7 @@ import { query } from '../databaseConnection.js'
 const router = Router()
 
 router.get('/', async (req, res) => {
-  const { categories, search } = req.query;
+  const { dauid } = req.query;
 
   const rows = await query(`
     SELECT json_build_object(
@@ -14,20 +14,14 @@ router.get('/', async (req, res) => {
           'type', 'Feature',
           'geometry', ST_AsGeoJSON(geom)::json,
           'properties', json_build_object(
-            'id', id,
-            'name', name,
-            'category', category,
-            'address', address
+            'dauid', dauid
           )
         )
       )
     ) AS geojson
-    FROM food_assets
-    WHERE
-      geom IS NOT NULL
-      AND ($1::text[] IS NULL OR category = ANY($1::text[]))
-      AND ($2::text IS NULL OR name ILIKE '%' || $2 || '%')
-  `, [categories ?? null, search ?? null])
+    FROM dissemination_areas
+    WHERE ($1::bigint IS NULL OR dauid = $1::bigint)
+  `, [dauid ?? null])
 
   res.json(rows[0].geojson)
 })

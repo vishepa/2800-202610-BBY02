@@ -26,3 +26,8 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# GTFS and data files (downloaded for ingest, not committed)
+*.zip
+*.pbf
+*.csv
