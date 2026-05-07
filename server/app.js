@@ -2,6 +2,7 @@ import 'dotenv/config'
 import express from 'express'
 import foodAssets from './routes/foodAssets.js'
 import disseminationAreaBoundaries from './routes/disseminationAreaBoundaries.js'
+import disseminationAreaStatistics from './routes/disseminationAreaStatistics.js'
 
 const app = express();
 app.use(express.json());
@@ -9,6 +10,7 @@ app.use(express.json());
 
 app.use('/api/food-assets', foodAssets);
 app.use('/api/da-boundaries', disseminationAreaBoundaries);
+app.use('/api/da-statistics', disseminationAreaStatistics);
 // app.use('/api/vulnerability-scores', vulnerabilityScores);
 // app.use('/api/transit-stops', transitStops);
 // app.use('/api/simulation', simulation);

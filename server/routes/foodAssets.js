@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { query } from '../databaseConnection.js'
 
-const router = Router()
+const router = Router();
 
 router.get('/', async (req, res) => {
   const { categories, search } = req.query;
@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
       AND ($2::text IS NULL OR name ILIKE '%' || $2 || '%')
   `, [categories ?? null, search ?? null])
 
-  res.json(rows[0].geojson)
+  res.json(rows[0].geojson);
 })
 
 export default router;
