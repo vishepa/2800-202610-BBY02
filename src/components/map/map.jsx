@@ -11,13 +11,16 @@ import {
 
 // import { TestMarker } from './testMarker'; // TODO: Remove once real food asset markers are wired up (Halie's deck.gl work).
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import DeckGLOverlay  from './DeckGLOverlay';
 import { getTestLayer } from '../../layers/TestLayer';
 import { getFoodAssetLayer } from '../../layers/foodAssetLayer';
 import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
 
 import FoodTypeFilter from "../FoodTypeFilter";
+import { getDisseminationAreaLayer } from '../../layers/DisseminationAreaLayer.js';
+import {LayerPopup} from './popups/LayerPopup';
+// import TestMarker from "testMarker";
 
 export function Map({ active, setActive }) {
 
@@ -26,8 +29,22 @@ export function Map({ active, setActive }) {
     const [activeFoodCategories, setActiveFoodCategories] = useState(null); // null means "all types" 
 
 
-    const layers = useMemo(() => [
+    
+    // Selected state for the popups
+    const [selected, setSelected] = useState(null);
+
+    // Function to handle the click event for the popups
+    const handleClick = useCallback((info, layerId) => {
+        //info: the object deck.gl passes to onClick
+        //  info.object: the GeoJSON feature that was clicked
+        //  info.coordinate: [long, lat] of the click
+        console.log("LeftClick working");
+        setSelected({object: info.object, coordinate:info.coordinate, layerId});
+    }, []); 
+
+    const LAYERS = useMemo(() => [
         getTestLayer(),
+        getDisseminationAreaLayer(info => handleClick(info, 'dissemination-areas')),
         getFoodAssetLayer({
             data: foodData,
             visible: foodLayerVisible,
@@ -43,7 +60,7 @@ export function Map({ active, setActive }) {
         <h1 className="text-xl font-bold text-gray-700">JohnMap</h1>
       </div>
 
-      <MapSimButton active={active} setActive={setActive} /> {/* 👈 */}
+      <MapSimButton active={active} setActive={setActive} /> {/* Simulation mode toggle */}
 
             {/* Filters button should be attached to the header.*/}
             <div className="fixed right-0 top-16 flex items-center px-6 z-10 cursor-pointer bg-white shadow-md rounded-bl-lg h-10">
@@ -77,9 +94,14 @@ export function Map({ active, setActive }) {
                         position="top-right" 
                         style={{ marginTop: '50px'}}
                     />
-                    {/* <TestMarker /> TODO: Remove once real food asset markers are wired up (Halie's deck.gl work).    */}
+                    
+                    <DeckGLOverlay layers = {LAYERS} interleaved />
+                
+                <LayerPopup id='layer-popup'
+                    selected={selected}
+                    onClose={() => setSelected(null)}
+                />
 
-                    <DeckGLOverlay layers = {layers} />
                 </MapLibre>
                         
             </div>
