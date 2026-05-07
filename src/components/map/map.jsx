@@ -52,7 +52,7 @@ export function Map({ active, setActive }) {
             onHover: ({ object, x, y }) => {/* sidebar update - add later */},
             onClick: ({ object }) => console.log('Clicked on food asset:', object),
         }),
-    ], [foodData, foodLayerVisible, activeFoodCategorieshandleClick]);
+    ], [foodData, foodLayerVisible, activeFoodCategories]);
 
   return (
     <div className="w-full h-full flex flex-col">
