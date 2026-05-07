@@ -14,10 +14,12 @@ import {
 import { useMemo } from 'react';
 import DeckGLOverlay  from './DeckGLOverlay';
 import { getTestLayer } from '../../layers/TestLayer';
+import { getDisseminationAreaLayer } from "../../layers/DisseminationAreaLayer.js";
 
 export function Map({ active, setActive }) {
     const layers = useMemo(() => [
-        getTestLayer()
+        getTestLayer(),
+        getDisseminationAreaLayer(),
     ], []);
 
   return (
@@ -26,7 +28,7 @@ export function Map({ active, setActive }) {
         <h1 className="text-xl font-bold text-gray-700">JohnMap</h1>
       </div>
 
-      <MapSimButton active={active} setActive={setActive} /> {/* 👈 */}
+      <MapSimButton active={active} setActive={setActive} /> {/* Simulation mode toggle */}
 
             {/* Filters button should be attached to the header.*/}
             <div className="fixed right-0 top-16 flex items-center px-6 z-10 cursor-pointer bg-white shadow-md rounded-bl-lg h-10">
