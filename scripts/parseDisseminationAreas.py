@@ -6,7 +6,7 @@ Set to None to keep all 2631 characteristics.
  
 Requirements:  pip install pandas
 Usage:
-    python3 parse_da.py <census_csv> <geo_starting_row_csv> [output_csv]
+    python3 parseDisseminationAreas.py <census_csv> <geo_starting_row_csv> [output_csv]
 """
  
 import sys
@@ -17,7 +17,7 @@ import pandas as pd
 # CONFIGURATION
 # =============================================================================
  
-CENSUS_CSV       = "98-401-X2021006_English_CSV_data.csv"
+CENSUS_CSV       = "98-401-X2021006_English_CSV_data_BritishColumbia.csv"
 GEO_STARTING_ROW = "98-401-X2021006_Geo_starting_row_BritishColumbia.CSV"
 OUTPUT_CSV       = "vancouver_DA_2021_filtered.csv"
  
@@ -179,9 +179,7 @@ VANCOUVER_CSD_DGUID = "2021A00055915022"
  
 CHARACTERISTIC_IDS = [
     # Population
-    1, 2, 3, 4, 5, 6, 7,
-    # Age
-    9, 13, 24, 40,
+    1, 6, 7,
     # Household size
     57,
     # Income (individual, 100% data)
@@ -190,16 +188,10 @@ CHARACTERISTIC_IDS = [
     243, 244,
     # Low income
     345, 360,
-    # Immigration
-    1529, 1537,
     # Visible minority
     1684,
-    # Housing tenure
-    1415, 1416,
     # Shelter cost
     1467,
-    # Education (25-64)
-    2015, 2025, 2029,
     # Labour
     2229, 2230,
     # Commuting
