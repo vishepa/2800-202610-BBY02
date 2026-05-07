@@ -1,4 +1,4 @@
-import MapSimButton from "../MapSimButton";
+import MapSimButton from "./MapSimButton";
 import 'maplibre-gl/dist/maplibre-gl.css';
 import MapLibre, { NavigationControl } from 'react-map-gl/maplibre';
 import {
@@ -8,25 +8,31 @@ import {
     MAX_ZOOM,
     MAP_STYLE
 } from '../../constants/mapDefaults';
-
-import { TestMarker } from './testMarker'; // TODO: Remove once real food asset markers are wired up (Halie's deck.gl work).
-
+import { TestMarker } from './testMarker';
+import { useScreenWidth } from '../widthHelper';
 
 export function Map({ active, setActive }) {
-  return (
-    <div className="w-full h-full flex flex-col">
-      <div className="w-full h-16 bg-white shadow-md flex items-center px-6 z-10">
-        <h1 className="text-xl font-bold text-gray-700">JohnMap</h1>
-      </div>
+    const width = useScreenWidth();
+    const isDesktop = width >= 760;
 
-      <MapSimButton active={active} setActive={setActive} /> {/* 👈 */}
-
-            {/* Filters button should be attached to the header.*/}
-            <div className="fixed right-0 top-16 flex items-center px-6 z-10 cursor-pointer bg-white shadow-md rounded-bl-lg h-10">
-                <span className="text-gray-500">filters</span>
+    return (
+        <div className="w-full h-full flex flex-col">
+            {/* Header — shared, but content differs by breakpoint */}
+            <div className="w-full h-16 bg-white shadow-md flex items-center px-6 z-10">
+                <h1 className="text-xl font-bold text-gray-700">JohnMap</h1>
             </div>
 
-            {/* Map content */}
+            {/* Desktop-only chrome */}
+            {isDesktop && (
+                <>
+                    <MapSimButton active={active} setActive={setActive} />
+                    <div className="fixed right-0 top-16 flex items-center px-6 z-10 cursor-pointer bg-white shadow-md rounded-bl-lg h-10">
+                        <span className="text-gray-500">filters</span>
+                    </div>
+                </>
+            )}
+
+            {/* Map — always rendered */}
             <div className="flex-1 relative">
                 <MapLibre
                     initialViewState={{ ...VANCOUVER_CENTER, zoom: DEFAULT_ZOOM }}
@@ -35,15 +41,14 @@ export function Map({ active, setActive }) {
                     maxZoom={MAX_ZOOM}
                 >
                     <NavigationControl
-                        position="top-right" 
-                        style={{ marginTop: '50px'}}
+                        position="top-right"
+                        style={{ marginTop: '50px' }}
                     />
-                    <TestMarker /> {/* TODO: Remove once real food asset markers are wired up (Halie's deck.gl work). */}   
+                    <TestMarker />
                 </MapLibre>
-                        
             </div>
-
         </div>
     );
 }
+
 export default Map;

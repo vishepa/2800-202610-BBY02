@@ -44,7 +44,7 @@ const FilterDropdown = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute top-[calc(100%-0px)] right-0 min-w-[180px] bg-white rounded-b-xl rounded-tl-xl overflow-hidden z-50">
+        <div className="absolute top-full right-0 min-w-45 bg-white rounded-b-xl rounded-tl-xl overflow-hidden z-50">
           <ul className="p-1">
             {options.map((opt) => (
               <li key={opt}>
