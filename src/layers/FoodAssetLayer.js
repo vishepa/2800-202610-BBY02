@@ -54,6 +54,7 @@ export function getFoodAssetLayer({
 function getIconUrlForCategory(category) {
     const icons = {
     'Grocery Stores':       'https://cdn-icons-png.flaticon.com/512/3724/3724788.png',
+    'Supermarkets':       'https://cdn-icons-png.flaticon.com/512/3724/3724788.png',
     'Commissary Kitchens':        'https://cdn-icons-png.flaticon.com/512/10630/10630027.png',
     'Kitchen Access':        'https://cdn-icons-png.flaticon.com/512/2728/2728879.png',
     'Community Gardens':  'https://cdn-icons-png.flaticon.com/512/628/628324.png',

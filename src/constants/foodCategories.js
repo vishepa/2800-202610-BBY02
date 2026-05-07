@@ -7,6 +7,7 @@ export const FOOD_CATEGORIES = [
   { id: 'Community Gardens', label: 'Community Gardens' },
   { id: 'Free Meal',        label: 'Free Meals' },
   { id: 'Low Cost Meal',    label: 'Low-Cost Meals' },
+  { id: 'Supermarkets',      label: 'Supermarkets' },
 ];
 
 export const FOOD_CATEGORY_IDS = FOOD_CATEGORIES.map(c => c.id);
