@@ -27,6 +27,7 @@ dist-ssr
 .env.*
 !.env.example
 
-*.csv
+# GTFS and data files (downloaded for ingest, not committed)
 *.zip
-scripts/venv
+*.pbf
+*.csv
