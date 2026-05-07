@@ -12,9 +12,16 @@ router.get('/', async (req, res) => {
       'features', json_agg(
         json_build_object(
           'type', 'Feature',
-          'geometry', ST_AsGeoJSON(geom)::json,
           'properties', json_build_object(
-            'dauid', dauid
+            'dauid', dauid,
+            'population_density_per_km2', population_density_per_km2,
+            'avg_household_size', avg_household_size,
+            'median_household_income', median_household_income,
+            'pct_low_income_lim_at', pct_low_income_lim_at,
+            'pct_shelter_cost_30pct_plus', pct_shelter_cost_30pct_plus,
+            'pct_commute_car', pct_commute_car,
+            'pct_commute_transit', pct_commute_transit,
+            'pct_commute_walk', pct_commute_walk
           )
         )
       )
@@ -23,7 +30,7 @@ router.get('/', async (req, res) => {
     WHERE ($1::bigint IS NULL OR dauid = $1::bigint)
   `, [dauid ?? null])
 
-  res.json(rows[0].geojson);
+  res.json(rows[0].geojson)
 })
 
 export default router;
