@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef } from "react"
+import FeaturePopup from "./FeaturePopup"
 
 const FilterDropdown = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [selected, setSelected] = useState("Filters")
+  const [showFilterPopup, setShowFilterPopup] = useState(false)
+  const [filterPopupSeen, setFilterPopupSeen] = useState(false)
   const rootRef = useRef(null)
 
   // Close on outside click
@@ -23,13 +26,23 @@ const FilterDropdown = () => {
     return () => document.removeEventListener("keydown", handler)
   }, [])
 
+  const handleToggle = () => {
+    const opening = !isOpen
+    if (opening && !filterPopupSeen) {
+      setShowFilterPopup(true)
+      setFilterPopupSeen(true)
+    }
+    setIsOpen(opening)
+  }
+
   const options = ["Filter 1", "Filter 2", "Filter 3","Filter 4","Filter 5 ","Filter 6"]
 
   return (
+    <>
     <div ref={rootRef} className="relative inline-block">
       <button
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={handleToggle}
         className="flex items-center gap-2 px-4 h-10 bg-white rounded-bl-xl text-sm cursor-pointer"
       >
         {selected}
@@ -61,6 +74,13 @@ const FilterDropdown = () => {
         </div>
       )}
     </div>
+
+    {showFilterPopup && (
+      <FeaturePopup title="Map Filters" onClose={() => setShowFilterPopup(false)}>
+        <p>Toggle between different data layers to view grocery stores, community gardens, farmers markets, and other food sources on the map.</p>
+      </FeaturePopup>
+    )}
+    </>
   )
 }
 
