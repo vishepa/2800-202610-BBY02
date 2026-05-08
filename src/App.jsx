@@ -8,6 +8,9 @@ import FeaturePopup from "./components/FeaturePopup";
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [active, setActive] = useState("map");
+
+  /* Pop up states */
+  const [showWelcome, setShowWelcome] = useState(true);
   const [showSimPopup, setShowSimPopup] = useState(false);
   const [simPopupSeen, setSimPopupSeen] = useState(false);
   const [showSliderPopup, setShowSliderPopup] = useState(false);
@@ -54,6 +57,13 @@ export default function App() {
       <div className="absolute top-16 right-0 z-30">
         <FilterDropdown />
       </div>
+
+      {showWelcome && (
+        <FeaturePopup title="Welcome to the Vancouver Food Accessibility Map" onClose={() => setShowWelcome(false)}>
+          <p className="mb-2">This interactive map visualizes food accessibility across Vancouver neighborhoods using a a variety of layers.</p>
+          <p>Each area on the map represents a dissemination area scored by proximity to grocery stores, community gardens, farmers markets, and transit access. Explore the map to find underserved areas and identify where new food sources could have the most impact.</p>
+        </FeaturePopup>
+      )}
 
       {showSimPopup && (
         <FeaturePopup title="Simulation Mode" onClose={() => setShowSimPopup(false)}>
