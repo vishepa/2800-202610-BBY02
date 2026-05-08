@@ -56,6 +56,15 @@ export function Map({ active, setActive, foodLayerVisible, transitLayerVisible }
             onHover: ({ object, x, y }) => {/* sidebar update - add later */},
             onClick: ({ object }) => console.log('Clicked on food asset:', object),
         }),
+        getTransitAssetLayer({
+            data: transitData,
+            visible: transitLayerVisible,
+            activeRoutes,
+            onHover: ({ object }) => {},
+            onClick: (info) => handleClick(info, 'transit-stops'),
+    }),
+
+    ], [foodData, foodLayerVisible, activeFoodCategories, transitData, transitLayerVisible, activeRoutes]);
 
     const width = useScreenWidth();
     const isDesktop = width >= 760;
