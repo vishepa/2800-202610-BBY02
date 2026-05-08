@@ -1,8 +1,29 @@
-require('dotenv').config();
-const express = require('express');
+import 'dotenv/config'
+import express from 'express'
+import foodAssets from './routes/foodAssets.js'
+import disseminationAreaBoundaries from './routes/disseminationAreaBoundaries.js'
+import isochrones from './routes/isochrones.js'
+import disseminationAreaStatistics from './routes/disseminationAreaStatistics.js'
+import transitStops from './routes/transitStops.js'
+
+// TODO Testing this is a simpler implementation for the popup to work
+import disseminationArea from './routes/disseminationArea.js'
+
 
 const app = express();
 app.use(express.json());
+
+
+app.use('/api/food-assets', foodAssets);
+app.use('/api/da-boundaries', disseminationAreaBoundaries);
+app.use('/api/isochrones', isochrones);
+app.use('/api/da-statistics', disseminationAreaStatistics);
+app.use('/api/transit-stops', transitStops);
+// app.use('/api/vulnerability-scores', vulnerabilityScores);
+// app.use('/api/simulation', simulation);
+
+// TODO Testing this is a simpler implementation for the popup to work
+app.use('/api/dissemination-areas', disseminationArea);
 
 app.get('/api/test', (req, res) => {
   res.json({ status: 'ok' });
