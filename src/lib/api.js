@@ -1,36 +1,28 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 
-export function getIsochroneData() {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+export function useIsochrones(range_seconds) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    useEffect(() => {
+  useEffect(() => {
+    const url = new URL("/api/isochrones?source_type=transit_stop", window.location.origin);
+    if (range_seconds) {
+      url.searchParams.set("range_seconds", range_seconds);
+    }
 
-        let cancelled = false;
+    setLoading(true);
+    setError(null);
 
-        fetch('/api/')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`API error: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (cancelled) return;
-                setData(data);
-                setLoading(false);
-                
-            })
-            .catch(error => {
-                if (cancelled) return;
-                setError(error);
-                setLoading(false);
-            });
+    fetch(url.toString())
+      .then((r) => {
+        if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
+        return r.json();
+      })
+      .then(setData)
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, [range_seconds]);
 
-        return () => { cancelled = true; };
-
-    }, []);
-
-    return { data, loading, error };
+  return { data, loading, error };
 }

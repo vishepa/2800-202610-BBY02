@@ -15,10 +15,12 @@ import DeckGLOverlay  from './DeckGLOverlay';
 import { getTestLayer } from '../../layers/TestLayer';
 import { getFoodAssetLayer } from '../../layers/foodAssetLayer';
 import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
+import { useIsochrones } from '../../lib/api';
 
 import FoodTypeFilter from "../FoodTypeFilter";
 import { getDisseminationAreaLayer } from '../../layers/DisseminationAreaLayer.js';
 import {LayerPopup} from './popups/LayerPopup';
+import { getIsochroneLayer } from "../../layers/IsochroneLayer.js";
 // import TestMarker from "testMarker";
 
 export function Map({ active, setActive }) {
@@ -27,7 +29,10 @@ export function Map({ active, setActive }) {
     const [foodLayerVisible, setFoodLayerVisible] = useState(true);
     const [activeFoodCategories, setActiveFoodCategories] = useState(null); // null means "all types" 
 
-
+    // Isochrone data/state
+    const { data: isochroneData, loading, error } = useIsochrones();
+    const [activeRanges, setActiveRanges] = useState([300]); // only showing range_seconds 300. can be 600 or 900
+    const [highlightSource, setHighlightSource] = useState(null);
     
     // Selected state for the popups
     const [selected, setSelected] = useState(null);
@@ -43,6 +48,10 @@ export function Map({ active, setActive }) {
 
     const LAYERS = useMemo(() => [
         getTestLayer(),
+        getIsochroneLayer({
+            data: isochroneData,
+            activeRanges
+        }),
         getDisseminationAreaLayer(info => handleClick(info, 'dissemination-areas')),
         getFoodAssetLayer({
             data: foodData,
@@ -50,8 +59,8 @@ export function Map({ active, setActive }) {
             activeCategories: activeFoodCategories,
             onHover: ({ object, x, y }) => {/* sidebar update - add later */},
             onClick: ({ object }) => console.log('Clicked on food asset:', object),
-        }),
-    ], [foodData, foodLayerVisible, activeFoodCategories]);
+        })
+    ].filter(Boolean), [isochroneData, activeRanges, foodData, foodLayerVisible, activeFoodCategories]);
 
     const width = useScreenWidth();
     const isDesktop = width >= 760;
