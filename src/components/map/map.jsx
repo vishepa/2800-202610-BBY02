@@ -57,18 +57,15 @@ export function Map({ active, setActive }) {
     return (
         <div className="w-full h-full flex flex-col">
             {/* Header — shared, but content differs by breakpoint */}
-            <div className="w-full h-16 bg-white shadow-md flex items-center px-6 z-10">
+            <div className="w-full h-25 bg-white shadow-md flex items-center px-6 z-10">
                 <h1 className="text-3xl font-bold text-gray-700 bg-green-400 rounded-xl p-2">Onion</h1>
-                <h1 className="ml-2 text-3xl font-bold text-gray-700 text-middle">The Map</h1>
+                <h1 className="flex ml-2 text-3xl font-bold text-gray-700 text-center items-center">The Map</h1>
             </div>
 
             {/* Desktop-only chrome */}
             {isDesktop && (
                 <>
                     <MapSimButton active={active} setActive={setActive} />
-                    <div className="fixed right-0 top-16 flex items-center px-6 z-10 cursor-pointer bg-white shadow-md rounded-bl-lg h-10">
-                        <span className="text-gray-500">filters</span>
-                    </div>
                 </>
             )}
 
@@ -92,6 +89,9 @@ export function Map({ active, setActive }) {
                     onClose={() => setSelected(null)}
                 />
                 </MapLibre>
+            </div>
+            <div>
+                <button className="absolute min-w-15 min-h-15 right-15 bottom-15 bg-green-400 rounded-full" >hello</button>
             </div>
         </div>
     );

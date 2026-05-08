@@ -37,24 +37,24 @@ export default function App() {
     <div className="relative w-full h-screen">
 
       {/* Map */}
-      <div className={`absolute inset-0 transition-all duration-300 ${sidebarOpen ? "pl-85" : "pl-0"}`}>
+      <div className={`absolute inset-0 transition-all duration-300 ${sidebarOpen ? "pl-95" : "pl-0"}`}>
         <Map active={active} setActive={handleSetActive} />
       </div>
 
       {/* Sidebar */}
-      <div className={`absolute top-0 left-0 h-full w-85 z-10 bg-white shadow-lg transition-transform duration-300 overflow-visible ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <div className={`absolute top-0 left-0 h-full w-95 z-10 bg-white shadow-lg transition-transform duration-300 overflow-visible ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <SimulationToolbar active={active} setActive={handleSetActive} />
       </div>
 
       {/* Toggle sidebar */}
       <button
         onClick={handleToggleSidebar}
-        className={`absolute top-1/2 z-20 bg-white shadow-md minimum-height-20 rounded-r-lg px-1 py-3 transition-all duration-300 ${sidebarOpen ? `left-85` : "left-0"}`}
+        className={`absolute top-1/2 z-20 bg-white shadow-md minimum-height-20 rounded-r-lg px-1 py-3 transition-all duration-300 ${sidebarOpen ? `left-95` : "left-0"}`}
       >
         {sidebarOpen ? "<<" : ">>"}
       </button>
 
-      <div className="absolute top-16 right-0 z-30">
+      <div className="absolute top-25 right-0 z-30">
         <FilterDropdown />
       </div>
 
