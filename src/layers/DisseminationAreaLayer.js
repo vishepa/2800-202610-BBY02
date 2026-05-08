@@ -84,18 +84,28 @@ import { GeoJsonLayer } from '@deck.gl/layers';
 //   AREAS_BY_DAUID[feature.properties.dauid] = feature});
 
 
-async function loadDisseminationData (){
+async function getAreaGeoJSON(){
     const RESPONSE = await fetch('/api/da-boundaries');
-    const GEO_JSON = await RESPONSE.json();
-    return GEO_JSON;
+    const BOUNDARY_DATA = await RESPONSE.json();
+    return BOUNDARY_DATA;
 }
 
+async function getAreaProperties(){
+    let RESPONSE = await fetch('/api/da-statistics');
+    const PROPERTY_DATA = await RESPONSE.json();
+    return  PROPERTY_DATA;
+}
 
+async function loadDisseminationData (){
+    let response = await fetch('/api/dissemination-areas');
+    const AREA_DATA = await response.json();
+    return AREA_DATA;
+}
 
-export function getDisseminationAreaLayer(data, onClick) {
+export function getDisseminationAreaLayer(onClick) {
   return new GeoJsonLayer({
     id: 'dissemination-areas',
-    data: loadDisseminationData (),
+    data: loadDisseminationData(),
     filled: true,
     getFillColor: [171, 212, 185, 60],
     stroked: true,

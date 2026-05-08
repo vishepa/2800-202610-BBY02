@@ -39,20 +39,9 @@ export function Map({ active, setActive }) {
         setSelected({object: info.object, coordinate:info.coordinate, layerId});
     }, []); 
 
-    // const [areaData, setAreaData] = useState(null);
-    // TODO I don't know if this is correct, I don't think it needs to be re-rendered every time the state changes, the boundary shouldn't change
-    // useEffect(() => {
-    //     async function loadDisseminationData(){
-    //             const RESPONSE = await fetch('/api/da-boundaries');
-    //             const GEO_JSON = await RESPONSE.json();
-    //             setAreaData(GEO_JSON);
-    //     }
-    //     loadDisseminationData();
-    // }, [])
-
     const LAYERS = useMemo( () => [
         getTestLayer(),
-        getDisseminationAreaLayer(info => handleClick(/*areaData,*/info, 'dissemination-areas')),
+        getDisseminationAreaLayer(info => handleClick(info, 'dissemination-areas')),
         getFoodAssetLayer({
             data: foodData,
             visible: foodLayerVisible,
@@ -60,7 +49,7 @@ export function Map({ active, setActive }) {
             onHover: ({ object, x, y }) => {/* sidebar update - add later */},
             onClick: ({ object }) => console.log('Clicked on food asset:', object),
         }),
-    ], [/*areaData*/foodData, foodLayerVisible, activeFoodCategories]);
+    ], [foodData, foodLayerVisible, activeFoodCategories]);
 
     const width = useScreenWidth();
     const isDesktop = width >= 760;

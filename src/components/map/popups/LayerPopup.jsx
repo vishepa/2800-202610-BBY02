@@ -3,7 +3,7 @@ import { DisseminationPopup } from './DisseminationPopup';
 
 // Popup lookup table
 const MAP_POPUP = {
-  "dissemination-areas": DisseminationPopup,
+  'dissemination-areas': DisseminationPopup,
 };
 
 // selected: the object saved in state when a user clicks a layer
@@ -20,7 +20,7 @@ export function LayerPopup({selected, onClose}){
       longitude={selected.coordinate[0]}
       latitude={selected.coordinate[1]}
       onClose={onClose}
-      anchor="bottom"
+      anchor='bottom'
     >
       <PopupContent properties={selected.object.properties}/>
     </Popup>
