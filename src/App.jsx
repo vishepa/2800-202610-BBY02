@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import Map from "./components/map/map";
+import Map from "./components/map/Map";
 import SimulationToolbar from "./components/SimulationToolbar";
 import FilterDropdown from "./components/FilterDropdown";
 import FeaturePopup from "./components/FeaturePopup";

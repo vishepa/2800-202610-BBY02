@@ -3,11 +3,11 @@ import { GeoJsonLayer } from '@deck.gl/layers';
 // Temporary data to be removed once we have the dissemination area GeoJSON data from database
 // const tempData = {
 //   "type": "FeatureCollection",
-//   "features": [
+//   "features": [ 
 //     {
 //       "type": "Feature",
 //       "properties": {
-//         "DAUID": "59150369",
+//         "DAUID": "59150369", 
 //         "PRUID": "59",
 //         "neighbourhood": "Coal Harbour",
 //         "population": 54056,

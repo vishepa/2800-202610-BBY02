@@ -13,7 +13,7 @@ const TEST_POINT = {
 
 export function TestMarker() {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
-
+ 
     return (
         <>
             <Marker
@@ -22,7 +22,7 @@ export function TestMarker() {
                 onClick={(e) => {
                     e.originalEvent.stopPropagation();
                     setIsPopupOpen(true);
-                }}
+                }} 
             />
 
             {isPopupOpen && (

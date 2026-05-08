@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useScreenWidth } from "./widthHelper";
+import { useScreenWidth } from "./WidthHelper";
 import MapSimButton from "./map/MapSimButton";
 import MapSimButtonMobile from "./map/MapSimButtonMobile";
 import Tooltip from "./Tooltip";

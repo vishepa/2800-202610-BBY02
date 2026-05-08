@@ -1,4 +1,4 @@
-import MapSimButton from "./MapSimButton";
+import MapSimButton from "./MapSimButton.jsx";
 import 'maplibre-gl/dist/maplibre-gl.css';
 import MapLibre, { NavigationControl } from 'react-map-gl/maplibre';
 import {
@@ -6,18 +6,18 @@ import {
     DEFAULT_ZOOM,
     MIN_ZOOM,
     MAX_ZOOM,
-    MAP_STYLE
-} from '../../constants/mapDefaults';
+    MAP_STYLE  
+} from '../../constants/mapDefaults.js';
 // import { TestMarker } from './testMarker';
-import { useScreenWidth } from '../widthHelper';
+import { useScreenWidth } from '../WidthHelper.jsx';
 import { useMemo, useState, useCallback, useEffect } from 'react';
-import DeckGLOverlay  from './DeckGLOverlay';
-import { getTestLayer } from '../../layers/TestLayer';
-import { getFoodAssetLayer } from '../../layers/FoodAssetLayer';
-import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
-
+import DeckGLOverlay  from './DeckGLOverlay.jsx';
+import { getTestLayer } from '../../layers/testLayer.js';
+import { getFoodAssetLayer } from '../../layers/foodAssetLayer.js';
+import { useFoodAssets } from '../../lib/hooks/useFoodAssets.js';
+ 
 import FoodTypeFilter from "../FoodTypeFilter.jsx";
-import { getDisseminationAreaLayer } from '../../layers/DisseminationAreaLayer.js';
+import { getDisseminationAreaLayer } from '../../layers/disseminationAreaLayer.js';
 import {LayerPopup} from './popups/LayerPopup.jsx';
 // import TestMarker from "testMarker";
 
