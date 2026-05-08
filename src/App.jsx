@@ -39,7 +39,7 @@ export default function App() {
       </div>
 
       {/* Sidebar */}
-      <div className={`absolute top-0 left-0 h-full w-85 z-10 bg-white shadow-lg transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      <div className={`absolute top-0 left-0 h-full w-85 z-10 bg-white shadow-lg transition-transform duration-300 overflow-visible ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <SimulationToolbar active={active} setActive={handleSetActive} />
       </div>
 

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useScreenWidth } from "./widthHelper";
 import MapSimButton from "./map/MapSimButton";
 import MapSimButtonMobile from "./map/MapSimButtonMobile";
+import Tooltip from "./Tooltip";
 
 export function SimulationToolbar({ active, setActive }) {
 
@@ -18,25 +19,25 @@ export function SimulationToolbar({ active, setActive }) {
 
     const sliders = (
         <>
-            <p>slider1 : {pct}</p>
+            <p><Tooltip text="How important nearby transit stops are to the accessibility score">slider1 : {pct}</Tooltip></p>
             <input type="range" min={0} max={100} value={pct}
                 onChange={(e) => setPct(Number(e.target.value))}
                 className="accent-blue-600 w-full h-1 rounded-full cursor-pointer"
                 style={trackStyle} />
 
-            <p>slider2 : {something}</p>
+            <p><Tooltip text="How much food price and affordability affect the score">slider2 : {something}</Tooltip></p>
             <input type="range" min={0} max={100} value={something}
                 onChange={(e) => setSomething(Number(e.target.value))}
                 className="accent-blue-600 w-full h-1 rounded-full cursor-pointer"
                 style={trackStyle} />
 
-            <p>slider3 : {another}</p>
+            <p><Tooltip text="How much walking distance to food sources matters">slider3 : {another}</Tooltip></p>
             <input type="range" min={0} max={100} value={another}
                 onChange={(e) => setAnother(Number(e.target.value))}
                 className="accent-blue-600 w-full h-1 rounded-full cursor-pointer"
                 style={trackStyle} />
 
-            <p>slider4 : {yetAnother}</p>
+            <p><Tooltip text="How much neighborhood population density factors in">slider4 : {yetAnother}</Tooltip></p>
             <input type="range" min={0} max={100} value={yetAnother}
                 onChange={(e) => setYetAnother(Number(e.target.value))}
                 className="accent-blue-600 w-full h-1 rounded-full cursor-pointer"
