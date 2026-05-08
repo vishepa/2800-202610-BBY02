@@ -65,8 +65,6 @@ export function Map({ active, setActive }) {
     const width = useScreenWidth();
     const isDesktop = width >= 760;
 
-    const width = useScreenWidth();
-    const isDesktop = width >= 760;
     return (
         <div className="w-full h-full flex flex-col">
             {/* Header — shared, but content differs by breakpoint */}
