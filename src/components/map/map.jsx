@@ -58,7 +58,8 @@ export function Map({ active, setActive }) {
         <div className="w-full h-full flex flex-col">
             {/* Header — shared, but content differs by breakpoint */}
             <div className="w-full h-16 bg-white shadow-md flex items-center px-6 z-10">
-                <h1 className="text-xl font-bold text-gray-700">JohnMap</h1>
+                <h1 className="text-3xl font-bold text-gray-700 bg-green-400 rounded-xl p-2">Onion</h1>
+                <h1 className="ml-2 text-3xl font-bold text-gray-700 text-middle">The Map</h1>
             </div>
 
             {/* Desktop-only chrome */}
