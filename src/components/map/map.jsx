@@ -13,7 +13,7 @@ import { useScreenWidth } from '../widthHelper';
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import DeckGLOverlay  from './DeckGLOverlay';
 import { getTestLayer } from '../../layers/TestLayer';
-import { getFoodAssetLayer } from '../../layers/foodAssetLayer';
+import { getFoodAssetLayer } from '../../layers/FoodAssetLayer';
 import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
 
 import FoodTypeFilter from "../FoodTypeFilter.jsx";
