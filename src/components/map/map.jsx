@@ -1,4 +1,4 @@
-import MapSimButton from "../MapSimButton";
+import MapSimButton from "../MapSimButton.jsx";
 import 'maplibre-gl/dist/maplibre-gl.css';
 import MapLibre, { NavigationControl } from 'react-map-gl/maplibre';
 import {
@@ -7,19 +7,19 @@ import {
     MIN_ZOOM,
     MAX_ZOOM,
     MAP_STYLE
-} from '../../constants/mapDefaults';
+} from '../../constants/mapDefaults.js';
 
 // import { TestMarker } from './testMarker'; // TODO: Remove once real food asset markers are wired up (Halie's deck.gl work).
 
-import { useMemo, useState, useCallback } from 'react';
-import DeckGLOverlay  from './DeckGLOverlay';
-import { getTestLayer } from '../../layers/TestLayer';
-import { getFoodAssetLayer } from '../../layers/foodAssetLayer';
-import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
+import { useMemo, useState, useCallback, useEffect } from 'react';
+import DeckGLOverlay  from './DeckGLOverlay.jsx';
+import { getTestLayer } from '../../layers/TestLayer.js';
+import { getFoodAssetLayer } from '../../layers/foodAssetLayer.js';
+import { useFoodAssets } from '../../lib/hooks/useFoodAssets.js';
 
-import FoodTypeFilter from "../FoodTypeFilter";
+import FoodTypeFilter from "../FoodTypeFilter.jsx";
 import { getDisseminationAreaLayer } from '../../layers/DisseminationAreaLayer.js';
-import {LayerPopup} from './popups/LayerPopup';
+import {LayerPopup} from './popups/LayerPopup.jsx';
 // import TestMarker from "testMarker";
 
 export function Map({ active, setActive }) {
@@ -28,8 +28,6 @@ export function Map({ active, setActive }) {
     const [foodLayerVisible, setFoodLayerVisible] = useState(true);
     const [activeFoodCategories, setActiveFoodCategories] = useState(null); // null means "all types" 
 
-
-    
     // Selected state for the popups
     const [selected, setSelected] = useState(null);
 
@@ -42,9 +40,20 @@ export function Map({ active, setActive }) {
         setSelected({object: info.object, coordinate:info.coordinate, layerId});
     }, []); 
 
-    const LAYERS = useMemo(() => [
+    // const [areaData, setAreaData] = useState(null);
+    // TODO I don't know if this is correct, I don't think it needs to be re-rendered every time the state changes, the boundary shouldn't change
+    // useEffect(() => {
+    //     async function loadDisseminationData(){
+    //             const RESPONSE = await fetch('/api/da-boundaries');
+    //             const GEO_JSON = await RESPONSE.json();
+    //             setAreaData(GEO_JSON);
+    //     }
+    //     loadDisseminationData();
+    // }, [])
+
+    const LAYERS = useMemo( () => [
         getTestLayer(),
-        getDisseminationAreaLayer(info => handleClick(info, 'dissemination-areas')),
+        getDisseminationAreaLayer(info => handleClick(/*areaData,*/info, 'dissemination-areas')),
         getFoodAssetLayer({
             data: foodData,
             visible: foodLayerVisible,
@@ -52,7 +61,7 @@ export function Map({ active, setActive }) {
             onHover: ({ object, x, y }) => {/* sidebar update - add later */},
             onClick: ({ object }) => console.log('Clicked on food asset:', object),
         }),
-    ], [foodData, foodLayerVisible, activeFoodCategories]);
+    ], [/*areaData*/foodData, foodLayerVisible, activeFoodCategories]);
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -101,9 +110,7 @@ export function Map({ active, setActive }) {
                     selected={selected}
                     onClose={() => setSelected(null)}
                 />
-
-                </MapLibre>
-                        
+                </MapLibre>         
             </div>
 
         </div>
