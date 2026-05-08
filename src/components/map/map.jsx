@@ -10,15 +10,15 @@ import {
 } from '../../constants/mapDefaults';
 // import { TestMarker } from './testMarker';
 import { useScreenWidth } from '../widthHelper';
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
 import DeckGLOverlay  from './DeckGLOverlay';
 import { getTestLayer } from '../../layers/TestLayer';
 import { getFoodAssetLayer } from '../../layers/FoodAssetLayer';
 import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
 
-import FoodTypeFilter from "../FoodTypeFilter";
+import FoodTypeFilter from "../FoodTypeFilter.jsx";
 import { getDisseminationAreaLayer } from '../../layers/DisseminationAreaLayer.js';
-import {LayerPopup} from './popups/LayerPopup';
+import {LayerPopup} from './popups/LayerPopup.jsx';
 // import TestMarker from "testMarker";
 
 export function Map({ active, setActive }) {
@@ -27,8 +27,6 @@ export function Map({ active, setActive }) {
     const [foodLayerVisible, setFoodLayerVisible] = useState(true);
     const [activeFoodCategories, setActiveFoodCategories] = useState(null); // null means "all types" 
 
-
-    
     // Selected state for the popups
     const [selected, setSelected] = useState(null);
 
@@ -41,7 +39,7 @@ export function Map({ active, setActive }) {
         setSelected({object: info.object, coordinate:info.coordinate, layerId});
     }, []); 
 
-    const LAYERS = useMemo(() => [
+    const LAYERS = useMemo( () => [
         getTestLayer(),
         getDisseminationAreaLayer(info => handleClick(info, 'dissemination-areas')),
         getFoodAssetLayer({
@@ -92,7 +90,6 @@ export function Map({ active, setActive }) {
                     selected={selected}
                     onClose={() => setSelected(null)}
                 />
-
                 </MapLibre>
             </div>
         </div>
