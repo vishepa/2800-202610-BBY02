@@ -17,7 +17,7 @@ import { getFoodAssetLayer } from '../../layers/foodAssetLayer.js';
 import { useFoodAssets } from '../../lib/hooks/useFoodAssets.js';
  
 import FoodTypeFilter from "../FoodTypeFilter.jsx";
-import { getDisseminationAreaLayer } from '../../layers/disseminationAreaLayer.js';
+import { getDisseminationAreaLayer } from '../../layers/DisseminationAreaLayer.js';
 import {LayerPopup} from './popups/LayerPopup.jsx';
 // import TestMarker from "testMarker";
 
@@ -50,7 +50,7 @@ export function Map({ active, setActive }) {
             onClick: ({ object }) => console.log('Clicked on food asset:', object),
         }),
     ], [foodData, foodLayerVisible, activeFoodCategories]);
-
+    
     const width = useScreenWidth();
     const isDesktop = width >= 760;
 
