@@ -11,6 +11,8 @@ import {
 // import { TestMarker } from './testMarker';
 import { useScreenWidth } from '../shared/widthHelper.jsx';
 import { useMemo, useState, useCallback, useEffect } from 'react';
+import { useScreenWidth } from '../widthHelper';
+import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import DeckGLOverlay  from './DeckGLOverlay';
 import { getTestLayer } from '../../layers/TestLayer';
 import { getFoodAssetLayer } from '../../layers/FoodAssetLayer';
@@ -81,6 +83,10 @@ export function Map({ active, setActive, foodLayerVisible, transitLayerVisible }
             {isDesktop && (
                 <>
                     <MapSimButton active={active} setActive={setActive} />
+                    <div className="fixed right-0 top-16 flex items-center px-6 z-10 cursor-pointer bg-white shadow-md rounded-bl-lg h-10">
+                        <span className="text-gray-500">filters</span>
+                    </div>
+                    
                 </>
             )}
 
