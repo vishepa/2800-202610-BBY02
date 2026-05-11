@@ -1,4 +1,4 @@
-import { FOOD_CATEGORIES } from "../constants/foodCategories";
+import { FOOD_CATEGORIES } from "../../constants/foodCategories";
 
 export default function FoodTypeFilter({ activeCategories, onChange }) {
 
