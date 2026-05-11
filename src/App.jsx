@@ -1,13 +1,16 @@
 import { useState, useCallback } from "react";
 import Map from "./components/map/Map";
 import SimulationToolbar from "./components/SimulationToolbar";
-import FilterDropdown from "./components/FilterDropdown";
+import LayerDropdown from "./components/LayerToggleDropdown";
 import FeaturePopup from "./components/FeaturePopup";
 
 {/* this is the app JSX, it will contain the main application structure */ }
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [active, setActive] = useState("map");
+
+  const [foodLayerVisible, setFoodLayerVisible] = useState(true);
+  const [transitLayerVisible, setTransitLayerVisible] = useState(false);
 
   /* Pop up states */
   const [showWelcome, setShowWelcome] = useState(true);
@@ -38,7 +41,12 @@ export default function App() {
 
       {/* Map */}
       <div className={`absolute inset-0 transition-all duration-300 ${sidebarOpen ? "pl-85" : "pl-0"}`}>
-        <Map active={active} setActive={handleSetActive} />
+        <Map
+          active={active}
+          setActive={setActive}
+          foodLayerVisible={foodLayerVisible}
+          transitLayerVisible={transitLayerVisible}
+        />
       </div>
 
       {/* Sidebar */}
@@ -55,7 +63,12 @@ export default function App() {
       </button>
 
       <div className="absolute top-16 right-0 z-30">
-        <FilterDropdown />
+        <LayerDropdown
+          toggles={[
+            { id: 'food', label: 'Food assets', visible: foodLayerVisible, onToggle: setFoodLayerVisible },
+            { id: 'transit', label: 'Transit stops', visible: transitLayerVisible, onToggle: setTransitLayerVisible },
+          ]}
+        />
       </div>
 
       {showWelcome && (
