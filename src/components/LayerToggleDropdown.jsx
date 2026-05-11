@@ -7,6 +7,9 @@ const LayerToggleDropdown = ({ toggles, buttonLabel = "Layers"}) => {
   // const [selected, setSelected] = useState("Filters")
   const rootRef = useRef(null)
 
+  const [showFilterPopup, setShowFilterPopup] = useState(false)
+  const [filterPopupSeen, setFilterPopupSeen] = useState(false)
+
   // Close on outside click
   useEffect(() => {
     const handler = (e) => {
@@ -24,6 +27,17 @@ const LayerToggleDropdown = ({ toggles, buttonLabel = "Layers"}) => {
     document.addEventListener("keydown", handler)
     return () => document.removeEventListener("keydown", handler)
   }, [])
+
+  
+  const handleToggle = () => {
+  const opening = !isOpen
+  if (opening && !filterPopupSeen) {
+    setShowFilterPopup(true)
+    setFilterPopupSeen(true)
+  }
+  setIsOpen(opening)
+  
+  }
 
 
     const visibleCount = toggles.filter(t => t.visible).length;

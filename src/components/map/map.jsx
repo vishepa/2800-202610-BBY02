@@ -10,7 +10,7 @@ import {
 } from '../../constants/mapDefaults';
 // import { TestMarker } from './testMarker';
 import { useScreenWidth } from '../widthHelper';
-import { useMemo, useState, useCallback, useEffect } from 'react';
+import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import DeckGLOverlay  from './DeckGLOverlay';
 import { getTestLayer } from '../../layers/TestLayer';
 import { getFoodAssetLayer } from '../../layers/FoodAssetLayer';
