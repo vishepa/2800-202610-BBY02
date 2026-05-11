@@ -14,6 +14,9 @@ import { useMemo, useState, useCallback, useEffect } from 'react';
 import DeckGLOverlay  from './DeckGLOverlay';
 import { getTestLayer } from '../../layers/TestLayer';
 import { getFoodAssetLayer } from '../../layers/FoodAssetLayer';
+import { getTransitAssetLayer } from '../../layers/TransitLayer.js';
+
+import { useTransitStops } from '../../lib/hooks/useTransitStops';
 import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
 
 import FoodTypeFilter from "./FoodTypeFilter.jsx";
@@ -21,10 +24,14 @@ import { getDisseminationAreaLayer } from '../../layers/DisseminationAreaLayer.j
 import {LayerPopup} from './popups/LayerPopup.jsx';
 // import TestMarker from "testMarker";
 
-export function Map({ active, setActive }) {
-
+export function Map({ active, setActive, foodLayerVisible, transitLayerVisible }) {
+    
+    // Data fetching hooks
     const { data: foodData } = useFoodAssets();
-    const [foodLayerVisible, setFoodLayerVisible] = useState(true);
+    const { data: transitData } = useTransitStops();
+
+    const [activeRoutes, setActiveRoutes] = useState(null);
+
     const [activeFoodCategories, setActiveFoodCategories] = useState(null); // null means "all types" 
 
     // Selected state for the popups
@@ -49,7 +56,15 @@ export function Map({ active, setActive }) {
             onHover: ({ object, x, y }) => {/* sidebar update - add later */},
             onClick: ({ object }) => console.log('Clicked on food asset:', object),
         }),
-    ], [foodData, foodLayerVisible, activeFoodCategories]);
+        getTransitAssetLayer({
+            data: transitData,
+            visible: transitLayerVisible,
+            activeRoutes,
+            onHover: ({ object }) => {},
+            onClick: (info) => handleClick(info, 'transit-stops'),
+    }),
+
+    ], [foodData, foodLayerVisible, activeFoodCategories, transitData, transitLayerVisible, activeRoutes]);
 
     const width = useScreenWidth();
     const isDesktop = width >= 760;
@@ -82,7 +97,7 @@ export function Map({ active, setActive }) {
                         style={{ marginTop: '50px' }}
                     />
                     
-                    <DeckGLOverlay layers = {LAYERS} interleaved />
+                    <DeckGLOverlay layers = {LAYERS}/>
                 
                 <LayerPopup id='layer-popup'
                     selected={selected}
