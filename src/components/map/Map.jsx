@@ -9,22 +9,29 @@ import {
     MAP_STYLE  
 } from '../../constants/mapDefaults.js';
 // import { TestMarker } from './testMarker';
-import { useScreenWidth } from '../widthHelper';
+import { useScreenWidth } from '../shared/widthHelper.jsx';
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import DeckGLOverlay  from './DeckGLOverlay';
-import { getTestLayer } from '../../layers/TestLayer';
+// import { getTestLayer } from '../../layers/TestLayer';
 import { getFoodAssetLayer } from '../../layers/FoodAssetLayer';
 import { getTransitAssetLayer } from '../../layers/TransitLayer.js';
 
-import { useTransitStops } from '../../lib/hooks/useTransitStops';
+import { useTransitStops } from '../../lib/hooks/useTransitStops.js';
 import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
 
-import FoodTypeFilter from "../FoodTypeFilter.jsx";
-import { getDisseminationAreaLayer } from '../../layers/DisseminationAreaLayer.js';
+import FoodTypeFilter from "./FoodTypeFilter.jsx";
+import { getDisseminationAreaLayer } from '../../layers/disseminationAreaLayer.js';
 import {LayerPopup} from './popups/LayerPopup.jsx';
 // import TestMarker from "testMarker";
 
-export function Map({ active, setActive, foodLayerVisible, transitLayerVisible }) {
+export function Map({
+    active, 
+    setActive,
+    foodLayerVisible,
+    transitLayerVisible,
+    disseminationLayerVisible,
+
+}) {
     
     // Data fetching hooks
     const { data: foodData } = useFoodAssets();
@@ -47,8 +54,13 @@ export function Map({ active, setActive, foodLayerVisible, transitLayerVisible }
     }, []); 
 
     const LAYERS = useMemo( () => [
-        getTestLayer(),
-        getDisseminationAreaLayer(info => handleClick(info, 'dissemination-areas')),
+        // getTestLayer(),
+        getDisseminationAreaLayer({
+            
+            visible: disseminationLayerVisible,
+            onClick: info => handleClick(info, 'dissemination-areas'),
+
+            }),
         getFoodAssetLayer({
             data: foodData,
             visible: foodLayerVisible,
@@ -64,7 +76,7 @@ export function Map({ active, setActive, foodLayerVisible, transitLayerVisible }
             onClick: (info) => handleClick(info, 'transit-stops'),
     }),
 
-    ], [foodData, foodLayerVisible, activeFoodCategories, transitData, transitLayerVisible, activeRoutes]);
+    ], [foodData, foodLayerVisible, activeFoodCategories, transitData, transitLayerVisible, activeRoutes, disseminationLayerVisible]);
 
     const width = useScreenWidth();
     const isDesktop = width >= 760;
@@ -72,8 +84,9 @@ export function Map({ active, setActive, foodLayerVisible, transitLayerVisible }
     return (
         <div className="w-full h-full flex flex-col">
             {/* Header — shared, but content differs by breakpoint */}
-            <div className="w-full h-16 bg-white shadow-md flex items-center px-6 z-10">
-                <h1 className="text-xl font-bold text-gray-700">JohnMap</h1>
+            <div className="w-full h-25 bg-white shadow-md flex items-center px-6 z-10">
+                <h1 className="text-5xl text-gray-700 rounded-xl p-4" style={{ fontFamily: 'Monoton, cursive' }}>Onion</h1>
+                <h1 className="hidden sm:flex ml-2 text-3xl font-bold text-gray-700 text-center items-center">The Map</h1>
             </div>
 
             {/* Desktop-only chrome */}

@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useScreenWidth } from "./WidthHelper";
-import MapSimButton from "./map/MapSimButton";
-import MapSimButtonMobile from "./map/MapSimButtonMobile";
+import { useScreenWidth } from "../shared/widthHelper";
+import MapSimButton from "./MapSimButton";
+import MapSimButtonMobile from "./MapSimButtonMobile";
 import Tooltip from "./Tooltip";
 
 export function SimulationToolbar({ active, setActive }) {
@@ -46,7 +46,6 @@ export function SimulationToolbar({ active, setActive }) {
     );
 
     if (width >= 760) {
-        // Desktop
         return (
             <div className="p-4">
                 <h2 className="text-xl font-bold mb-4">
@@ -56,19 +55,18 @@ export function SimulationToolbar({ active, setActive }) {
             </div>
         );
     } else {
-        // Mobile
         return (
-            <div className="p-4">
-                <MapSimButtonMobile active={active} setActive={setActive} />
-                <div className="p-4">
+            <div className="flex flex-col h-full p-4">
+                <div className="flex-1 p-4">
                     <h2 className="text-xl font-bold mb-4">
                         {active === "sim" ? "Simulation Toolbar" : "Map Data Display"}
                     </h2>
                     {active === "sim" ? sliders : <p>see a bunch of stats when hovering over map</p>}
                 </div>
+                <MapSimButtonMobile active={active} setActive={setActive} />
             </div>
         );
     }
 }
 
-export default SimulationToolbar;
+export default SimulationToolbar;   
