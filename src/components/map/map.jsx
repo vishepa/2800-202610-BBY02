@@ -10,15 +10,13 @@ import {
 } from '../../constants/mapDefaults';
 // import { TestMarker } from './testMarker';
 import { useScreenWidth } from '../shared/widthHelper.jsx';
-import { useMemo, useState, useCallback, useEffect } from 'react';
-import { useScreenWidth } from '../widthHelper';
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import DeckGLOverlay  from './DeckGLOverlay';
-import { getTestLayer } from '../../layers/TestLayer';
+// import { getTestLayer } from '../../layers/TestLayer';
 import { getFoodAssetLayer } from '../../layers/FoodAssetLayer';
 import { getTransitAssetLayer } from '../../layers/TransitLayer.js';
 
-import { useTransitStops } from '../../lib/hooks/useTransitStops';
+import { useTransitStops } from '../../lib/hooks/useTransitStops.js';
 import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
 
 import FoodTypeFilter from "./FoodTypeFilter.jsx";
@@ -26,7 +24,14 @@ import { getDisseminationAreaLayer } from '../../layers/DisseminationAreaLayer.j
 import {LayerPopup} from './popups/LayerPopup.jsx';
 // import TestMarker from "testMarker";
 
-export function Map({ active, setActive, foodLayerVisible, transitLayerVisible }) {
+export function Map({
+    active, 
+    setActive,
+    foodLayerVisible,
+    transitLayerVisible,
+    disseminationLayerVisible,
+
+}) {
     
     // Data fetching hooks
     const { data: foodData } = useFoodAssets();
@@ -49,8 +54,13 @@ export function Map({ active, setActive, foodLayerVisible, transitLayerVisible }
     }, []); 
 
     const LAYERS = useMemo( () => [
-        getTestLayer(),
-        getDisseminationAreaLayer(info => handleClick(info, 'dissemination-areas')),
+        // getTestLayer(),
+        getDisseminationAreaLayer({
+            
+            visible: disseminationLayerVisible,
+            onClick: info => handleClick(info, 'dissemination-areas'),
+
+            }),
         getFoodAssetLayer({
             data: foodData,
             visible: foodLayerVisible,
@@ -66,7 +76,7 @@ export function Map({ active, setActive, foodLayerVisible, transitLayerVisible }
             onClick: (info) => handleClick(info, 'transit-stops'),
     }),
 
-    ], [foodData, foodLayerVisible, activeFoodCategories, transitData, transitLayerVisible, activeRoutes]);
+    ], [foodData, foodLayerVisible, activeFoodCategories, transitData, transitLayerVisible, activeRoutes, disseminationLayerVisible]);
 
     const width = useScreenWidth();
     const isDesktop = width >= 760;

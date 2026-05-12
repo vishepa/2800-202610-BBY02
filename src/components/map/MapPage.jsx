@@ -16,6 +16,8 @@ export default function MapPage({ setPage }) {
 
     // Layer visibility state lifted up from map.jsx
     const [foodLayerVisible, setFoodLayerVisible] = useState(true);
+    const [transitLayerVisible, setTransitLayerVisible] = useState(true);
+    const [disseminationLayerVisible, setDisseminationLayerVisible] = useState(true);
 
     const handleToggleSidebar = () => {
         const opening = !sidebarOpen;
@@ -36,6 +38,8 @@ export default function MapPage({ setPage }) {
 
     const toggles = [
         { id: "food", label: "Food Assets", visible: foodLayerVisible, onToggle: setFoodLayerVisible },
+        { id: "transit", label: "Transit Stops", visible: transitLayerVisible, onToggle: setTransitLayerVisible },
+        { id: "dissemination", label: "Dissemination Areas", visible: disseminationLayerVisible, onToggle: setDisseminationLayerVisible },
     ];
 
     return (
@@ -46,6 +50,8 @@ export default function MapPage({ setPage }) {
                     setActive={handleSetActive}
                     setPage={setPage}
                     foodLayerVisible={foodLayerVisible}
+                    transitLayerVisible={transitLayerVisible}
+                    disseminationLayerVisible={disseminationLayerVisible}
                 />
             </div>
 
