@@ -102,7 +102,7 @@ async function loadDisseminationData (){
     return AREA_DATA;
 }
 
-export function getDisseminationAreaLayer(onClick) {
+export function getDisseminationAreaLayer({ visible = true, onClick } = {}){
   return new GeoJsonLayer({
     id: 'dissemination-areas',
     data: loadDisseminationData(),
@@ -111,7 +111,8 @@ export function getDisseminationAreaLayer(onClick) {
     stroked: true,
     getLineColor: [0, 50, 31, 255],
     getLineWidth: 20,
-    pickable: true, 
+    pickable: true,
+    visible, 
     onClick,
   });
 }
