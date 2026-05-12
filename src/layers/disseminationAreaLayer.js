@@ -291,7 +291,7 @@ function scoreToColor(feature, alpha){
 
 }
 
-export function getDisseminationAreaLayer(onClick) {
+export function getDisseminationAreaLayer({data, visible = true,onClick} = {}) {
   return new GeoJsonLayer({
     id: 'dissemination-areas',
     data: loadDisseminationData(),
@@ -301,7 +301,8 @@ export function getDisseminationAreaLayer(onClick) {
     stroked: true,
     getLineColor: (feature) => scoreToColor(feature, 255),
     getLineWidth: 10,
-    pickable: true, 
+    pickable: true,
+    visible, 
     onClick,
   });
 }
