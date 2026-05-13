@@ -13,8 +13,8 @@ import { useScreenWidth } from '../shared/widthHelper.jsx';
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import DeckGLOverlay  from './DeckGLOverlay';
 // import { getTestLayer } from '../../layers/TestLayer';
-import { getFoodAssetLayer } from '../../layers/FoodAssetLayer';
-import { getTransitAssetLayer } from '../../layers/TransitLayer.js';
+import { getFoodAssetLayer } from '../../layers/foodAssetLayer';
+import { getTransitAssetLayer } from '../../layers/transitLayer.js';
 
 import { useTransitStops } from '../../lib/hooks/useTransitStops.js';
 import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
