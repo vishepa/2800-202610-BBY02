@@ -22,6 +22,7 @@ import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
 import FoodTypeFilter from "./FoodTypeFilter.jsx";
 import { getDisseminationAreaLayer } from '../../layers/DisseminationAreaLayer.js';
 import {LayerPopup} from './popups/LayerPopup.jsx';
+import SearchBar from "./SearchBar";
 // import TestMarker from "testMarker";
 
 export function Map({
@@ -43,6 +44,8 @@ export function Map({
 
     // Selected state for the popups
     const [selected, setSelected] = useState(null);
+
+    const mapRef = useRef(null);
 
     // Function to handle the click event for the popups
     const handleClick = useCallback((info, layerId) => {
@@ -78,6 +81,14 @@ export function Map({
 
     ], [foodData, foodLayerVisible, activeFoodCategories, transitData, transitLayerVisible, activeRoutes, disseminationLayerVisible]);
 
+    // search bar
+    const handleAssetSelect = (asset) => {
+        if (!asset) return; // user cleared
+        // fly the MapLibre camera to the selected asset
+        mapRef.current?.flyTo({ center: [asset.lng, asset.lat], zoom: 16 });
+        // optionally update a deck.gl highlight layer
+    };
+
     const width = useScreenWidth();
     const isDesktop = width >= 760;
 
@@ -88,7 +99,6 @@ export function Map({
                 <h1 className="text-5xl text-gray-700 rounded-xl p-4" style={{ fontFamily: 'Monoton, cursive' }}>Onion</h1>
                 <h1 className="hidden sm:flex ml-2 text-3xl font-bold text-gray-700 text-center items-center">The Map</h1>
             </div>
-
             {/* Desktop-only chrome */}
             {isDesktop && (
                 <>
@@ -99,10 +109,15 @@ export function Map({
                     
                 </>
             )}
+            <SearchBar
+                onSelect={handleAssetSelect}
+                className="absolute top-4 left-4 z-10"
+            />
 
             {/* Map — always rendered */}
             <div className="flex-1 relative">
                 <MapLibre
+                    ref={mapRef}
                     initialViewState={{ ...VANCOUVER_CENTER, zoom: DEFAULT_ZOOM }}
                     mapStyle={MAP_STYLE}
                     minZoom={MIN_ZOOM}
