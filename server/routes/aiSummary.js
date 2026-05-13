@@ -26,7 +26,7 @@ router.post('/', async (req, res) => {
             WHERE dauid = $1
             `, [dauid]);
 
-        if (status.length === 0) {
+        if (statsResult.length === 0) {
             return res.status(404).json({error: 'Dissemination area not found'});
         }
 
@@ -36,7 +36,7 @@ router.post('/', async (req, res) => {
         const foodResult = await query(`
             SELECT f.name, f.category, i.range_seconds
             FROM isochrones i
-            JOIN food_assets f ON i.source_id = f.id
+            JOIN food_assets f ON i.source_id::integer = f.id
             WHERE ST_Intersects(
                 i.geom,
                 (SELECT geom FROM dissemination_areas WHERE dauid = $1)
