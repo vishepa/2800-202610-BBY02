@@ -21,6 +21,27 @@ export default function MapPage({ setPage }) {
     const [transitLayerVisible, setTransitLayerVisible] = useState(true);
     const [disseminationLayerVisible, setDisseminationLayerVisible] = useState(true);
 
+    const [selectedCategory, setSelectedCategory] = useState(null); // null means "all types"
+    const [placedAssets, setPlacedAssets] = useState([]);
+
+    const addPlacedAsset = useCallback((category, lat, lng) => {
+        setPlacedAssets(prev => [
+            ...prev,
+        {
+             id: crypto.randomUUID(),
+             category,
+             lat,
+             lng,
+         },
+     ]);
+     // Deselect after placing — single-click placement mode.
+        setSelectedCategory(null);
+    }, []);
+
+    const removePlacedAsset = useCallback((id) => {
+        setPlacedAssets(prev => prev.filter(a => a.id !== id));
+    }, []);
+
     const handleToggleSidebar = () => {
         const opening = !sidebarOpen;
         if (opening && !sliderPopupSeen) {
@@ -57,13 +78,23 @@ export default function MapPage({ setPage }) {
                     foodLayerVisible={foodLayerVisible}
                     transitLayerVisible={transitLayerVisible}
                     disseminationLayerVisible={disseminationLayerVisible}
+                    selectedCategory={selectedCategory}
+                    placedAssets={placedAssets}
+                    addPlacedAsset={addPlacedAsset}
                 />
             </div>
             
             <TogglePage page={active} setPage={setPage} sidebarOpen={sidebarOpen} />
 
             <div className={`absolute top-0 left-0 h-full w-95 z-10 bg-white shadow-lg transition-transform duration-300 overflow-visible ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
-                <SimulationToolbar active={active} setActive={handleSetActive} />
+                <SimulationToolbar
+                    active={active}
+                    setActive={handleSetActive}
+                    selectedCategory={selectedCategory}
+                    setSelectedCategory={setSelectedCategory}
+                    placedAssets={placedAssets}
+                    removePlacedAsset={removePlacedAsset}
+                />
             </div>
 
             <button
