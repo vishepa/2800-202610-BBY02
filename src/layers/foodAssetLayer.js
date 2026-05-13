@@ -6,11 +6,11 @@ import { FOOD_CATEGORY_IDS } from "../constants/foodCategories";
 
 export function getFoodAssetLayer({
     data,
-    visible = true,
+    visible = true, 
     activeCategories = null,
     onHover,
     onClick,
-}) {
+}) { 
 
     const features = data?.features ?? [];  
 

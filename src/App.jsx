@@ -1,6 +1,6 @@
 import { useState } from "react";
 import MapPage from "./components/map/MapPage";
-import AccountPage from "./components/account/Account";
+import AccountPage from "./components/account/account";
 
 export default function App() {
   const [page, setPage] = useState("map");

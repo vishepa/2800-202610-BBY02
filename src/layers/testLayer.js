@@ -8,7 +8,7 @@ export function getTestLayer() {
       { name: 'Vancouver', position: [-123.129, 49.289] }
     ],
 
-    getPosition: d => d.position,
+    getPosition: d => d.position, 
 
     // Replace icons to use atlas to improve performance
     getIcon: () => ({
