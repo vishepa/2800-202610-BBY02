@@ -22,14 +22,14 @@ export function IconPicker({ selectedCategory, setSelectedCategory }) {
                             title={cat.label}
                             className={`p-2 rounded-lg border-2 transition-colors ${
                                 isSelected
-                                    ? 'border-blue-600 bg-blue-50'
+                                    ? 'border-green-300 bg-green-50'
                                     : 'border-gray-200 bg-white hover:border-gray-400'
                             }`}
                         >
                             <img
                                 src={cat.icon}
                                 alt={cat.label}
-                                className="w-8 h-8"
+                                className="w-11 h-11"
                             />
                         </button>
                     );
