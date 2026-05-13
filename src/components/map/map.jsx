@@ -22,8 +22,8 @@ import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
 import FoodTypeFilter from "./FoodTypeFilter.jsx";
 import { getDisseminationAreaLayer } from '../../layers/DisseminationAreaLayer.js';
 import {LayerPopup} from './popups/LayerPopup.jsx';
-// import TestMarker from "testMarker";
-import Header from '../shared/Header.jsx';
+
+
 
 export function Map({
     active, 
@@ -84,7 +84,6 @@ export function Map({
 
     return (
         <div className="w-full h-full flex flex-col">
-        <Header />
             {/* Desktop-only chrome */}
             {isDesktop && (
                 <>

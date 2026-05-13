@@ -1,8 +1,13 @@
 import React from "react";
 import accountIcon from "../../../public/user.png";
+import AccountPage from "../account/account";
 import mapIcon from "../../../public/map.png";
+import { useScreenWidth } from "./widthHelper";
 
-export default function TogglePage({ page, setPage }) {
+export default function TogglePage({ page, setPage, sidebarOpen }) {
+  const width = useScreenWidth();
+  if (sidebarOpen && width < 768) return null;
+
   return (
     <button
       onClick={() => setPage(page === "map" ? "account" : "map")}

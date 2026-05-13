@@ -46,6 +46,9 @@ export default function MapPage({ setPage }) {
 
     return (
         <>
+        <div className = "w-full h-25 flex">
+        <Header sidebarOpen={sidebarOpen} />
+        </div>
             <div className={`absolute inset-0 transition-all duration-300 ${sidebarOpen ? "pl-95" : "pl-0"}`}>
                 <Map
                     active={active}
@@ -57,7 +60,7 @@ export default function MapPage({ setPage }) {
                 />
             </div>
             
-            <TogglePage page={active} setPage={setPage} /> 
+            <TogglePage page={active} setPage={setPage} sidebarOpen={sidebarOpen} />
 
             <div className={`absolute top-0 left-0 h-full w-95 z-10 bg-white shadow-lg transition-transform duration-300 overflow-visible ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
                 <SimulationToolbar active={active} setActive={handleSetActive} />
