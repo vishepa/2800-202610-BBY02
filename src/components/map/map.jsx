@@ -23,6 +23,7 @@ import FoodTypeFilter from "./FoodTypeFilter.jsx";
 import { getDisseminationAreaLayer } from '../../layers/DisseminationAreaLayer.js';
 import {LayerPopup} from './popups/LayerPopup.jsx';
 // import TestMarker from "testMarker";
+import Header from '../shared/Header.jsx';
 
 export function Map({
     active, 
@@ -83,20 +84,11 @@ export function Map({
 
     return (
         <div className="w-full h-full flex flex-col">
-            {/* Header — shared, but content differs by breakpoint */}
-            <div className="w-full h-25 bg-white shadow-md flex items-center px-6 z-10">
-                <h1 className="text-5xl text-gray-700 rounded-xl p-4" style={{ fontFamily: 'Monoton, cursive' }}>Onion</h1>
-                <h1 className="hidden sm:flex ml-2 text-3xl font-bold text-gray-700 text-center items-center">The Map</h1>
-            </div>
-
+        <Header />
             {/* Desktop-only chrome */}
             {isDesktop && (
                 <>
                     <MapSimButton active={active} setActive={setActive} />
-                    <div className="fixed right-0 top-16 flex items-center px-6 z-10 cursor-pointer bg-white shadow-md rounded-bl-lg h-10">
-                        <span className="text-gray-500">filters</span>
-                    </div>
-                    
                 </>
             )}
 

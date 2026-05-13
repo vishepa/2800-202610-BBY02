@@ -8,9 +8,9 @@ export default function App() {
   return (
     <div className="relative w-full h-screen">
       { page === "account" ? (
-        <AccountPage onBack={() => setPage("map")} />
+        <AccountPage onBack={() => setPage("map")} page={page} setPage={setPage} />
       ) : (
-        <MapPage setPage={setPage} />
+        <MapPage page={page} setPage={setPage} />
       )}
     </div>
   );
