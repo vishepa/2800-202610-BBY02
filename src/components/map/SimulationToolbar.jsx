@@ -3,8 +3,18 @@ import { useScreenWidth } from "../shared/widthHelper";
 import MapSimButton from "./MapSimButton";
 import MapSimButtonMobile from "./MapSimButtonMobile";
 import Tooltip from "./Tooltip";
+import IconPicker from "./simulation/IconPicker";
+import PlacedAssetList from "./simulation/PlacedAssetList";
 
-export function SimulationToolbar({ active, setActive }) {
+export function SimulationToolbar({
+    active,
+    setActive,
+    selectedCategory,
+    setSelectedCategory,
+    placedAssets,
+    removePlacedAsset, 
+
+}) {
 
     const [pct, setPct] = useState(50);
     const [something, setSomething] = useState(50);
@@ -45,13 +55,27 @@ export function SimulationToolbar({ active, setActive }) {
         </>
     );
 
+    const simContent = (
+        <>
+            {sliders}
+            <IconPicker
+                selectedCategory={selectedCategory}
+                setSelectedCategory={setSelectedCategory}
+            />
+            <PlacedAssetList 
+                placedAssets={placedAssets}
+                removePlacedAsset={removePlacedAsset}
+            />
+        </>
+    );
+
     if (width >= 760) {
         return (
             <div className="p-4">
                 <h2 className="text-xl font-bold mb-4">
                     {active === "sim" ? "Simulation Toolbar" : "Map Data Display"}
                 </h2>
-                {active === "sim" ? sliders : <p>see a bunch of stats when hovering over map</p>}
+                {active === "sim" ? simContent : <p>see a bunch of stats when hovering over map</p>}
             </div>
         );
     } else {
@@ -61,7 +85,7 @@ export function SimulationToolbar({ active, setActive }) {
                     <h2 className="text-xl font-bold mb-4">
                         {active === "sim" ? "Simulation Toolbar" : "Map Data Display"}
                     </h2>
-                    {active === "sim" ? sliders : <p>see a bunch of stats when hovering over map</p>}
+                    {active === "sim" ? simContent : <p>see a bunch of stats when hovering over map</p>}
                 </div>
                 <MapSimButtonMobile active={active} setActive={setActive} />
             </div>

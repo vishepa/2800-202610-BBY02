@@ -15,6 +15,7 @@ import DeckGLOverlay  from './DeckGLOverlay';
 // import { getTestLayer } from '../../layers/TestLayer';
 import { getFoodAssetLayer } from '../../layers/foodAssetLayer';
 import { getTransitAssetLayer } from '../../layers/transitLayer.js';
+import { getSimAssetLayers } from "../../layers/SimAssetLayer.js";
 
 import { useTransitStops } from '../../lib/hooks/useTransitStops.js';
 import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
@@ -25,12 +26,17 @@ import {LayerPopup} from './popups/LayerPopup.jsx';
 
 
 
+
+
 export function Map({
     active, 
     setActive,
     foodLayerVisible,
     transitLayerVisible,
     disseminationLayerVisible,
+    selectedCategory,
+    placedAssets,
+    addPlacedAsset,
 
 }) {
     
@@ -45,14 +51,24 @@ export function Map({
     // Selected state for the popups
     const [selected, setSelected] = useState(null);
 
+    const inPlacementMode = active === "sim" && selectedCategory !== null;
+
     // Function to handle the click event for the popups
     const handleClick = useCallback((info, layerId) => {
         //info: the object deck.gl passes to onClick
         //  info.object: the GeoJSON feature that was clicked
         //  info.coordinate: [long, lat] of the click
+        if (inPlacementMode) return;
         console.log("LeftClick working");
         setSelected({object: info.object, coordinate:info.coordinate, layerId});
-    }, []); 
+    }, [inPlacementMode]);
+    
+    const handleMapClick = useCallback((info) => {
+        if (!inPlacementMode) return;
+        if (!info.coordinate) return;
+        const [lng, lat] = info.coordinate;
+        addPlacedAsset(selectedCategory, lat, lng);
+    }, [inPlacementMode, selectedCategory, addPlacedAsset]);
 
     const LAYERS = useMemo( () => [
         // getTestLayer(),
@@ -75,9 +91,10 @@ export function Map({
             activeRoutes,
             onHover: ({ object }) => {},
             onClick: (info) => handleClick(info, 'transit-stops'),
-    }),
+        }),
+        ...getSimAssetLayers({ placedAssets }),
 
-    ], [foodData, foodLayerVisible, activeFoodCategories, transitData, transitLayerVisible, activeRoutes, disseminationLayerVisible]);
+    ], [foodData, foodLayerVisible, activeFoodCategories, transitData, transitLayerVisible, activeRoutes, disseminationLayerVisible, handleClick, placedAssets]);
 
     const width = useScreenWidth();
     const isDesktop = width >= 760;
@@ -92,7 +109,9 @@ export function Map({
             )}
 
             {/* Map — always rendered */}
-            <div className="flex-1 relative">
+            <div className="flex-1 relative"
+                 style={{ cursor: inPlacementMode ? 'crosshair' : 'default' }}
+            >
                 <MapLibre
                     initialViewState={{ ...VANCOUVER_CENTER, zoom: DEFAULT_ZOOM }}
                     mapStyle={MAP_STYLE}
@@ -104,7 +123,7 @@ export function Map({
                         style={{ marginTop: '50px' }}
                     />
                     
-                    <DeckGLOverlay layers = {LAYERS}/>
+                    <DeckGLOverlay layers = {LAYERS} onClick={handleMapClick}/>
                 
                 <LayerPopup id='layer-popup'
                     selected={selected}
