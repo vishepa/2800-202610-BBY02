@@ -29,11 +29,12 @@ import SearchBar from "./SearchBar";
 
 
 export function Map({
-    active, 
+    active,
     setActive,
     foodLayerVisible,
     transitLayerVisible,
     disseminationLayerVisible,
+    disseminationData,
     selectedCategory,
     placedAssets,
     addPlacedAsset,
@@ -74,10 +75,9 @@ export function Map({
     const LAYERS = useMemo( () => [
         // getTestLayer(),
         getDisseminationAreaLayer({
-            
+            data: disseminationData,
             visible: disseminationLayerVisible,
             onClick: info => handleClick(info, 'dissemination-areas'),
-
             }),
         getFoodAssetLayer({
             data: foodData,
@@ -95,7 +95,7 @@ export function Map({
         }),
         ...getSimAssetLayers({ placedAssets }),
 
-    ], [foodData, foodLayerVisible, activeFoodCategories, transitData, transitLayerVisible, activeRoutes, disseminationLayerVisible, handleClick, placedAssets]);
+    ], [foodData, foodLayerVisible, activeFoodCategories, transitData, transitLayerVisible, activeRoutes, disseminationLayerVisible, disseminationData, handleClick, placedAssets]);
 
     // search bar
     const handleAssetSelect = (asset) => {
