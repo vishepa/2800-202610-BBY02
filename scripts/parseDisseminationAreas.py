@@ -1,182 +1,71 @@
 """
-Filter 2021 Census Profile CSV to City of Vancouver Dissemination Areas
-========================================================================
-Edit CHARACTERISTIC_IDS below to select which variables you want.
-Set to None to keep all 2631 characteristics.
- 
-Requirements:  pip install pandas
+BC Cities Census Pipeline
+=========================
+Combines three steps into one pass for one or more cities:
+
+  1. getBoundaries    – extracts DA boundaries from the national shapefile
+  2. parseDissemination – filters census characteristics to target DAs
+  3. combineData      – merges geometry + characteristics into one CSV
+
+The geo lookup CSV is read once and shared across steps 1 & 2.
+All cities are unioned before the combine step, so the output is one file.
+
+Requirements:
+    pip install geopandas pandas
+
+Inputs (all in the same directory, or pass paths as CLI args):
+    - lda_000b21a_e.zip
+    - 98-401-X2021006_Geo_starting_row_BritishColumbia.CSV
+    - 98-401-X2021006_English_CSV_data_BritishColumbia.csv
+
+Output:
+    - bc_cities_das_combined.csv      (final merged output)
+
+Intermediate files (written so you can inspect them):
+    - bc_cities_dissemination_areas.csv
+    - bc_cities_DA_2021_filtered.csv
+
 Usage:
-    python3 parseDisseminationAreas.py <census_csv> <geo_starting_row_csv> [output_csv]
+    python3 vancouver_census_pipeline.py
+    python3 vancouver_census_pipeline.py <shapefile_zip> <geo_csv> <census_csv> [output_csv]
+
+To add or remove cities, edit the CITIES list in the CONFIGURATION section.
+Each entry is a (city_name, csd_dguid) tuple.
+  city_name  must match the "Geo Name" column in the geo lookup CSV exactly.
+  csd_dguid  is the CSD-level DGUID from the same file (e.g. "2021A00055915022").
 """
- 
+
+import os
 import sys
 import csv
+import zipfile
+import tempfile
 import pandas as pd
- 
+import geopandas as gpd
+from pathlib import Path
+
 # =============================================================================
 # CONFIGURATION
 # =============================================================================
- 
+
+SHAPEFILE_ZIP    = "lda_000b21a_e.zip"
+GEO_CSV          = "98-401-X2021006_Geo_starting_row_BritishColumbia.CSV"
 CENSUS_CSV       = "98-401-X2021006_English_CSV_data_BritishColumbia.csv"
-GEO_STARTING_ROW = "98-401-X2021006_Geo_starting_row_BritishColumbia.CSV"
-OUTPUT_CSV       = "vancouver_DA_2021_filtered.csv"
- 
-VANCOUVER_CSD_DGUID = "2021A00055915022"
- 
-# =============================================================================
-# CHARACTERISTIC IDs TO EXTRACT
+
+INTERMEDIATE_BOUNDARIES = "bc_cities_dissemination_areas.csv"
+INTERMEDIATE_CHARS      = "bc_cities_DA_2021_filtered.csv"
+OUTPUT_CSV              = "bc_cities_das_combined.csv"
+
+# Add or remove cities here.
+# City name must match "Geo Name" in the geo lookup CSV exactly.
+CITIES = [
+    # "Metro Vancouver A",
+    "Vancouver",
+    "Musqueam 2"
+]
+
+# Characteristic IDs to extract from the census CSV.
 # Set to None to keep all 2631 characteristics.
-# All IDs verified against 98-401-X2021006_English_meta.txt
-# =============================================================================
-# --- Population ---
-#   1   Population, 2021
-#   2   Population, 2016
-#   3   Population percentage change, 2016 to 2021
-#   4   Total private dwellings
-#   5   Private dwellings occupied by usual residents
-#   6   Population density per square kilometre
-#   7   Land area in square kilometres
-#
-# --- Age ---
-#   8   Total - Age groups of the population
-#   9     0 to 14 years
-#   13    15 to 64 years
-#   24    65 years and over
-#   39  Average age of the population
-#   40  Median age of the population
-#
-# --- Dwelling type ---
-#   41  Total - Occupied private dwellings by structural type
-#   42    Single-detached house
-#   43    Semi-detached house
-#   44    Row house
-#   45    Apartment or flat in a duplex
-#   46    Apartment in a building that has fewer than five storeys
-#   47    Apartment in a building that has five or more storeys
-#
-# --- Household size ---
-#   50  Total - Private households by household size
-#   51    1 person
-#   52    2 persons
-#   57  Average household size
-#
-# --- Marital status ---
-#   58  Total - Marital status (15+)
-#   59    Married or living common-law
-#   66    Not married and not living common-law
-#
-# --- Income (individual, 2020) - 100% data ---
-#   111 Total - Income statistics (pop 15+) [note: individual stats, 100% data]
-#   113   Median total income in 2020 among recipients ($)
-#   115   Median after-tax income in 2020 among recipients ($)
-#   119   Median employment income in 2020 among recipients ($)
-#
-# --- Household income - 100% data ---
-#   242 Total - Income statistics for private households
-#   243   Median total income of household in 2020 ($)
-#   244   Median after-tax income of household in 2020 ($)
-#
-# --- Household income - 25% sample data ---
-#   251 Total - Income statistics for private households
-#   252   Average total income of household in 2020 ($)
-#   253   Average after-tax income of household in 2020 ($)
-#
-# --- Household total income groups ---
-#   260 Total - Household total income groups in 2020
-#
-# --- Low income ---
-#   345 Prevalence of low income based on LIM-AT (%)
-#   360 Prevalence of low income based on LICO-AT (%)
-#
-# --- Mother tongue ---
-#   393 Total - Mother tongue
-#   396   English
-#   397   French
-#   398   Non-official languages
-#
-# --- Immigration & citizenship ---
-#   1527 Total - Immigrant status and period of immigration
-#   1528   Non-immigrants
-#   1529   Immigrants
-#   1537   Non-permanent residents
-#
-# --- Visible minority ---
-#   1683 Total - Visible minority
-#   1684   Total visible minority population
-#   1685     South Asian
-#   1686     Chinese
-#   1687     Black
-#   1688     Filipino
-#   1689     Arab
-#   1690     Latin American
-#   1691     Southeast Asian
-#   1692     West Asian
-#   1693     Korean
-#   1694     Japanese
-#   1695     Visible minority, n.i.e.
-#   1696     Multiple visible minorities
-#   1697   Not a visible minority
-#
-# --- Indigenous identity ---
-#   1402 Total - Indigenous identity
-#   1403   Indigenous identity
-#   1405     First Nations (North American Indian)
-#   1406     Métis
-#   1407     Inuk (Inuit)
-#   1410   Non-Indigenous identity
-#
-# --- Housing tenure ---
-#   1414 Total - Private households by tenure
-#   1415   Owner
-#   1416   Renter
-#   1417   Dwelling provided by the local government, First Nation or Indian band
-#
-# --- Shelter cost ---
-#   1465 Total - Owner and tenant households by shelter-cost-to-income ratio
-#   1466   Spending less than 30% of income on shelter costs
-#   1467   Spending 30% or more of income on shelter costs
-#
-# --- Education (15+) ---
-#   1998 Total - Highest certificate, diploma or degree (15+)
-#   1999   No certificate, diploma or degree
-#   2000   High (secondary) school diploma or equivalency certificate
-#   2001   Postsecondary certificate, diploma or degree
-#   2003     Apprenticeship or trades certificate or diploma
-#   2006     College, CEGEP or other non-university certificate or diploma
-#   2008     Bachelor's degree or higher
-#   2009       Bachelor's degree
-#   2010       University certificate or diploma above bachelor level
-#   2011       Degree in medicine, dentistry, veterinary medicine or optometry
-#   2012       Master's degree
-#   2013       Earned doctorate
-#
-# --- Education (25-64) ---
-#   2014 Total - Highest certificate, diploma or degree (25-64)
-#   2015   No certificate, diploma or degree
-#   2017   Postsecondary certificate, diploma or degree
-#   2025     Bachelor's degree
-#   2028     Master's degree
-#   2029     Earned doctorate
-#
-# --- Labour force (15+) ---
-#   2223 Total - Population aged 15 years and over by labour force status
-#   2224   In the labour force
-#   2225     Employed
-#   2226     Unemployed
-#   2227   Not in the labour force
-#   2228 Participation rate
-#   2229 Employment rate
-#   2230 Unemployment rate
-#
-# --- Commuting ---
-#   2603 Total - Main mode of commuting
-#   2605   Car, truck or van - as a driver
-#   2606   Car, truck or van - as a passenger
-#   2607   Public transit
-#   2608   Walked
-#   2609   Bicycle
-#   2610   Other method
- 
 CHARACTERISTIC_IDS = [
     # Population
     1, 6, 7,
@@ -195,104 +84,246 @@ CHARACTERISTIC_IDS = [
     # Labour
     2229, 2230,
     # Commuting
-    2603, 2605, 2606, 2607, 2608, 2609, 2610
+    2603, 2605, 2606, 2607, 2608, 2609, 2610,
 ]
- 
-# Set to None to extract everything:
-# CHARACTERISTIC_IDS = None
+
+# Characteristic IDs used in the final combine step
+CHAR_IDS = {
+    1:    "population",
+    6:    "population_density_per_km2",
+    57:   "avg_household_size",
+    243:  "median_household_income_2020",
+    345:  "pct_low_income_lim_at",
+    1467: "pct_shelter_cost_30pct_plus",
+    2603: "commute_total",
+    2605: "commute_car_driver",
+    2606: "commute_car_passenger",
+    2607: "commute_transit",
+    2608: "commute_walk",
+}
+RATE_IDS = {345, 1467}
+
 
 # =============================================================================
-# STEP 1: Get Vancouver DA DGUIDs from Geo_starting_row file
+# STEP 1 — Read geo lookup CSV once; extract DA codes and DGUIDs for all cities.
 # =============================================================================
 
-def get_vancouver_da_dguids(geo_file: str, csd_dguid: str) -> set:
-    rows = []
+def load_geo_lookup(geo_file: str, cities: list[tuple[str, str]]):
+    print(f"\n[Step 1] Reading geo lookup: {geo_file}")
     with open(geo_file, encoding="latin-1") as f:
         reader = csv.DictReader(f)
-        for row in reader:
-            rows.append(row)
- 
-    van_idx = next(
-        (i for i, r in enumerate(rows) if r["Geo Code"] == csd_dguid), None
-    )
-    if van_idx is None:
-        raise ValueError(f"Vancouver CSD DGUID {csd_dguid} not found in {geo_file}")
- 
-    da_dguids = set()
-    for row in rows[van_idx + 1:]:
-        if row["Geo Code"].startswith("2021S0512"):
-            da_dguids.add(row["Geo Code"])
-        else:
-            break
- 
-    print(f"Vancouver DAs found: {len(da_dguids)}")
-    return da_dguids
- 
- 
+        rows = list(reader)
+    df = pd.DataFrame(rows)
+
+    all_da_codes:  list = []
+    all_da_dguids: set  = set()
+
+    for city_name in cities:
+        print(f"\n  City: {city_name}")
+
+        matches = df[df["Geo Name"] == city_name]
+        if matches.empty:
+            raise ValueError(f"  '{city_name}' not found in Geo Name column of {geo_file}")
+        city_idx = matches.index[0]
+
+        da_codes  = []
+        da_dguids = set()
+        for i in range(city_idx + 1, len(df)):
+            geo_code = str(df.iloc[i]["Geo Code"])
+            if geo_code.startswith("2021S"):
+                all_da_codes.append(df.iloc[i]["Geo Name"])   # DAUID (e.g. "59150016")
+                all_da_dguids.add(geo_code)                    # DGUID (e.g. "2021S051259150016")
+            else:
+                break
+
+        print(f"    DA codes (shapefile) : {len(da_codes)}")
+        print(f"    DA DGUIDs (census)   : {len(da_dguids)}")
+
+    print(f"\n  Total DA codes  : {len(all_da_codes)}")
+    print(f"  Total DA DGUIDs : {len(all_da_dguids)}")
+    return all_da_codes, all_da_dguids
+
+
 # =============================================================================
-# STEP 2: Filter census CSV
+# STEP 2 — Extract DA boundaries from national shapefile
 # =============================================================================
- 
-def filter_census_csv(
-    census_csv: str,
-    da_dguids: set,
-    output_csv: str,
-    characteristic_ids=None,
-) -> None:
-    print(f"Filtering {census_csv} ...")
- 
+
+def extract_boundaries(shapefile_zip: str, da_codes: list, output_csv: str) -> pd.DataFrame:
+    print(f"\n[Step 2] Extracting boundaries from: {shapefile_zip}")
+    with tempfile.TemporaryDirectory() as tmpdir:
+        with zipfile.ZipFile(shapefile_zip, "r") as zf:
+            zf.extractall(tmpdir)
+        shp_path = next(Path(tmpdir).glob("*.shp"), None)
+        if not shp_path:
+            raise FileNotFoundError("No .shp file found inside the zip.")
+        print(f"  Reading shapefile: {shp_path.name}")
+        gdf = gpd.read_file(shp_path)
+
+    print(f"  Filtering {len(gdf):,} national DAs to {len(da_codes)} target DAs...")
+    van_gdf = gdf[gdf["DAUID"].isin(da_codes)].copy()
+    print(f"  Matched {len(van_gdf)} DAs")
+
+    print("  Reprojecting to WGS84 (EPSG:4326)...")
+    van_gdf = van_gdf.to_crs(epsg=4326)
+
+    geo_df = van_gdf.copy()
+    geo_df["geometry"] = geo_df["geometry"].apply(lambda g: g.wkt)
+    geo_df = geo_df.rename(columns={
+        "DAUID":    "dauid",
+        "DGUID":    "dguid",
+        "LANDAREA": "land_area_km2",
+        "PRUID":    "pruid",
+        "geometry": "geom",
+    })
+
+    geo_df.to_csv(output_csv, index=False)
+    size_mb = os.path.getsize(output_csv) / 1024 / 1024
+    print(f"  Saved -> {output_csv} ({size_mb:.1f} MB, {len(geo_df)} rows)")
+    return geo_df
+
+
+# =============================================================================
+# STEP 3 — Filter census CSV to Vancouver DAs + selected characteristics
+# =============================================================================
+
+def filter_census(census_csv: str, da_dguids: set, output_csv: str,
+                  characteristic_ids=None) -> pd.DataFrame:
+    print(f"\n[Step 3] Filtering census data: {census_csv}")
+
     char_ids_str = (
         {str(x) for x in characteristic_ids} if characteristic_ids else None
     )
- 
+
     chunks = []
-    reader = pd.read_csv(
-        census_csv,
-        dtype=str,
-        chunksize=100_000,
-        encoding="latin-1",
-    )
- 
+    sample_dguids_seen = set()  # ← ADD THIS
+    reader = pd.read_csv(census_csv, dtype=str, chunksize=100_000, encoding="latin-1")
+
     for i, chunk in enumerate(reader):
         matched = chunk[chunk["DGUID"].isin(da_dguids)]
- 
         if char_ids_str is not None and not matched.empty:
             matched = matched[matched["CHARACTERISTIC_ID"].isin(char_ids_str)]
- 
         if not matched.empty:
             chunks.append(matched)
- 
         if (i + 1) % 10 == 0:
-            print(f"  ... {(i+1) * 100_000:,} rows scanned")
- 
+            print(f"  ... {(i + 1) * 100_000:,} rows scanned")
+
+    print(f"  Sample DGUIDs seen in census CSV: {list(sample_dguids_seen)[:5]}")  # ← ADD THIS
+    print(f"  Sample DGUIDs we built:           {list(da_dguids)[:5]}")
+
     if not chunks:
-        print("No matching rows found.")
-        return
- 
+        raise RuntimeError("No matching rows found in census CSV.")
+
     result = pd.concat(chunks, ignore_index=True)
- 
+
     for col in ["C1_COUNT_TOTAL", "C2_COUNT_MEN+", "C3_COUNT_WOMEN+",
                 "C10_RATE_TOTAL", "C11_RATE_MEN+", "C12_RATE_WOMEN+"]:
         if col in result.columns:
             result[col] = pd.to_numeric(result[col], errors="coerce")
- 
-    print(f"\nResults:")
+
     print(f"  Dissemination areas : {result['DGUID'].nunique()}")
     print(f"  Characteristics     : {result['CHARACTERISTIC_ID'].nunique()}")
     print(f"  Total rows          : {len(result):,}")
- 
+
     result.to_csv(output_csv, index=False)
     print(f"  Saved -> {output_csv}")
- 
- 
+    return result
+
+
+# =============================================================================
+# STEP 4 — Combine geometry + characteristics into final CSV
+# =============================================================================
+
+def combine(geo_df: pd.DataFrame, chars_df: pd.DataFrame, output_csv: str) -> pd.DataFrame:
+    print(f"\n[Step 4] Combining geometry and characteristics...")
+
+    chars_df["CHARACTERISTIC_ID"] = pd.to_numeric(chars_df["CHARACTERISTIC_ID"], errors="coerce")
+    chars = chars_df[chars_df["CHARACTERISTIC_ID"].isin(CHAR_IDS)]
+
+    def pick_value(row):
+        if row["CHARACTERISTIC_ID"] in RATE_IDS:
+            return row["C10_RATE_TOTAL"]
+        return row["C1_COUNT_TOTAL"]
+
+    chars = chars.copy()
+    chars["value"] = chars.apply(pick_value, axis=1)
+    chars["col_name"] = chars["CHARACTERISTIC_ID"].map(CHAR_IDS)
+
+    pivoted = (
+        chars
+        .pivot_table(index="ALT_GEO_CODE", columns="col_name", values="value", aggfunc="first")
+        .reset_index()
+        .rename(columns={"ALT_GEO_CODE": "dauid"})
+    )
+    pivoted["dauid"] = pivoted["dauid"].astype(str)
+
+    # Cast median income to nullable integer (pivot produces float)
+    if "median_household_income_2020" in pivoted.columns:
+        pivoted["median_household_income_2020"] = (
+            pivoted["median_household_income_2020"].round(0).astype("Int64")
+        )
+
+    # Derive commute percentages
+    pivoted["pct_commute_car"] = (
+        (pivoted["commute_car_driver"] + pivoted["commute_car_passenger"])
+        / pivoted["commute_total"] * 100
+    ).round(1)
+    pivoted["pct_commute_transit"] = (
+        pivoted["commute_transit"] / pivoted["commute_total"] * 100
+    ).round(1)
+    pivoted["pct_commute_walk"] = (
+        pivoted["commute_walk"] / pivoted["commute_total"] * 100
+    ).round(1)
+    pivoted = pivoted.drop(columns=["commute_total", "commute_car_driver",
+                                    "commute_car_passenger", "commute_transit",
+                                    "commute_walk"])
+
+    geo_df["dauid"] = geo_df["dauid"].astype(str)
+    merged = geo_df[["dauid", "geom"]].merge(pivoted, on="dauid", how="left")
+
+    col_order = [
+        "dauid",
+        "population_density_per_km2",
+        "avg_household_size",
+        "median_household_income_2020",
+        "pct_low_income_lim_at",
+        "pct_shelter_cost_30pct_plus",
+        "pct_commute_car",
+        "pct_commute_transit",
+        "pct_commute_walk",
+        "geom",
+    ]
+    # Only include columns that exist (guards against missing characteristics)
+    col_order = [c for c in col_order if c in merged.columns]
+    merged = merged[col_order]
+
+    merged.to_csv(output_csv, index=False)
+    size_kb = os.path.getsize(output_csv) / 1024
+    print(f"  Saved -> {output_csv} ({size_kb:.0f} KB, {len(merged)} rows)")
+    print(f"\n  Column summary:")
+    print(merged.drop(columns="geom").describe(include="all").to_string())
+    return merged
+
+
 # =============================================================================
 # MAIN
 # =============================================================================
- 
+
 if __name__ == "__main__":
-    census_csv       = sys.argv[1] if len(sys.argv) > 1 else CENSUS_CSV
-    geo_starting_row = sys.argv[2] if len(sys.argv) > 2 else GEO_STARTING_ROW
-    output_csv       = sys.argv[3] if len(sys.argv) > 3 else OUTPUT_CSV
- 
-    da_dguids = get_vancouver_da_dguids(geo_starting_row, VANCOUVER_CSD_DGUID)
-    filter_census_csv(census_csv, da_dguids, output_csv, CHARACTERISTIC_IDS)
+    shapefile_zip = sys.argv[1] if len(sys.argv) > 1 else SHAPEFILE_ZIP
+    geo_csv       = sys.argv[2] if len(sys.argv) > 2 else GEO_CSV
+    census_csv    = sys.argv[3] if len(sys.argv) > 3 else CENSUS_CSV
+    output_csv    = sys.argv[4] if len(sys.argv) > 4 else OUTPUT_CSV
+
+    # Step 1: read geo lookup once for all cities
+    da_codes, da_dguids = load_geo_lookup(geo_csv, CITIES)
+
+    # Step 2: boundaries (also writes intermediate CSV)
+    geo_df = extract_boundaries(shapefile_zip, da_codes, INTERMEDIATE_BOUNDARIES)
+
+    # Step 3: census characteristics (also writes intermediate CSV)
+    chars_df = filter_census(census_csv, da_dguids, INTERMEDIATE_CHARS, CHARACTERISTIC_IDS)
+
+    # Step 4: combine and write final output
+    combine(geo_df, chars_df, output_csv)
+
+    print(f"\nFinal output: {output_csv}")

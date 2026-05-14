@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import FeaturePopup from "./FeaturePopup"
 import Tooltip from "./Tooltip"
 
-const LayerToggleDropdown = ({ toggles, buttonLabel = "Layers" }) => {
+const FilterDropdown = ({ toggles, buttonLabel = "Layers"}) => {
   const [isOpen, setIsOpen] = useState(false);
   // const [selected, setSelected] = useState("Filters")
   const rootRef = useRef(null)
@@ -100,4 +100,4 @@ const LayerToggleDropdown = ({ toggles, buttonLabel = "Layers" }) => {
   )
 }
 
-export default LayerToggleDropdown;
+export default FilterDropdown;
