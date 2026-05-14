@@ -1,6 +1,6 @@
-const API_KEY = process.env.GEMINI_API_KEY;
-const MODEL = 'gemini-2.5-flash';
-const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+const API_KEY = process.env.GROQ_API_KEY;
+const MODEL = 'llama-3.3-70b-versatile';
+const API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 // Placeholder prompt
 // TODO: discuss with team a better prompt.
@@ -36,15 +36,15 @@ export async function generateDASummary(stats, nearbyFoodAssets, persona) {
   }
 
   const dataContext = `
-    Dissemination Area: ${stats.dauid}
-    Population Density: ${stats.population_density_per_km2} per km²
-    Average Household Size: ${stats.avg_household_size}
-    Median Household Income: $${Number(stats.median_household_income).toLocaleString()}
-    Low Income (LIM-AT): ${stats.pct_low_income_lim_at}%
-    Shelter Cost 30%+: ${stats.pct_shelter_cost_30pct_plus}%
-    Commute by Car: ${stats.pct_commute_car}%
-    Commute by Transit: ${stats.pct_commute_transit}%
-    Commute by Walking: ${stats.pct_commute_walk}%
+Dissemination Area: ${stats.dauid}
+Population Density: ${stats.population_density_per_km2} per km²
+Average Household Size: ${stats.avg_household_size}
+Median Household Income: $${Number(stats.median_household_income).toLocaleString()}
+Low Income (LIM-AT): ${stats.pct_low_income_lim_at}%
+Shelter Cost 30%+: ${stats.pct_shelter_cost_30pct_plus}%
+Commute by Car: ${stats.pct_commute_car}%
+Commute by Transit: ${stats.pct_commute_transit}%
+Commute by Walking: ${stats.pct_commute_walk}%
 
 Nearby Food Assets (by walking distance):
 ${nearbyFoodAssets.length === 0
@@ -59,20 +59,28 @@ ${nearbyFoodAssets.length === 0
 
   const res = await fetch(API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${API_KEY}`,
+    },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt + '\n\n' + dataContext }] }],
-      tools: [{ google_search: {} }],
+      model: MODEL,
+      messages: [
+        { role: 'system', content: prompt },
+        { role: 'user', content: dataContext },
+      ],
+      temperature: 0.7,
+      max_tokens: 300,
     })
   });
 
   const data = await res.json();
 
   if (!res.ok) {
-    throw new Error(data.error?.message || 'Gemini API request failed');
+    throw new Error(data.error?.message || 'Groq API request failed');
   }
 
-  const summary = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No summary generated.';
+  const summary = data.choices?.[0]?.message?.content || 'No summary generated.';
 
   cache.set(cacheKey, summary);
 
