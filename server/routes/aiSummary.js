@@ -43,7 +43,8 @@ router.post('/', async (req, res) => {
             SELECT f.name, f.category, i.range_seconds
             FROM isochrones i
             JOIN food_assets f ON i.source_id::integer = f.id
-            WHERE ST_Intersects(
+            WHERE i.source_id ~ '^\d+$'
+              AND ST_Intersects(
                 i.geom,
                 (SELECT geom FROM dissemination_areas WHERE dauid = $1)
             )
