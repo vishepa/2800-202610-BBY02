@@ -93,7 +93,26 @@ export function Map({
     const isDesktop = width >= 760;
 
     return (
-        <div className="w-full h-full flex flex-col">
+        <div className="w-full h-full relative">
+
+            {/* Map — always rendered */}
+            <MapLibre
+                ref={mapRef}
+                initialViewState={{ ...VANCOUVER_CENTER, zoom: DEFAULT_ZOOM }}
+                mapStyle={MAP_STYLE}
+                minZoom={MIN_ZOOM}
+                maxZoom={MAX_ZOOM}
+            >
+                <NavigationControl
+                    position="top-right"
+                    style={{ marginTop: '50px' }}
+                />
+                <DeckGLOverlay layers = {LAYERS}/>
+                <LayerPopup id='layer-popup'
+                    selected={selected}
+                    onClose={() => setSelected(null)}
+                />
+            </MapLibre>
             {/* Desktop-only chrome */}
             {isDesktop && (
                 <>
@@ -104,29 +123,6 @@ export function Map({
                 onSelect={handleAssetSelect}
                 className="absolute top-4 left-4 z-10"
             />
-
-            {/* Map — always rendered */}
-            <div className="flex-1 relative">
-                <MapLibre
-                    ref={mapRef}
-                    initialViewState={{ ...VANCOUVER_CENTER, zoom: DEFAULT_ZOOM }}
-                    mapStyle={MAP_STYLE}
-                    minZoom={MIN_ZOOM}
-                    maxZoom={MAX_ZOOM}
-                >
-                    <NavigationControl
-                        position="top-right"
-                        style={{ marginTop: '50px' }}
-                    />
-                    
-                    <DeckGLOverlay layers = {LAYERS}/>
-                
-                <LayerPopup id='layer-popup'
-                    selected={selected}
-                    onClose={() => setSelected(null)}
-                />
-                </MapLibre>
-            </div>
         </div>
     );
 }

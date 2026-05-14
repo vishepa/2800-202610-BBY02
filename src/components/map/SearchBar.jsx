@@ -144,7 +144,7 @@ export default function SearchBar({
   return (
     <div
       ref={wrapperRef}
-      className={`relative w-full max-w-sm ${className}`}
+      className={`w-full max-w-sm ${className}`}
     >
       {/* Input row */}
       <div className="flex items-center gap-2 rounded-lg bg-white/90 backdrop-blur border border-zinc-200 shadow-md px-3 py-2 focus-within:border-zinc-400 transition-colors">
