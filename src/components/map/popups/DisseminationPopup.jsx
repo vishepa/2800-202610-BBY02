@@ -1,15 +1,98 @@
-export function DisseminationPopup({properties}){
-  return(
-    <div>
-      <p>Population Density per km2:{properties.population_density_per_km2}</p>
-      <p>Average Household Size: {properties.avg_household_size}</p>
-      <p>Median Household Income: {properties.median_household_income}</p>
-      <p>Low Income (LIM-AT): {properties.pct_low_income_lim_at}</p>
-      <p>Shelter Cost 30%+: {properties.pct_shelter_cost_30pct_plus}</p>
-      <p>Commute by Car: {properties.pct_commute_car}</p>
-      <p>Commute by Transit: {properties.pct_commute_transit}</p>
-      <p>Commute by Walk: {properties.pct_commute_walk}</p>
-      <p>Dissemination Accessibility Score: {properties.normalized_da_score}</p>
-    </div>
-  )
+import { useState } from 'react';
+import { useAISummary } from '../../../lib/hooks/useAISummary';
+
+export function DisseminationPopup({ properties }) {
+    const [persona, setPersona] = useState('resident');
+    const { data: summary, loading, error, regenerate } = useAISummary(
+        properties.dauid,
+        persona
+    );
+
+    return (
+        <div className="max-w-xs text-sm">
+            {/* Header */}
+            <h3 className="font-semibold text-base mb-2">
+                Area {properties.dauid}
+            </h3>
+
+            {/* Key Stats */}
+            <div className="mb-2">
+                <h4 className="font-medium text-gray-700 mb-1">Key Stats</h4>
+                <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-gray-600">
+                    <span>Density</span>
+                    <span className="text-right">{Number(properties.population_density_per_km2).toLocaleString()}/km²</span>
+                    <span>Median Income</span>
+                    <span className="text-right">${Number(properties.median_household_income).toLocaleString()}</span>
+                    <span>Low Income</span>
+                    <span className="text-right">{properties.pct_low_income_lim_at}%</span>
+                    <span>Shelter 30%+</span>
+                    <span className="text-right">{properties.pct_shelter_cost_30pct_plus}%</span>
+                    <span>Household Size</span>
+                    <span className="text-right">{properties.avg_household_size}</span>
+                </div>
+            </div>
+
+            {/* Commute */}
+            <div className="mb-2">
+                <h4 className="font-medium text-gray-700 mb-1">Commute</h4>
+                <div className="flex gap-2 text-gray-600">
+                    <span>🚗 {properties.pct_commute_car}%</span>
+                    <span>🚌 {properties.pct_commute_transit}%</span>
+                    <span>🚶 {properties.pct_commute_walk}%</span>
+                </div>
+            </div>
+
+            {/* Divider */}
+            <hr className="my-2 border-gray-200" />
+
+            {/* AI Summary */}
+            <div>
+                <div className="flex items-center justify-between mb-1">
+                    <h4 className="font-medium text-gray-700">AI Insight</h4>
+                    <div className="flex gap-1">
+                        <button
+                            onClick={() => setPersona('resident')}
+                            className={`px-2 py-0.5 rounded text-xs ${
+                                persona === 'resident'
+                                    ? 'bg-teal-600 text-white'
+                                    : 'bg-gray-100 text-gray-600'
+                            }`}
+                        >
+                            Resident
+                        </button>
+                        <button
+                            onClick={() => setPersona('planner')}
+                            className={`px-2 py-0.5 rounded text-xs ${
+                                persona === 'planner'
+                                    ? 'bg-teal-600 text-white'
+                                    : 'bg-gray-100 text-gray-600'
+                            }`}
+                        >
+                            Planner
+                        </button>
+                    </div>
+                </div>
+
+                {loading && (
+                    <p className="text-gray-400 text-xs italic">Generating summary...</p>
+                )}
+                {error && (
+                    <p className="text-red-500 text-xs">Failed to load summary.</p>
+                )}
+                {summary && !loading && (
+                    <p className="text-gray-600 text-xs leading-relaxed">{summary}</p>
+                )}
+
+                <div className="flex items-center justify-between mt-1">
+                    <span className="text-gray-400 text-xs">⚡ AI-generated</span>
+                    <button
+                        onClick={regenerate}
+                        className="text-xs text-teal-600 hover:underline"
+                    >
+                        🔄 Regenerate
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
 }
