@@ -1,15 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 
 export function useAISummary(dauid, persona = 'resident') {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [refreshCount, setRefreshCount] = useState(0);
 
-    useEffect(() => {
+    const generate = useCallback((isRegenerate = false) => {
         if (!dauid) return;
 
-        let cancelled = false;
         setLoading(true);
         setError(null);
 
@@ -19,7 +17,7 @@ export function useAISummary(dauid, persona = 'resident') {
             body: JSON.stringify({
                 dauid,
                 persona,
-                regenerate: refreshCount > 0,
+                regenerate: isRegenerate,
             }),
         })
             .then(res => {
@@ -27,22 +25,18 @@ export function useAISummary(dauid, persona = 'resident') {
                 return res.json();
             })
             .then(data => {
-                if (cancelled) return;
                 setData(data.summary);
                 setLoading(false);
             })
             .catch(error => {
-                if (cancelled) return;
                 setError(error);
                 setLoading(false);
             });
-
-        return () => { cancelled = true; };
-    }, [dauid, persona, refreshCount]);
+    }, [dauid, persona]);
 
     function regenerate() {
-        setRefreshCount(c => c + 1);
+        generate(true);
     }
 
-    return { data, loading, error, regenerate };
+    return { data, loading, error, generate, regenerate };
 }

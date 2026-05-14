@@ -1,5 +1,5 @@
 const API_KEY = process.env.GEMINI_API_KEY;
-const MODEL = 'gemini-2.5-flash-lite';
+const MODEL = 'gemini-2.5-flash';
 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
 
 // Placeholder prompt
