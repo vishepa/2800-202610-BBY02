@@ -24,7 +24,7 @@ router.get('/', async (req, res) => {
             'pct_commute_walk', pct_commute_walk,
             'da_accessible_area', da_accessible_area,
             'normalized_da_score', normalized_da_score
-          )
+          ) 
         )
       )
     ) AS geojson
