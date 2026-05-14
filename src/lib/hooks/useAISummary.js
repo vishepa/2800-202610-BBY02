@@ -22,7 +22,10 @@ export function useAISummary(dauid, persona = 'resident') {
                 regenerate: refreshCount > 0,
             }),
         })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error('Failed to generate summary');
+                return res.json();
+            })
             .then(data => {
                 if (cancelled) return;
                 setData(data.summary);
