@@ -1,9 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import Map from "./Map.jsx";
 import SimulationToolbar from "./SimulationToolbar";
 import FilterDropdown from "./FilterDropdown";
 import FeaturePopup from "./FeaturePopup";
 import TogglePage from "../shared/TogglePage.jsx";
+import { useDisseminationAreas } from "../../lib/hooks/useDisseminationAreas";
+import { applySimulation } from "../../lib/scoring";
 
 export default function MapPage({ setPage }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -22,6 +24,12 @@ export default function MapPage({ setPage }) {
 
     const [selectedCategory, setSelectedCategory] = useState(null); // null means "all types"
     const [placedAssets, setPlacedAssets] = useState([]);
+
+    const { data: baselineDA } = useDisseminationAreas();
+    const disseminationData = useMemo(
+        () => applySimulation(baselineDA, placedAssets),
+        [baselineDA, placedAssets],
+    );
 
     const addPlacedAsset = useCallback((category, lat, lng) => {
         setPlacedAssets(prev => [
@@ -74,6 +82,7 @@ export default function MapPage({ setPage }) {
                     foodLayerVisible={foodLayerVisible}
                     transitLayerVisible={transitLayerVisible}
                     disseminationLayerVisible={disseminationLayerVisible}
+                    disseminationData={disseminationData}
                     selectedCategory={selectedCategory}
                     placedAssets={placedAssets}
                     addPlacedAsset={addPlacedAsset}
