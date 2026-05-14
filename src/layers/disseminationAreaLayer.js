@@ -11,7 +11,7 @@ function scoreToColor(feature, alpha) {
     case 7:  return [180, 220, 120, alpha];
     case 8:  return [100, 190, 100, alpha];
     case 9:  return [0,   124, 77,  alpha];
-    case 10: return [0,   59,  46,  alpha];
+    case 10: return [0,   59,  46,  alpha]; 
     default: return [180, 180, 180, alpha];
   }
 }
