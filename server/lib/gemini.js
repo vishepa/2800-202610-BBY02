@@ -1,8 +1,8 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+const API_KEY = process.env.GEMINI_API_KEY;
+const MODEL = 'gemini-2.5-flash-lite';
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
 
-const genAI =- new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-// Placeholder prompt 
+// Placeholder prompt
 // TODO: discuss with team a better prompt.
 const SYSTEM_PROMPT = `You are a food accessibility analyst for Vancouver, BC.
 You are given statistics about a dissemination area and its nearby food assets
@@ -23,12 +23,12 @@ If persona is "resident":
 Rules:
 - Only reference data you are given. Do not fabricate statistics.
 - Be specific, mention actual numbers from the data.
-- If relevant, include recent local news about this Vancouver neighbourhood, prioritize food access news (grocery openings/closures, community food programs, farmers markets) 
+- If relevant, include recent local news about this Vancouver neighbourhood, prioritize food access news (grocery openings/closures, community food programs, farmers markets)
   but also include relevant infrastructure news (transit changes, new developments, housing projects, community services) that could impact food accessibility.
 - Keep it concise (3-4 sentences max).`;
 
 const cache = new Map();
-        
+
 export async function generateDASummary(stats, nearbyFoodAssets, persona) {
   const cacheKey = `${stats.dauid}-${persona}`;
   if (cache.has(cacheKey)) {
@@ -46,28 +46,33 @@ export async function generateDASummary(stats, nearbyFoodAssets, persona) {
     Commute by Transit: ${stats.pct_commute_transit}%
     Commute by Walking: ${stats.pct_commute_walk}%
 
-    Nearby Food Assets (by walking distance):
-    ${nearbyFoodAssets.length === 0
-      ? 'No food assets within walking distance.'
-      : nearbyFoodAssets.map(f =>
+Nearby Food Assets (by walking distance):
+${nearbyFoodAssets.length === 0
+    ? 'No food assets within walking distance.'
+    : nearbyFoodAssets.map(f =>
         `- ${f.name} (${f.category}) — ${f.range_seconds / 60} min walk`
       ).join('\n')
-    }
-  `;
-  
+  }
+`;
+
   const prompt = SYSTEM_PROMPT.replace('{persona}', persona);
 
-  const model = genAI.getGenerativeModel({
-    // Switch model here
-    model: 'gemini-2.0-flash',
-    tools: [{googleSearch: {}}],
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt + '\n\n' + dataContext }] }],
+      tools: [{ google_search: {} }],
+    })
   });
 
-  const result = await model.generateContext({
-    contents: [{role: 'user', parts: [{text: prompt + '\n\n' + dataContext}] }],
-  });
+  const data = await res.json();
 
-  const summary = result.response.text();
+  if (!res.ok) {
+    throw new Error(data.error?.message || 'Gemini API request failed');
+  }
+
+  const summary = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No summary generated.';
 
   cache.set(cacheKey, summary);
 
@@ -77,4 +82,3 @@ export async function generateDASummary(stats, nearbyFoodAssets, persona) {
 export function clearCacheEntry(dauid, persona) {
   cache.delete(`${dauid}-${persona}`);
 }
-
