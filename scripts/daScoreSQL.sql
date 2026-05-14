@@ -125,7 +125,7 @@ UPDATE dissemination_areas da
 SET normalized_da_score = ROUND(
 	CASE 
 		WHEN stats.max_score = stats.min_score THEN 5 
-		ELSE 1 + ((da.raw_da_score - stats.min_score) / (stats.max_score -stats.min_score)) * 9 
+		ELSE 1 + ((da.raw_da_score - stats.min_score) / (stats.max_score - stats.min_score)) * 9 
 		END
 )::INT
 FROM (
