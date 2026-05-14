@@ -6,7 +6,6 @@ function AccountPage({ onBack, page, setPage }) {
   const sidebarOpen = false; //no sidebar on account page, but need to pass this prop down to header and toggle button to hide them on mobile
   return (
     <div className="bg-gray-100 h-screen">
-      <Header sidebarOpen={sidebarOpen} />
       <div className="flex">
         <div className="bg-white shadow-md p-6 rounded-lg m-5 w-1/3 h-100">
           <h2 className="text-2xl font-bold text-gray-700 mb-4">Account Settings</h2>

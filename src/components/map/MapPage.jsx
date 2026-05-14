@@ -4,7 +4,6 @@ import SimulationToolbar from "./SimulationToolbar";
 import FilterDropdown from "./FilterDropdown";
 import FeaturePopup from "./FeaturePopup";
 import TogglePage from "../shared/TogglePage.jsx";
-import Header from "../shared/Header.jsx";
 
 export default function MapPage({ setPage }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -67,10 +66,7 @@ export default function MapPage({ setPage }) {
 
     return (
         <>
-        <div className = "w-full h-25 flex">
-        <Header sidebarOpen={sidebarOpen} />
-        </div>
-            <div className={`absolute inset-0 transition-all duration-300 ${sidebarOpen ? "pl-95" : "pl-0"}`}>
+            <div className={`relative w-full h-full transition-all duration-300 ${sidebarOpen ? "pl-95" : "pl-0"}`}>
                 <Map
                     active={active}
                     setActive={handleSetActive}
@@ -104,7 +100,7 @@ export default function MapPage({ setPage }) {
                 {sidebarOpen ? "<<" : ">>"}
             </button>
 
-            <div className="absolute top-25 right-0 z-30">
+            <div className="absolute right-0 z-30">
                 <FilterDropdown toggles={toggles} />
             </div>
 
