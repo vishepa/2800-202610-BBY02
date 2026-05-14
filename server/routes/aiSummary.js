@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { query } from "../databaseConnection.js";
+import { generateDASummary, clearCacheEntry } from "../lib/gemini.js";
 
 const router = Router();
 
@@ -44,11 +45,7 @@ router.post('/', async (req, res) => {
             ORDER BY i.range_seconds ASC
             `, [dauid]);
         
-        res.json({
-            stats,
-            nearbyFoodAssets: foodResult,
-            persona
-        });
+        res.json({summary, stats});
     } catch (err) {
         console.error('AI summary error:', err);
         res.status(500).json({error: 'Failed to assemble summary data'});
