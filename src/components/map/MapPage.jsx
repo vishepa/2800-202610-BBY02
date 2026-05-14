@@ -24,6 +24,7 @@ export default function MapPage({ setPage }) {
 
     const [selectedCategory, setSelectedCategory] = useState(null); // null means "all types"
     const [placedAssets, setPlacedAssets] = useState([]);
+    const [selectedDA, setSelectedDA] = useState(null); // clicked dissemination area
 
     const { data: baselineDA } = useDisseminationAreas();
     const disseminationData = useMemo(
@@ -86,12 +87,14 @@ export default function MapPage({ setPage }) {
                     selectedCategory={selectedCategory}
                     placedAssets={placedAssets}
                     addPlacedAsset={addPlacedAsset}
+                    selectedDA={selectedDA}
+                    setSelectedDA={setSelectedDA}
                 />
             </div>
             
             <TogglePage page={active} setPage={setPage} sidebarOpen={sidebarOpen} />
 
-            <div className={`absolute top-0 left-0 h-full w-95 z-10 bg-white shadow-lg transition-transform duration-300 overflow-visible ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+            <div className={`absolute top-0 left-0 h-full w-95 z-10 bg-white shadow-lg transition-transform duration-300 overflow-y-auto ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
                 <SimulationToolbar
                     active={active}
                     setActive={handleSetActive}
@@ -99,6 +102,7 @@ export default function MapPage({ setPage }) {
                     setSelectedCategory={setSelectedCategory}
                     placedAssets={placedAssets}
                     removePlacedAsset={removePlacedAsset}
+                    selectedDA={selectedDA}
                 />
             </div>
 

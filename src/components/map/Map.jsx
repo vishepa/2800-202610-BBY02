@@ -38,6 +38,8 @@ export function Map({
     selectedCategory,
     placedAssets,
     addPlacedAsset,
+    selectedDA,
+    setSelectedDA,
 
 }) {
     
@@ -63,7 +65,11 @@ export function Map({
         if (inPlacementMode) return;
         console.log("LeftClick working");
         setSelected({object: info.object, coordinate:info.coordinate, layerId});
-    }, [inPlacementMode]);
+        // Send DA data to sidebar
+        if (layerId === 'dissemination-areas' && info.object?.properties) {
+            setSelectedDA(info.object.properties);
+        }
+    }, [inPlacementMode, setSelectedDA]);
     
     const handleMapClick = useCallback((info) => {
         if (!inPlacementMode) return;
