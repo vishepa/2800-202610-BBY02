@@ -9,6 +9,7 @@ export function DisseminationPopup({properties}){
       <p>Commute by Car: {properties.pct_commute_car}</p>
       <p>Commute by Transit: {properties.pct_commute_transit}</p>
       <p>Commute by Walk: {properties.pct_commute_walk}</p>
+      <p>Dissemination Accessibility Score: {properties.normalized_da_score}</p>
     </div>
   )
 }
