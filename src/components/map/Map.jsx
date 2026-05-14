@@ -23,8 +23,8 @@ import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
 import FoodTypeFilter from "./FoodTypeFilter.jsx";
 import { getDisseminationAreaLayer } from '../../layers/disseminationAreaLayer.js';
 import {LayerPopup} from './popups/LayerPopup.jsx';
-
-
+import SearchBar from "./SearchBar";
+// import TestMarker from "testMarker";
 
 
 
@@ -51,6 +51,7 @@ export function Map({
     // Selected state for the popups
     const [selected, setSelected] = useState(null);
 
+    const mapRef = useRef(null);
     const inPlacementMode = active === "sim" && selectedCategory !== null;
 
     // Function to handle the click event for the popups
@@ -96,20 +97,54 @@ export function Map({
 
     ], [foodData, foodLayerVisible, activeFoodCategories, transitData, transitLayerVisible, activeRoutes, disseminationLayerVisible, handleClick, placedAssets]);
 
+    // search bar
+    const handleAssetSelect = (asset) => {
+        if (!asset) return; // user cleared
+        // fly the MapLibre camera to the selected asset
+        mapRef.current?.flyTo({ center: [asset.lng, asset.lat], zoom: 16 });
+        // optionally update a deck.gl highlight layer
+    };
+
     const width = useScreenWidth();
     const isDesktop = width >= 760;
 
     return (
-        <div className="w-full h-full flex flex-col">
+        <div className="w-full h-full relative">
+
+            {/* Map — always rendered */}
+            <div className="w-full h-full" style={{ cursor: inPlacementMode ? 'crosshair' : 'default' }}>
+                <MapLibre
+                    ref={mapRef}
+                    initialViewState={{ ...VANCOUVER_CENTER, zoom: DEFAULT_ZOOM }}
+                    mapStyle={MAP_STYLE}
+                    minZoom={MIN_ZOOM}
+                    maxZoom={MAX_ZOOM}
+                >
+                    <NavigationControl
+                        position="top-right"
+                        style={{ marginTop: '50px' }}
+                    />
+                    <DeckGLOverlay layers = {LAYERS} onClick={handleMapClick}/>
+                    <LayerPopup id='layer-popup'
+                        selected={selected}
+                        onClose={() => setSelected(null)}
+                    />
+                </MapLibre>
+
+            </div>
             {/* Desktop-only chrome */}
             {isDesktop && (
                 <>
                     <MapSimButton active={active} setActive={setActive} />
                 </>
             )}
+            <SearchBar
+                onSelect={handleAssetSelect}
+                className="absolute top-4 left-4 z-10"
+            />
 
             {/* Map — always rendered */}
-            <div className="flex-1 relative"
+            {/* <div className="flex-1 relative"
                  style={{ cursor: inPlacementMode ? 'crosshair' : 'default' }}
             >
                 <MapLibre
@@ -123,14 +158,13 @@ export function Map({
                         style={{ marginTop: '50px' }}
                     />
                     
-                    <DeckGLOverlay layers = {LAYERS} onClick={handleMapClick}/>
                 
                 <LayerPopup id='layer-popup'
                     selected={selected}
                     onClose={() => setSelected(null)}
                 />
                 </MapLibre>
-            </div>
+            </div> */}
         </div>
     );
 }
