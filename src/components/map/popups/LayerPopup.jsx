@@ -21,6 +21,7 @@ export function LayerPopup({selected, onClose}){
       latitude={selected.coordinate[1]}
       onClose={onClose}
       anchor='bottom'
+      style={{ zIndex: 10 }}
     >
       <PopupContent properties={selected.object.properties}/>
     </Popup>

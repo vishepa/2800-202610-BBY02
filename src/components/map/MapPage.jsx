@@ -109,7 +109,7 @@ export default function MapPage({ setPage }) {
                 {sidebarOpen ? "<<" : ">>"}
             </button>
 
-            <div className="absolute right-0 z-30">
+            <div className="absolute top-0 right-0 z-30">
                 <FilterDropdown toggles={toggles} />
             </div>
 
