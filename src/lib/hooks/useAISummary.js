@@ -1,9 +1,21 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+
+// Client-side cache persists across DA switches
+const summaryCache = new Map();
 
 export function useAISummary(dauid, persona = 'resident') {
-    const [data, setData] = useState(null);
+    const cacheKey = `${dauid}-${persona}`;
+    const [data, setData] = useState(() => summaryCache.get(cacheKey) || null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    // When DA or persona changes, restore from cache or reset
+    useEffect(() => {
+        const cached = summaryCache.get(cacheKey);
+        setData(cached || null);
+        setLoading(false);
+        setError(null);
+    }, [cacheKey]);
 
     const generate = useCallback((isRegenerate = false) => {
         if (!dauid) return;
@@ -25,6 +37,7 @@ export function useAISummary(dauid, persona = 'resident') {
                 return res.json();
             })
             .then(data => {
+                summaryCache.set(cacheKey, data.summary);
                 setData(data.summary);
                 setLoading(false);
             })
@@ -32,7 +45,7 @@ export function useAISummary(dauid, persona = 'resident') {
                 setError(error);
                 setLoading(false);
             });
-    }, [dauid, persona]);
+    }, [dauid, persona, cacheKey]);
 
     function regenerate() {
         generate(true);
