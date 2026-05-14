@@ -89,6 +89,7 @@ export default function MapPage({ setPage }) {
                     addPlacedAsset={addPlacedAsset}
                     selectedDA={selectedDA}
                     setSelectedDA={setSelectedDA}
+                    setSidebarOpen={setSidebarOpen}
                 />
             </div>
             
