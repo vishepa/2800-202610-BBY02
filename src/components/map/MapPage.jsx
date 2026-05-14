@@ -75,7 +75,7 @@ export default function MapPage({ setPage }) {
 
     return (
         <>
-            <div className={`relative w-full h-full transition-all duration-300 ${sidebarOpen ? "pl-95" : "pl-0"}`}>
+            <div className="relative w-full h-full">
                 <Map
                     active={active}
                     setActive={handleSetActive}
@@ -94,16 +94,18 @@ export default function MapPage({ setPage }) {
             
             <TogglePage page={active} setPage={setPage} sidebarOpen={sidebarOpen} />
 
-            <div className={`absolute top-0 left-0 h-full w-95 z-10 bg-white shadow-lg transition-transform duration-300 overflow-y-auto ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
-                <SimulationToolbar
-                    active={active}
-                    setActive={handleSetActive}
-                    selectedCategory={selectedCategory}
-                    setSelectedCategory={setSelectedCategory}
-                    placedAssets={placedAssets}
-                    removePlacedAsset={removePlacedAsset}
-                    selectedDA={selectedDA}
-                />
+            <div className={`absolute top-0 left-0 h-full w-95 z-10 bg-white shadow-lg transition-transform duration-300 will-change-transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+                <div className="h-full overflow-y-auto">
+                    <SimulationToolbar
+                        active={active}
+                        setActive={handleSetActive}
+                        selectedCategory={selectedCategory}
+                        setSelectedCategory={setSelectedCategory}
+                        placedAssets={placedAssets}
+                        removePlacedAsset={removePlacedAsset}
+                        selectedDA={selectedDA}
+                    />
+                </div>
             </div>
 
             <button
