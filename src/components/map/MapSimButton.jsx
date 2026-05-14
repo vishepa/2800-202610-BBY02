@@ -2,7 +2,7 @@ import { useState } from "react";
 
 function MapSimButton({ active, setActive }) {
   return (
-    <div className="fixed top-25 left-1/2 -translate-x-1/2 z-10">
+    <div className="absolute top-0 left-1/2 -translate-x-1/2 z-10">
       <div className="relative flex w-40 bg-gray-200 rounded-b-xl p-1 shadow-md">
         
         <div

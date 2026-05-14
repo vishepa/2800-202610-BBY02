@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
     WHERE
       geom IS NOT NULL
       AND ($1::text[] IS NULL OR category = ANY($1::text[]))
-      AND ($2::text IS NULL OR name ILIKE '%' || $2 || '%')
+      AND ($2::text IS NULL OR name ILIKE '%' || $2 || '%' OR address ILIKE '%' || $2 || '%')
   `, [categories ?? null, search ?? null])
 
   res.json(rows[0].geojson);
