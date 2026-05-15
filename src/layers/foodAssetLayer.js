@@ -147,6 +147,7 @@ function getIconUrlForCategory(category) {
     'Community Gardens':  'https://cdn-icons-png.flaticon.com/512/628/628324.png',
     'Free Meal':         'https://cdn-icons-png.flaticon.com/512/6188/6188570.png',
     'Low Cost Meal':     'https://cdn-icons-png.flaticon.com/512/1027/1027943.png',
+    'Specialty Food Stores':     'https://cdn-icons-png.flaticon.com/512/3724/3724788.png',
     };
     return icons[category] || 'https://cdn-icons-png.flaticon.com/512/3334/3334886.png'; // Default icon
 }
