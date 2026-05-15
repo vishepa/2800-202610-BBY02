@@ -7,6 +7,7 @@ import IconPicker from "./simulation/IconPicker";
 import PlacedAssetList from "./simulation/PlacedAssetList";
 import DAInfoPanel from "./DAInfoPanel";
 import FoodInfoPanel from "./FoodInfoPanel";
+import TransitInfoPanel from "./TransitInfoPanel";
 
 export function SimulationToolbar({
     active,
@@ -62,7 +63,7 @@ export function SimulationToolbar({
         if (!selectedItem) {
             return (
                 <p className="text-gray-400 text-sm italic">
-                    Click a dissemination area or food asset to see details
+                    Click a dissemination area, food asset, or transit stop to see details
                 </p>
             );
         }
@@ -71,6 +72,9 @@ export function SimulationToolbar({
         }
         if (selectedItem.type === 'foodAsset') {
             return <FoodInfoPanel properties={selectedItem.data} />;
+        }
+        if (selectedItem.type === 'transitStop') {
+            return <TransitInfoPanel properties={selectedItem.data} />;
         }
     })();
 

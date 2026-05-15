@@ -41,6 +41,7 @@ export function Map({
     selectedDA,
     setSelectedDA,
     setSelectedFoodAsset,
+    setSelectedTransitStop,
     setSidebarOpen,
 
 }) {
@@ -100,7 +101,12 @@ export function Map({
             setSelectedDA(info.object.properties);
             setSidebarOpen(true);
         }
-    }, [inPlacementMode, setSelectedDA, setSidebarOpen]);
+        // Send transit stop data to sidebar and open it
+        if (layerId === 'transit-stops' && info.object?.properties) {
+            setSelectedTransitStop(info.object.properties);
+            setSidebarOpen(true);
+        }
+    }, [inPlacementMode, setSelectedDA, setSelectedTransitStop, setSidebarOpen]);
     
     const handleMapClick = useCallback((info) => {
         if (!inPlacementMode) return;
