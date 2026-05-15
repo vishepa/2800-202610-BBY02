@@ -133,10 +133,10 @@ export function Map({
                         style={{ marginTop: '50px' }}
                     />
                     <DeckGLOverlay layers = {LAYERS} onClick={handleMapClick}/>
-                    <LayerPopup id='layer-popup'
+                    {/* <LayerPopup id='layer-popup'
                         selected={selected}
                         onClose={() => setSelected(null)}
-                    />
+                    /> */}
                 </MapLibre>
 
             </div>
