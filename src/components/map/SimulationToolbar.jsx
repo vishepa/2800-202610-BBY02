@@ -6,6 +6,7 @@ import Tooltip from "./Tooltip";
 import IconPicker from "./simulation/IconPicker";
 import PlacedAssetList from "./simulation/PlacedAssetList";
 import DAInfoPanel from "./DAInfoPanel";
+import FoodInfoPanel from "./FoodInfoPanel";
 
 export function SimulationToolbar({
     active,
@@ -14,8 +15,7 @@ export function SimulationToolbar({
     setSelectedCategory,
     placedAssets,
     removePlacedAsset,
-    selectedDA,
-
+    selectedItem,
 }) {
 
     const [pct, setPct] = useState(50);
@@ -57,13 +57,36 @@ export function SimulationToolbar({
         </>
     );
 
-    const daInfoContent = selectedDA ? (
+
+    const infoContent = (() => {
+        if (!selectedItem) {
+            return (
+                <p className="text-gray-400 text-sm italic">
+                    Click a dissemination area or food asset to see details
+                </p>
+            );
+        }
+        if (selectedItem.type === 'da') {
+            return <DAInfoPanel properties={selectedItem.data} />;
+        }
+        if (selectedItem.type === 'foodAsset') {
+            return <FoodInfoPanel properties={selectedItem.data} />;
+        }
+    })();
+
+    const daInfoContent = (
         <div className="mt-4 pt-4 border-t border-gray-200">
-            <DAInfoPanel properties={selectedDA} />
+            {infoContent}
         </div>
-    ) : (
-        <p className="mt-4 text-gray-400 text-sm italic">Click a dissemination area on the map to see details</p>
     );
+
+    // const daInfoContent = selectedDA ? (
+    //     <div className="mt-4 pt-4 border-t border-gray-200">
+    //         <DAInfoPanel properties={selectedDA} />
+    //     </div>
+    // ) : (
+    //     <p className="mt-4 text-gray-400 text-sm italic">Click a dissemination area on the map to see details</p>
+    // );
 
     const simContent = (
         <>

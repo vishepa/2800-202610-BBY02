@@ -40,6 +40,7 @@ export function Map({
     addPlacedAsset,
     selectedDA,
     setSelectedDA,
+    setSelectedFoodAsset,
     setSidebarOpen,
 
 }) {
@@ -92,7 +93,12 @@ export function Map({
             visible: foodLayerVisible,
             activeCategories: activeFoodCategories,
             onHover: ({ object, x, y }) => {/* sidebar update - add later */},
-            onClick: ({ object }) => console.log('Clicked on food asset:', object),
+            onClick: ({ object, coordinate }) => {
+                if (!object || inPlacementMode) return;
+                setSelected({ object, coordinate, layerId: 'food-assets' });
+                setSelectedFoodAsset(object.properties);
+                setSidebarOpen(true);
+            },
         }),
         getTransitAssetLayer({
             data: transitData,
@@ -103,14 +109,15 @@ export function Map({
         }),
         ...getSimAssetLayers({ placedAssets }),
 
-    ], [foodData, foodLayerVisible, activeFoodCategories, transitData, transitLayerVisible, activeRoutes, disseminationLayerVisible, disseminationData, handleClick, placedAssets]);
+    ], [foodData, foodLayerVisible, activeFoodCategories, transitData, transitLayerVisible, activeRoutes, disseminationLayerVisible, disseminationData, handleClick, placedAssets, setSelectedFoodAsset]);
 
     // search bar
     const handleAssetSelect = (asset) => {
         if (!asset) return; // user cleared
         // fly the MapLibre camera to the selected asset
         mapRef.current?.flyTo({ center: [asset.lng, asset.lat], zoom: 16 });
-        // optionally update a deck.gl highlight layer
+        setSelectedFoodAsset(asset);
+        setSidebarOpen(true);
     };
 
     const width = useScreenWidth();
