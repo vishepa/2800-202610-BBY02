@@ -6,6 +6,7 @@ import FeaturePopup from "./FeaturePopup";
 import TogglePage from "../shared/TogglePage.jsx";
 import { useDisseminationAreas } from "../../lib/hooks/useDisseminationAreas";
 import { applySimulation } from "../../lib/scoring";
+import { useScreenWidth } from "../shared/widthHelper";
 
 export default function MapPage({ setPage }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -67,6 +68,9 @@ export default function MapPage({ setPage }) {
         setActive(mode);
     }, [simPopupSeen]);
 
+    const width = useScreenWidth();
+    const isDesktop = width >= 760;
+
     const toggles = [
         { id: "food", label: "Food Assets", visible: foodLayerVisible, onToggle: setFoodLayerVisible },
         { id: "transit", label: "Transit Stops", visible: transitLayerVisible, onToggle: setTransitLayerVisible },
@@ -95,26 +99,53 @@ export default function MapPage({ setPage }) {
             
             <TogglePage page={active} setPage={setPage} sidebarOpen={sidebarOpen} />
 
-            <div className={`absolute top-0 left-0 h-full w-95 z-10 bg-white shadow-lg transition-transform duration-300 will-change-transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
-                <div className="h-full overflow-y-auto">
-                    <SimulationToolbar
-                        active={active}
-                        setActive={handleSetActive}
-                        selectedCategory={selectedCategory}
-                        setSelectedCategory={setSelectedCategory}
-                        placedAssets={placedAssets}
-                        removePlacedAsset={removePlacedAsset}
-                        selectedDA={selectedDA}
-                    />
-                </div>
-            </div>
-
-            <button
-                onClick={handleToggleSidebar}
-                className={`absolute top-1/2 z-20 bg-white shadow-md rounded-r-lg px-1 py-3 transition-all duration-300 ${sidebarOpen ? "left-95" : "left-0"}`}
-            >
-                {sidebarOpen ? "<<" : ">>"}
-            </button>
+            {/* Desktop: slide from left */}
+            {isDesktop ? (
+                <>
+                    <div className={`absolute top-0 left-0 h-full w-95 z-10 bg-white shadow-lg transition-transform duration-300 will-change-transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+                        <div className="h-full overflow-y-auto">
+                            <SimulationToolbar
+                                active={active}
+                                setActive={handleSetActive}
+                                selectedCategory={selectedCategory}
+                                setSelectedCategory={setSelectedCategory}
+                                placedAssets={placedAssets}
+                                removePlacedAsset={removePlacedAsset}
+                                selectedDA={selectedDA}
+                            />
+                        </div>
+                    </div>
+                    <button
+                        onClick={handleToggleSidebar}
+                        className={`absolute top-1/2 z-20 bg-white shadow-md rounded-r-lg px-1 py-3 transition-all duration-300 ${sidebarOpen ? "left-95" : "left-0"}`}
+                    >
+                        {sidebarOpen ? "<<" : ">>"}
+                    </button>
+                </>
+            ) : (
+                <>
+                    {/* Mobile: slide from bottom */}
+                    <div className={`absolute bottom-0 left-0 w-full h-2/3 z-10 bg-white shadow-lg rounded-t-2xl transition-transform duration-300 will-change-transform ${sidebarOpen ? "translate-y-0" : "translate-y-full"}`}>
+                        <div className="h-full overflow-y-auto p-4">
+                            <div className="flex justify-center mb-2">
+                                <button
+                                    onClick={handleToggleSidebar}
+                                    className="w-10 h-1.5 bg-gray-300 rounded-full"
+                                />
+                            </div>
+                            <SimulationToolbar
+                                active={active}
+                                setActive={handleSetActive}
+                                selectedCategory={selectedCategory}
+                                setSelectedCategory={setSelectedCategory}
+                                placedAssets={placedAssets}
+                                removePlacedAsset={removePlacedAsset}
+                                selectedDA={selectedDA}
+                            />
+                        </div>
+                    </div>
+                </>
+            )}
 
             <div className="absolute top-0 right-0 z-30">
                 <FilterDropdown toggles={toggles} />
