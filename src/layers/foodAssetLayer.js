@@ -8,6 +8,8 @@ const CLUSTER_OPTIONS = {
     minPoints: 2,
 };
 
+const CLUSTER_ZOOM_THRESHOLD = 13;
+
 export function buildFoodClusterIndex(data, activeCategories) {
     const features = data?.features ?? [];
     const valid = features.filter(f =>
@@ -31,10 +33,17 @@ export function getFoodAssetLayers({
     onHover,
     onClick,
     onClusterClick,
+    clusterZoomThreshold = CLUSTER_ZOOM_THRESHOLD,
 } = {}) {
     if (!index || !bbox || zoom == null) return [];
 
-    const clusters = index.getClusters(bbox, Math.floor(zoom));
+    const effectiveZoom = zoom >= clusterZoomThreshold
+        ? CLUSTER_OPTIONS.maxZoom + 1  // +1 pushes past maxZoom so no clusters form
+        : Math.floor(zoom);
+
+    const clusters = index.getClusters(bbox, effectiveZoom);
+    
+    // const clusters = index.getClusters(bbox, Math.floor(zoom));
     const clusterFeatures = [];
     const pointFeatures = [];
     for (const c of clusters) {
