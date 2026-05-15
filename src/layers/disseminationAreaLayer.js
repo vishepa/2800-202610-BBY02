@@ -2,16 +2,16 @@ import { GeoJsonLayer } from '@deck.gl/layers';
 
 function scoreToColor(feature, alpha) {
   switch (feature.properties.normalized_da_score) {
-    case 1:  return [64,  11,  16,  alpha];
-    case 2:  return [122, 17,  14,  alpha];
-    case 3:  return [185, 40,  30,  alpha];
-    case 4:  return [220, 90,  40,  alpha];
-    case 5:  return [240, 160, 60,  alpha];
-    case 6:  return [254, 241, 150, alpha];
-    case 7:  return [180, 220, 120, alpha];
-    case 8:  return [100, 190, 100, alpha];
-    case 9:  return [0,   124, 77,  alpha];
-    case 10: return [0,   59,  46,  alpha];
+    case 1:  return [235, 40,  50,  alpha];
+    case 2:  return [220, 70,  40,  alpha];
+    case 3:  return [230, 110, 35,  alpha];
+    case 4:  return [235, 150, 40,  alpha];
+    case 5:  return [245, 200, 80,  alpha];
+    case 6:  return [230, 235, 90,  alpha];
+    case 7:  return [190, 230, 100, alpha];
+    case 8:  return [120, 210, 100, alpha];
+    case 9:  return [40,  190, 80,  alpha];
+    case 10: return [0,   210, 60,  alpha];
     default: return [180, 180, 180, alpha];
   }
 }

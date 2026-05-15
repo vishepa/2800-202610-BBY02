@@ -26,7 +26,7 @@ router.get('/', async (req, res) => {
             'raw_da_score', raw_da_score,
             'da_area_m2', ST_Area(geom::geography),
             'normalized_da_score', normalized_da_score
-          )
+          ) 
         )
       )
     ) AS geojson
