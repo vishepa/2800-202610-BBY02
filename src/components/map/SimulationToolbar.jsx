@@ -5,6 +5,7 @@ import MapSimButtonMobile from "./MapSimButtonMobile";
 import Tooltip from "./Tooltip";
 import IconPicker from "./simulation/IconPicker";
 import PlacedAssetList from "./simulation/PlacedAssetList";
+import DAInfoPanel from "./DAInfoPanel";
 
 export function SimulationToolbar({
     active,
@@ -12,7 +13,8 @@ export function SimulationToolbar({
     selectedCategory,
     setSelectedCategory,
     placedAssets,
-    removePlacedAsset, 
+    removePlacedAsset,
+    selectedDA,
 
 }) {
 
@@ -55,6 +57,14 @@ export function SimulationToolbar({
         </>
     );
 
+    const daInfoContent = selectedDA ? (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+            <DAInfoPanel properties={selectedDA} />
+        </div>
+    ) : (
+        <p className="mt-4 text-gray-400 text-sm italic">Click a dissemination area on the map to see details</p>
+    );
+
     const simContent = (
         <>
             {sliders}
@@ -62,10 +72,11 @@ export function SimulationToolbar({
                 selectedCategory={selectedCategory}
                 setSelectedCategory={setSelectedCategory}
             />
-            <PlacedAssetList 
+            <PlacedAssetList
                 placedAssets={placedAssets}
                 removePlacedAsset={removePlacedAsset}
             />
+            {daInfoContent}
         </>
     );
 
@@ -75,7 +86,7 @@ export function SimulationToolbar({
                 <h2 className="text-xl font-bold mb-4">
                     {active === "sim" ? "Simulation Toolbar" : "Map Data Display"}
                 </h2>
-                {active === "sim" ? simContent : <p>see a bunch of stats when hovering over map</p>}
+                {active === "sim" ? simContent : daInfoContent}
             </div>
         );
     } else {
@@ -85,7 +96,7 @@ export function SimulationToolbar({
                     <h2 className="text-xl font-bold mb-4">
                         {active === "sim" ? "Simulation Toolbar" : "Map Data Display"}
                     </h2>
-                    {active === "sim" ? simContent : <p>see a bunch of stats when hovering over map</p>}
+                    {active === "sim" ? simContent : daInfoContent}
                 </div>
                 <MapSimButtonMobile active={active} setActive={setActive} />
             </div>

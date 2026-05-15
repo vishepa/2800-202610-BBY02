@@ -1,15 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+
+// Client-side cache persists across DA switches
+const summaryCache = new Map();
 
 export function useAISummary(dauid, persona = 'resident') {
-    const [data, setData] = useState(null);
+    const cacheKey = `${dauid}-${persona}`;
+    const [data, setData] = useState(() => summaryCache.get(cacheKey) || null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [refreshCount, setRefreshCount] = useState(0);
 
+    // When DA or persona changes, restore from cache or reset
     useEffect(() => {
+        const cached = summaryCache.get(cacheKey);
+        setData(cached || null);
+        setLoading(false);
+        setError(null);
+    }, [cacheKey]);
+
+    const generate = useCallback((isRegenerate = false) => {
         if (!dauid) return;
 
-        let cancelled = false;
         setLoading(true);
         setError(null);
 
@@ -19,7 +29,7 @@ export function useAISummary(dauid, persona = 'resident') {
             body: JSON.stringify({
                 dauid,
                 persona,
-                regenerate: refreshCount > 0,
+                regenerate: isRegenerate,
             }),
         })
             .then(res => {
@@ -27,22 +37,19 @@ export function useAISummary(dauid, persona = 'resident') {
                 return res.json();
             })
             .then(data => {
-                if (cancelled) return;
+                summaryCache.set(cacheKey, data.summary);
                 setData(data.summary);
                 setLoading(false);
             })
             .catch(error => {
-                if (cancelled) return;
                 setError(error);
                 setLoading(false);
             });
-
-        return () => { cancelled = true; };
-    }, [dauid, persona, refreshCount]);
+    }, [dauid, persona, cacheKey]);
 
     function regenerate() {
-        setRefreshCount(c => c + 1);
+        generate(true);
     }
 
-    return { data, loading, error, regenerate };
+    return { data, loading, error, generate, regenerate };
 }

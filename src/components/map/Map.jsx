@@ -38,6 +38,9 @@ export function Map({
     selectedCategory,
     placedAssets,
     addPlacedAsset,
+    selectedDA,
+    setSelectedDA,
+    setSidebarOpen,
 
 }) {
     
@@ -63,7 +66,12 @@ export function Map({
         if (inPlacementMode) return;
         console.log("LeftClick working");
         setSelected({object: info.object, coordinate:info.coordinate, layerId});
-    }, [inPlacementMode]);
+        // Send DA data to sidebar and open it
+        if (layerId === 'dissemination-areas' && info.object?.properties) {
+            setSelectedDA(info.object.properties);
+            setSidebarOpen(true);
+        }
+    }, [inPlacementMode, setSelectedDA, setSidebarOpen]);
     
     const handleMapClick = useCallback((info) => {
         if (!inPlacementMode) return;
@@ -125,10 +133,10 @@ export function Map({
                         style={{ marginTop: '50px' }}
                     />
                     <DeckGLOverlay layers = {LAYERS} onClick={handleMapClick}/>
-                    <LayerPopup id='layer-popup'
+                    {/* <LayerPopup id='layer-popup'
                         selected={selected}
                         onClose={() => setSelected(null)}
-                    />
+                    /> */}
                 </MapLibre>
 
             </div>
