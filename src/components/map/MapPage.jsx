@@ -25,13 +25,22 @@ export default function MapPage({ setPage }) {
 
     const [selectedCategory, setSelectedCategory] = useState(null); // null means "all types"
     const [placedAssets, setPlacedAssets] = useState([]);
-    const [selectedDA, setSelectedDA] = useState(null); // clicked dissemination area
+    // const [selectedDA, setSelectedDA] = useState(null); // clicked dissemination area
+    const [selectedItem, setSelectedItem] = useState(null); // clicked dissemination area/food asset
 
     const { data: baselineDA } = useDisseminationAreas();
     const disseminationData = useMemo(
         () => applySimulation(baselineDA, placedAssets),
         [baselineDA, placedAssets],
     );
+
+    const handleSelectDA = useCallback((daProperties) => {
+        setSelectedItem(daProperties ? { type: 'da', data: daProperties } : null);
+    }, []);
+
+    const handleSelectFoodAsset = useCallback((assetProperties) => {
+        setSelectedItem(assetProperties ? { type: 'foodAsset', data: assetProperties } : null);
+    }, []);
 
     const addPlacedAsset = useCallback((category, lat, lng) => {
         setPlacedAssets(prev => [
@@ -91,8 +100,9 @@ export default function MapPage({ setPage }) {
                     selectedCategory={selectedCategory}
                     placedAssets={placedAssets}
                     addPlacedAsset={addPlacedAsset}
-                    selectedDA={selectedDA}
-                    setSelectedDA={setSelectedDA}
+                    selectedItem={selectedItem}
+                    setSelectedDA={handleSelectDA}
+                    setSelectedFoodAsset={handleSelectFoodAsset}
                     setSidebarOpen={setSidebarOpen}
                 />
             </div>
@@ -111,7 +121,7 @@ export default function MapPage({ setPage }) {
                                 setSelectedCategory={setSelectedCategory}
                                 placedAssets={placedAssets}
                                 removePlacedAsset={removePlacedAsset}
-                                selectedDA={selectedDA}
+                                selectedItem={selectedItem}
                             />
                         </div>
                     </div>
@@ -140,7 +150,7 @@ export default function MapPage({ setPage }) {
                                 setSelectedCategory={setSelectedCategory}
                                 placedAssets={placedAssets}
                                 removePlacedAsset={removePlacedAsset}
-                                selectedDA={selectedDA}
+                                selectedItem={selectedItem}
                             />
                         </div>
                     </div>

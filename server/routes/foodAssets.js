@@ -12,21 +12,29 @@ router.get('/', async (req, res) => {
       'features', json_agg(
         json_build_object(
           'type', 'Feature',
-          'geometry', ST_AsGeoJSON(geom)::json,
+          'geometry', ST_AsGeoJSON(fa.geom)::json,
           'properties', json_build_object(
-            'id', id,
-            'name', name,
-            'category', category,
-            'address', address
+            'id', fa.id,
+            'name', fa.name,
+            'category', fa.category,
+            'address', fa.address,
+            'tags', COALESCE(
+              (
+                SELECT json_agg(fat.tag ORDER BY fat.tag)
+                FROM food_asset_tags fat
+                WHERE fat.asset_id = fa.id
+              ),
+              '[]'::json
+            )
           )
         )
       )
     ) AS geojson
-    FROM food_assets
+    FROM food_assets fa
     WHERE
-      geom IS NOT NULL
-      AND ($1::text[] IS NULL OR category = ANY($1::text[]))
-      AND ($2::text IS NULL OR name ILIKE '%' || $2 || '%' OR address ILIKE '%' || $2 || '%')
+      fa.geom IS NOT NULL
+      AND ($1::text[] IS NULL OR fa.category = ANY($1::text[]))
+      AND ($2::text IS NULL OR fa.name ILIKE '%' || $2 || '%' OR fa.address ILIKE '%' || $2 || '%')
   `, [categories ?? null, search ?? null])
 
   res.json(rows[0].geojson);
