@@ -1,18 +1,21 @@
 import { IconLayer } from "@deck.gl/layers";
 import { FOOD_CATEGORY_IDS } from "../constants/foodCategories";
 
-
+// Below this zoom level food icons are hidden so the map doesn't turn into a
+// blob of overlapping markers. Adjust if the team wants them to appear sooner.
+export const FOOD_ASSET_MIN_ZOOM = 13;
 
 
 export function getFoodAssetLayer({
     data,
-    visible = true, 
+    visible = true,
+    zoom = null,
     activeCategories = null,
     onHover,
     onClick,
-}) { 
+}) {
 
-    const features = data?.features ?? [];  
+    const features = data?.features ?? [];
 
     // Makes the markers only render if their category matches with one from foodCategories.js.
     const validFeatures = features.filter(f =>
@@ -26,10 +29,12 @@ export function getFoodAssetLayer({
         ? validFeatures.filter(f => activeCategories.includes(f.properties.category))
         : validFeatures;
 
+    const zoomedInEnough = zoom == null || zoom >= FOOD_ASSET_MIN_ZOOM;
+
         return new IconLayer({
             id: 'food-assets',
             data: filteredFeatures,
-            visible,
+            visible: visible && zoomedInEnough,
 
             getPosition: f => f.geometry.coordinates,
 

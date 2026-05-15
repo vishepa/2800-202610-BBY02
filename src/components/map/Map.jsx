@@ -58,6 +58,12 @@ export function Map({
     const mapRef = useRef(null);
     const inPlacementMode = active === "sim" && selectedCategory !== null;
 
+    const [mapZoom, setMapZoom] = useState(DEFAULT_ZOOM);
+    const handleMapMove = useCallback(() => {
+        const m = mapRef.current;
+        if (m) setMapZoom(m.getZoom());
+    }, []);
+
     // Function to handle the click event for the popups
     const handleClick = useCallback((info, layerId) => {
         //info: the object deck.gl passes to onClick
@@ -90,6 +96,7 @@ export function Map({
         getFoodAssetLayer({
             data: foodData,
             visible: foodLayerVisible,
+            zoom: mapZoom,
             activeCategories: activeFoodCategories,
             onHover: ({ object, x, y }) => {/* sidebar update - add later */},
             onClick: ({ object }) => console.log('Clicked on food asset:', object),
@@ -103,7 +110,7 @@ export function Map({
         }),
         ...getSimAssetLayers({ placedAssets }),
 
-    ], [foodData, foodLayerVisible, activeFoodCategories, transitData, transitLayerVisible, activeRoutes, disseminationLayerVisible, disseminationData, handleClick, placedAssets]);
+    ], [foodData, foodLayerVisible, mapZoom, activeFoodCategories, transitData, transitLayerVisible, activeRoutes, disseminationLayerVisible, disseminationData, handleClick, placedAssets]);
 
     // search bar
     const handleAssetSelect = (asset) => {
@@ -127,6 +134,8 @@ export function Map({
                     mapStyle={MAP_STYLE}
                     minZoom={MIN_ZOOM}
                     maxZoom={MAX_ZOOM}
+                    onLoad={handleMapMove}
+                    onMove={handleMapMove}
                 >
                     <NavigationControl
                         position="top-right"
