@@ -2,11 +2,11 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-import { AuthProvider } from './components/shared/authentication/Authentication.jsx'
+import { AuthProvider } from './components/shared/authentication/AuthContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <AuthProvider> {/* yay authentication! */}
+    <AuthProvider>  {/* authentication !*/}
       <App />
     </AuthProvider>
   </StrictMode>
