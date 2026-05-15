@@ -1,66 +1,138 @@
-import { IconLayer } from "@deck.gl/layers";
+import { IconLayer, ScatterplotLayer, TextLayer } from "@deck.gl/layers";
+import Supercluster from "supercluster";
 import { FOOD_CATEGORY_IDS } from "../constants/foodCategories";
 
-// Below this zoom level food icons are hidden so the map doesn't turn into a
-// blob of overlapping markers. Adjust if the team wants them to appear sooner.
-export const FOOD_ASSET_MIN_ZOOM = 13;
+const CLUSTER_OPTIONS = {
+    radius: 60,
+    maxZoom: 16,
+    minPoints: 2,
+};
 
-
-export function getFoodAssetLayer({
-    data,
-    visible = true,
-    zoom = null,
-    activeCategories = null,
-    onHover,
-    onClick,
-}) {
-
+export function buildFoodClusterIndex(data, activeCategories) {
     const features = data?.features ?? [];
-
-    // Makes the markers only render if their category matches with one from foodCategories.js.
-    const validFeatures = features.filter(f =>
+    const valid = features.filter(f =>
         f.geometry?.coordinates &&
         FOOD_CATEGORY_IDS.includes(f.properties.category)
     );
+    const filtered = activeCategories
+        ? valid.filter(f => activeCategories.includes(f.properties.category))
+        : valid;
 
+    const index = new Supercluster(CLUSTER_OPTIONS);
+    index.load(filtered);
+    return index;
+}
 
+export function getFoodAssetLayers({
+    index,
+    zoom,
+    bbox,
+    visible = true,
+    onHover,
+    onClick,
+    onClusterClick,
+} = {}) {
+    if (!index || !bbox || zoom == null) return [];
 
-    const filteredFeatures = activeCategories
-        ? validFeatures.filter(f => activeCategories.includes(f.properties.category))
-        : validFeatures;
+    const clusters = index.getClusters(bbox, Math.floor(zoom));
+    const clusterFeatures = [];
+    const pointFeatures = [];
+    for (const c of clusters) {
+        (c.properties.cluster ? clusterFeatures : pointFeatures).push(c);
+    }
 
-    const zoomedInEnough = zoom == null || zoom >= FOOD_ASSET_MIN_ZOOM;
+    // Points that share a location stack exactly and hide each other. Fan
+    // any such group out by a few pixels so every icon stays visible.
+    const pixelOffsets = computeSpreadOffsets(pointFeatures);
 
-        return new IconLayer({
-            id: 'food-assets',
-            data: filteredFeatures,
-            visible: visible && zoomedInEnough,
+    const iconLayer = new IconLayer({
+        id: 'food-assets',
+        data: pointFeatures,
+        visible,
+        getPosition: f => f.geometry.coordinates,
+        getIcon: f => ({
+            url: getIconUrlForCategory(f.properties.category),
+            width: 100,
+            height: 100,
+            anchorY: 128,
+        }),
+        getSize: 32,
+        sizeUnits: 'pixels',
+        getPixelOffset: (f, { index: i }) => pixelOffsets[i],
+        pickable: true,
+        onHover,
+        onClick,
+    });
 
-            getPosition: f => f.geometry.coordinates,
+    const clusterCircles = new ScatterplotLayer({
+        id: 'food-asset-clusters',
+        data: clusterFeatures,
+        visible,
+        getPosition: c => c.geometry.coordinates,
+        getRadius: c => 14 + Math.min(20, Math.log10(c.properties.point_count) * 10),
+        radiusUnits: 'pixels',
+        getFillColor: [37, 99, 235, 220],
+        getLineColor: [255, 255, 255, 255],
+        stroked: true,
+        lineWidthUnits: 'pixels',
+        getLineWidth: 2,
+        pickable: true,
+        onClick: info => {
+            if (info.object && onClusterClick) onClusterClick(info.object);
+        },
+    });
 
-            // TODO: Replace with real icons once we have them.
-            getIcon: f => ({
-                url: getIconUrlForCategory(f.properties.category),
-                width: 100,
-                height: 100,
-                anchorY: 128,
-            }),
+    const clusterLabels = new TextLayer({
+        id: 'food-asset-cluster-labels',
+        data: clusterFeatures,
+        visible,
+        getPosition: c => c.geometry.coordinates,
+        getText: c => String(c.properties.point_count_abbreviated ?? c.properties.point_count),
+        getSize: 14,
+        sizeUnits: 'pixels',
+        getColor: [255, 255, 255, 255],
+        fontFamily: 'sans-serif',
+        fontWeight: 'bold',
+        getTextAnchor: 'middle',
+        getAlignmentBaseline: 'center',
+        pickable: false,
+    });
 
-            getSize: 32,
-            sizeUnits: 'pixels',
+    return [iconLayer, clusterCircles, clusterLabels];
+}
 
-            pickable: true,
-            onHover,
-            onClick,
+// Groups features by rounded coordinate (~1m precision) and returns a
+// per-feature [x, y] pixel offset. Solo points get [0, 0]; coincident
+// points are fanned evenly around a small circle.
+function computeSpreadOffsets(features) {
+    const FAN_RADIUS = 14; // pixels
+    const groups = new Map();
+    features.forEach((f, i) => {
+        const [lng, lat] = f.geometry.coordinates;
+        const key = `${lng.toFixed(5)},${lat.toFixed(5)}`;
+        const group = groups.get(key);
+        if (group) group.push(i);
+        else groups.set(key, [i]);
+    });
 
+    const offsets = new Array(features.length).fill(null).map(() => [0, 0]);
+    for (const indices of groups.values()) {
+        if (indices.length < 2) continue;
+        indices.forEach((featureIndex, k) => {
+            const angle = (2 * Math.PI * k) / indices.length;
+            offsets[featureIndex] = [
+                Math.round(FAN_RADIUS * Math.cos(angle)),
+                Math.round(FAN_RADIUS * Math.sin(angle)),
+            ];
         });
+    }
+    return offsets;
 }
 
 function getIconUrlForCategory(category) {
     const icons = {
     'Grocery Stores':       'https://cdn-icons-png.flaticon.com/512/3724/3724788.png',
     'Supermarkets':       'https://cdn-icons-png.flaticon.com/512/3724/3724788.png',
-    'Specialty Food Stores':       'https://cdn-icons-png.flaticon.com/512/3724/3724788.png',
     'Commissary Kitchens':        'https://cdn-icons-png.flaticon.com/512/10630/10630027.png',
     'Kitchen Access':        'https://cdn-icons-png.flaticon.com/512/2728/2728879.png',
     'Community Gardens':  'https://cdn-icons-png.flaticon.com/512/628/628324.png',

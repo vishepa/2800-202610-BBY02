@@ -13,7 +13,7 @@ import { useScreenWidth } from '../shared/widthHelper.jsx';
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import DeckGLOverlay  from './DeckGLOverlay';
 // import { getTestLayer } from '../../layers/TestLayer';
-import { getFoodAssetLayer } from '../../layers/foodAssetLayer';
+import { getFoodAssetLayers, buildFoodClusterIndex } from '../../layers/foodAssetLayer';
 import { getTransitAssetLayer } from '../../layers/transitLayer.js';
 import { getSimAssetLayers } from "../../layers/SimAssetLayer.js";
 
@@ -59,11 +59,33 @@ export function Map({
     const mapRef = useRef(null);
     const inPlacementMode = active === "sim" && selectedCategory !== null;
 
-    const [mapZoom, setMapZoom] = useState(DEFAULT_ZOOM);
+    const [foodViewport, setFoodViewport] = useState(null);
     const handleMapMove = useCallback(() => {
         const m = mapRef.current;
-        if (m) setMapZoom(m.getZoom());
+        if (!m) return;
+        const b = m.getBounds();
+        setFoodViewport({
+            zoom: m.getZoom(),
+            bbox: [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()],
+        });
     }, []);
+
+    const foodClusterIndex = useMemo(
+        () => buildFoodClusterIndex(foodData, activeFoodCategories),
+        [foodData, activeFoodCategories]
+    );
+
+    const handleClusterClick = useCallback((cluster) => {
+        const m = mapRef.current;
+        if (!m || !foodClusterIndex) return;
+        const expansionZoom = foodClusterIndex.getClusterExpansionZoom(
+            cluster.properties.cluster_id
+        );
+        m.flyTo({
+            center: cluster.geometry.coordinates,
+            zoom: Math.min(expansionZoom, MAX_ZOOM),
+        });
+    }, [foodClusterIndex]);
 
     // Function to handle the click event for the popups
     const handleClick = useCallback((info, layerId) => {
@@ -94,19 +116,8 @@ export function Map({
             visible: disseminationLayerVisible,
             onClick: info => handleClick(info, 'dissemination-areas'),
             }),
-        getFoodAssetLayer({
-            data: foodData,
-            visible: foodLayerVisible,
-            zoom: mapZoom,
-            activeCategories: activeFoodCategories,
-            onHover: ({ object, x, y }) => {/* sidebar update - add later */},
-            onClick: ({ object, coordinate }) => {
-                if (!object || inPlacementMode) return;
-                setSelected({ object, coordinate, layerId: 'food-assets' });
-                setSelectedFoodAsset(object.properties);
-                setSidebarOpen(true);
-            },
-        }),
+        // Transit stops render below food assets/clusters so the food layer
+        // stays the visual focus where the two overlap.
         getTransitAssetLayer({
             data: transitData,
             visible: transitLayerVisible,
@@ -114,9 +125,24 @@ export function Map({
             onHover: ({ object }) => {},
             onClick: (info) => handleClick(info, 'transit-stops'),
         }),
+        // eslint-disable-next-line react-hooks/refs -- handleClusterClick reads mapRef only when invoked
+        ...getFoodAssetLayers({
+            index: foodClusterIndex,
+            zoom: foodViewport?.zoom,
+            bbox: foodViewport?.bbox,
+            visible: foodLayerVisible,
+            onHover: ({ object, x, y }) => {/* sidebar update - add later */},
+            onClick: ({ object, coordinate }) => {
+                if (!object || inPlacementMode) return;
+                setSelected({ object, coordinate, layerId: 'food-assets' });
+                setSelectedFoodAsset(object.properties);
+                setSidebarOpen(true);
+            },
+            onClusterClick: handleClusterClick,
+        }),
         ...getSimAssetLayers({ placedAssets }),
 
-    ], [foodData, foodLayerVisible, mapZoom, activeFoodCategories, transitData, transitLayerVisible, activeRoutes, disseminationLayerVisible, disseminationData, handleClick, placedAssets, setSelectedFoodAsset]);
+    ], [foodClusterIndex, foodViewport, foodLayerVisible, handleClusterClick, inPlacementMode, transitData, transitLayerVisible, activeRoutes, disseminationLayerVisible, disseminationData, handleClick, placedAssets, setSelectedFoodAsset, setSidebarOpen]);
 
     // search bar
     const handleAssetSelect = (asset) => {
