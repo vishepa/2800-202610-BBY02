@@ -42,6 +42,10 @@ export default function MapPage({ setPage }) {
         setSelectedItem(assetProperties ? { type: 'foodAsset', data: assetProperties } : null);
     }, []);
 
+    const handleSelectTransitStop = useCallback((stopProperties) => {
+        setSelectedItem(stopProperties ? { type: 'transitStop', data: stopProperties } : null);
+    }, []);
+
     const addPlacedAsset = useCallback((category, lat, lng) => {
         setPlacedAssets(prev => [
             ...prev,
@@ -103,6 +107,7 @@ export default function MapPage({ setPage }) {
                     selectedItem={selectedItem}
                     setSelectedDA={handleSelectDA}
                     setSelectedFoodAsset={handleSelectFoodAsset}
+                    setSelectedTransitStop={handleSelectTransitStop}
                     setSidebarOpen={setSidebarOpen}
                 />
             </div>

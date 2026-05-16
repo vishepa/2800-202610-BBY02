@@ -32,10 +32,10 @@ export function getTransitAssetLayer({
 
             getPosition: f => f.geometry.coordinates,
 
-            getRadius: 30,
+            getRadius: 18,
             radiusUnits: 'meters',
-            radiusMinPixels: 3,
-            radiusMaxPixels: 8,
+            radiusMinPixels: 1,
+            radiusMaxPixels: 7,
 
             getFillColor: [37, 99, 235, 200],
             getLineColor: [255, 255, 255, 220],
