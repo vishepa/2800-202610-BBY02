@@ -2,7 +2,7 @@ import { GeoJsonLayer } from '@deck.gl/layers';
 
 function scoreToColor(feature, alpha) {
   switch (feature.properties.normalized_da_score) {
-    case 1:  return [235, 40,  50,  alpha];
+    case 1:  return [235, 50,  60,  alpha];
     case 2:  return [220, 70,  40,  alpha];
     case 3:  return [230, 110, 35,  alpha];
     case 4:  return [235, 150, 40,  alpha];
@@ -21,7 +21,7 @@ export function getDisseminationAreaLayer({ data, visible = true, onClick } = {}
     id: 'dissemination-areas',
     data,
     filled: true,
-    getFillColor: (feature) => scoreToColor(feature, 60),
+    getFillColor: (feature) => scoreToColor(feature, 80),
     stroked: true,
     getLineColor: [128, 128, 128], //(feature) => scoreToColor(feature, 255),
     getLineWidth: 3,
