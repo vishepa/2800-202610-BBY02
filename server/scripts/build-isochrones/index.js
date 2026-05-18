@@ -2,13 +2,14 @@
  * build-isochrones/index.js
  *
  * For every transit stop and geocoded food asset, requests 5/10/15-minute
- * walking isochrones from a local ORS instance and stores the polygons
+ * isochrones from a local ORS instance and stores the polygons
  * in the isochrones table.
  *
  * Usage:
- *   node index.js                                # process everything
+ *   node index.js                                # process everything (foot-walking)
  *   node index.js --source-type=transit_stop     # only transit stops
  *   node index.js --source-type=food_asset       # only food assets
+ *   node index.js --profile=driving-car          # driving isochrones
  *   node index.js --limit=10                     # smoke test with 10 features
  */
 
@@ -28,6 +29,8 @@ const RETRY_BASE_MS = 1000;
 // CLI flags
 const SOURCE_TYPE_FLAG = process.argv.find(a => a.startsWith('--source-type='));
 const SOURCE_TYPE = SOURCE_TYPE_FLAG ? SOURCE_TYPE_FLAG.split('=')[1] : null;
+const PROFILE_FLAG = process.argv.find(a => a.startsWith('--profile='));
+const PROFILE = PROFILE_FLAG ? PROFILE_FLAG.split('=')[1] : 'foot-walking';
 const LIMIT_FLAG = process.argv.find(a => a.startsWith('--limit='));
 const LIMIT = LIMIT_FLAG ? parseInt(LIMIT_FLAG.split('=')[1], 10) : null;
 
@@ -51,7 +54,7 @@ async function fetchIsochrones(lon, lat, retries = 0) {
   };
 
   const res = await fetch(
-    `${ORS_URL}/ors/v2/isochrones/foot-walking`,
+    `${ORS_URL}/ors/v2/isochrones/${PROFILE}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -98,7 +101,9 @@ async function main() {
   });
 
   await pool.query('SELECT 1');
-  console.log('Connected to database.\n');
+  console.log('Connected to database.');
+  console.log(`Profile: ${PROFILE}`);
+  console.log(`ORS URL: ${ORS_URL}\n`);
 
   // -----------------------------------------------------------------------
   // 1. Build the list of features to process
@@ -140,8 +145,8 @@ async function main() {
   for (const feature of features) {
     const { rows } = await pool.query(
       `SELECT COUNT(*) FROM isochrones
-       WHERE source_type = $1 AND source_id = $2`,
-      [feature.source_type, feature.source_id]
+       WHERE source_type = $1 AND source_id = $2 AND profile = $3`,
+      [feature.source_type, feature.source_id, PROFILE]
     );
     const existing = parseInt(rows[0].count, 10);
     if (existing < 3) {
@@ -182,10 +187,10 @@ async function main() {
         // Insert each polygon
         for (const iso of result.results) {
           await pool.query(
-            `INSERT INTO isochrones (source_type, source_id, range_seconds, geom)
-             VALUES ($1, $2, $3, ST_GeomFromGeoJSON($4)::geography)
-             ON CONFLICT (source_type, source_id, range_seconds) DO NOTHING`,
-            [feature.source_type, feature.source_id, iso.range_seconds, iso.geojson]
+            `INSERT INTO isochrones (source_type, source_id, profile, range_seconds, geom)
+             VALUES ($1, $2, $3, $4, ST_GeomFromGeoJSON($5)::geography)
+             ON CONFLICT (source_type, source_id, profile, range_seconds) DO NOTHING`,
+            [feature.source_type, feature.source_id, PROFILE, iso.range_seconds, iso.geojson]
           );
         }
         succeeded++;
