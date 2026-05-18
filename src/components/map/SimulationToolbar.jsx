@@ -5,6 +5,9 @@ import MapSimButtonMobile from "./MapSimButtonMobile";
 import Tooltip from "./Tooltip";
 import IconPicker from "./simulation/IconPicker";
 import PlacedAssetList from "./simulation/PlacedAssetList";
+import DAInfoPanel from "./DAInfoPanel";
+import FoodInfoPanel from "./FoodInfoPanel";
+import TransitInfoPanel from "./TransitInfoPanel";
 
 export function SimulationToolbar({
     active,
@@ -12,8 +15,8 @@ export function SimulationToolbar({
     selectedCategory,
     setSelectedCategory,
     placedAssets,
-    removePlacedAsset, 
-
+    removePlacedAsset,
+    selectedItem,
 }) {
 
     const [pct, setPct] = useState(50);
@@ -55,6 +58,40 @@ export function SimulationToolbar({
         </>
     );
 
+
+    const infoContent = (() => {
+        if (!selectedItem) {
+            return (
+                <p className="text-gray-400 text-sm italic">
+                    Click a dissemination area, food asset, or transit stop to see details
+                </p>
+            );
+        }
+        if (selectedItem.type === 'da') {
+            return <DAInfoPanel properties={selectedItem.data} />;
+        }
+        if (selectedItem.type === 'foodAsset') {
+            return <FoodInfoPanel properties={selectedItem.data} />;
+        }
+        if (selectedItem.type === 'transitStop') {
+            return <TransitInfoPanel properties={selectedItem.data} />;
+        }
+    })();
+
+    const daInfoContent = (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+            {infoContent}
+        </div>
+    );
+
+    // const daInfoContent = selectedDA ? (
+    //     <div className="mt-4 pt-4 border-t border-gray-200">
+    //         <DAInfoPanel properties={selectedDA} />
+    //     </div>
+    // ) : (
+    //     <p className="mt-4 text-gray-400 text-sm italic">Click a dissemination area on the map to see details</p>
+    // );
+
     const simContent = (
         <>
             {sliders}
@@ -62,10 +99,11 @@ export function SimulationToolbar({
                 selectedCategory={selectedCategory}
                 setSelectedCategory={setSelectedCategory}
             />
-            <PlacedAssetList 
+            <PlacedAssetList
                 placedAssets={placedAssets}
                 removePlacedAsset={removePlacedAsset}
             />
+            {daInfoContent}
         </>
     );
 
@@ -75,7 +113,7 @@ export function SimulationToolbar({
                 <h2 className="text-xl font-bold mb-4">
                     {active === "sim" ? "Simulation Toolbar" : "Map Data Display"}
                 </h2>
-                {active === "sim" ? simContent : <p>see a bunch of stats when hovering over map</p>}
+                {active === "sim" ? simContent : daInfoContent}
             </div>
         );
     } else {
@@ -85,7 +123,7 @@ export function SimulationToolbar({
                     <h2 className="text-xl font-bold mb-4">
                         {active === "sim" ? "Simulation Toolbar" : "Map Data Display"}
                     </h2>
-                    {active === "sim" ? simContent : <p>see a bunch of stats when hovering over map</p>}
+                    {active === "sim" ? simContent : daInfoContent}
                 </div>
                 <MapSimButtonMobile active={active} setActive={setActive} />
             </div>
