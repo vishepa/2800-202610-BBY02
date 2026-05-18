@@ -3,18 +3,22 @@ import { useAuth } from "../shared/authentication/AuthContext.jsx";
 
 export default function LoginSignupPopup({ onClose }) {
   const { signIn, signUp } = useAuth();
+
   const [tab, setTab] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const reset = () => {
     setEmail("");
     setPassword("");
+    setConfirm("");
     setError("");
     setSuccess("");
+    setLoading(false);
   };
 
   const switchTab = (t) => {
@@ -26,227 +30,150 @@ export default function LoginSignupPopup({ onClose }) {
     if (!email || !password) return setError("Please fill in all fields.");
     setLoading(true);
     setError("");
+    setSuccess("");
     const { error: err } = await signIn(email, password);
     setLoading(false);
     if (err) return setError(err.message);
-    onClose();
+    setSuccess("Signed in successfully!");
+    setTimeout(onClose, 800);
   };
 
   const handleSignup = async () => {
-    if (!email || !password) return setError("Please fill in all fields.");
-    if (password.length < 8) return setError("Password must be at least 8 characters.");
+    if (!email || !password || !confirm) return setError("Please fill in all fields.");
+    if (password.length < 6) return setError("Password must be at least 6 characters.");
+    if (password !== confirm) return setError("Passwords do not match.");
     setLoading(true);
     setError("");
+    setSuccess("");
     const { error: err } = await signUp(email, password);
     setLoading(false);
     if (err) return setError(err.message);
-    setSuccess("Account created! Check your email to verify.");
-    setEmail("");
-    setPassword("");
+    setSuccess("Account created! Check your email to confirm.");
   };
-
-  const strengthScore = (val) => {
-    let s = 0;
-    if (val.length >= 8) s++;
-    if (/[A-Z]/.test(val)) s++;
-    if (/[0-9]/.test(val)) s++;
-    if (/[^a-zA-Z0-9]/.test(val)) s++;
-    return s;
-  };
-
-  const strengthColor = ["", "#ef4444", "#f97316", "#eab308", "#4ade80"];
-  const strengthWidth = [0, 30, 55, 80, 100];
-  const score = tab === "signup" ? strengthScore(password) : 0;
 
   return (
+    /* Backdrop */
     <div
-      className="fixed inset-0 z-[10000] flex items-center justify-center bg-grey-100 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div
-        className="relative w-full max-w-sm mx-4 rounded-2xl border p-8"
-        style={{
-          background: "#1a1a1a",
-          borderColor: "#2a2a2a",
-          fontFamily: "'DM Sans', system-ui, sans-serif",
-        }}
-      >
-        {/* Close */}
+      <div className="relative w-full max-w-sm mx-4 bg-white rounded-[20px] border border-neutral-200 shadow-xl p-10 pt-9">
+
+        {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-200 transition-colors text-xl leading-none px-2 py-1 rounded"
+          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg bg-neutral-100 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-800 text-xl leading-none transition-colors"
+          aria-label="Close"
         >
           ×
         </button>
 
-        {/* Logo */}
-        <div className="text-2xl" style={{fontFamily: "'monoton', cursive"}}>
-          ONION
-        </div>
+        {/* Header */}
+        <p className="font-serif text-[22px] text-neutral-900 mb-0.5 tracking-tight">
+          {tab === "login" ? "Welcome back" : "Get started"}
+        </p>
+        <p className="text-[13px] text-neutral-400 mb-6">
+          {tab === "login" ? "Sign in to continue" : "Create your account"}
+        </p>
 
-        {/* Tabs */}
-        <div
-          className="flex rounded-lg p-0.5 mb-6"
-          style={{ background: "#111" }}
-        >
+        {/* Tab toggle */}
+        <div className="flex gap-0 bg-neutral-100 rounded-xl p-1 mb-6">
           {["login", "signup"].map((t) => (
             <button
               key={t}
               onClick={() => switchTab(t)}
-              className="flex-1 py-1.5 text-sm font-medium rounded-md transition-all"
-              style={{
-                background: tab === t ? "#1a1a1a" : "transparent",
-                color: tab === t ? "#f5f5f0" : "#888",
-              }}
+              className={`flex-1 py-1.5 text-[13.5px] font-medium rounded-[9px] transition-all duration-150 ${
+                tab === t
+                  ? "bg-white text-neutral-900 shadow-sm"
+                  : "text-neutral-400 hover:text-neutral-600"
+              }`}
             >
-              {t === "login" ? "Sign in" : "Create account"}
+              {t === "login" ? "Log in" : "Sign up"}
             </button>
           ))}
         </div>
 
-        {/* Heading */}
-        <h2
-          className="text-xl mb-1"
-          style={{
-            fontFamily: "'DM Serif Display', Georgia, serif",
-            color: "#f5f5f0",
-          }}
-        >
-          {tab === "login" ? "Welcome back" : "Get started"}
-        </h2>
-        <p className="text-sm mb-5" style={{ color: "#888" }}>
-          {tab === "login"
-            ? "Sign in to continue to your account."
-            : "Create your account in seconds."}
-        </p>
+        {/* Fields */}
+        <div className="space-y-3.5">
+          <Field label="Email">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="lsp-input"
+              onKeyDown={(e) => e.key === "Enter" && (tab === "login" ? handleLogin() : handleSignup())}
+            />
+          </Field>
 
-        {/* Feedback */}
-        {error && (
-          <div
-            className="text-xs px-3 py-2 rounded-md mb-4"
-            style={{
-              background: "#2a1010",
-              border: "0.5px solid #5a2020",
-              color: "#f08080",
-            }}
-          >
-            {error}
-          </div>
-        )}
-        {success && (
-          <div
-            className="text-xs px-3 py-2 rounded-md mb-4"
-            style={{
-              background: "#0a1a12",
-              border: "0.5px solid #1d5c34",
-              color: "#4ade80",
-            }}
-          >
-            {success}
-          </div>
-        )}
+          <Field label="Password">
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="lsp-input"
+              onKeyDown={(e) => e.key === "Enter" && (tab === "login" ? handleLogin() : handleSignup())}
+            />
+          </Field>
 
-        {/* Email */}
-        <div className="mb-4">
-          <label
-            className="block text-xs mb-1.5 tracking-wide uppercase"
-            style={{ color: "#888" }}
-          >
-            Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && (tab === "login" ? handleLogin() : handleSignup())}
-            placeholder="you@example.com"
-            className="w-full rounded-lg px-3 py-2.5 text-sm outline-none transition-colors"
-            style={{
-              background: "#111",
-              border: "0.5px solid #2a2a2a",
-              color: "#f5f5f0",
-            }}
-            onFocus={(e) => (e.target.style.borderColor = "#4ade80")}
-            onBlur={(e) => (e.target.style.borderColor = "#2a2a2a")}
-          />
-        </div>
-
-        {/* Password */}
-        <div className="mb-5">
-          <label
-            className="block text-xs mb-1.5 tracking-wide uppercase"
-            style={{ color: "#888" }}
-          >
-            Password
-          </label>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && (tab === "login" ? handleLogin() : handleSignup())}
-            placeholder={tab === "signup" ? "Min. 8 characters" : "••••••••"}
-            className="w-full rounded-lg px-3 py-2.5 text-sm outline-none transition-colors"
-            style={{
-              background: "#111",
-              border: "0.5px solid #2a2a2a",
-              color: "#f5f5f0",
-            }}
-            onFocus={(e) => (e.target.style.borderColor = "#4ade80")}
-            onBlur={(e) => (e.target.style.borderColor = "#2a2a2a")}
-          />
-          {tab === "signup" && password.length > 0 && (
-            <div
-              className="mt-1.5 h-0.5 rounded-full overflow-hidden"
-              style={{ background: "#2a2a2a" }}
-            >
-              <div
-                className="h-full rounded-full transition-all duration-300"
-                style={{
-                  width: `${strengthWidth[score]}%`,
-                  background: strengthColor[score],
-                }}
+          {tab === "signup" && (
+            <Field label="Confirm password">
+              <input
+                type="password"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                placeholder="Repeat password"
+                className="lsp-input"
+                onKeyDown={(e) => e.key === "Enter" && handleSignup()}
               />
-            </div>
+            </Field>
           )}
         </div>
-
-        {tab === "login" && (
-          <p
-            className="text-xs text-right -mt-3 mb-4 cursor-pointer transition-colors"
-            style={{ color: "#888" }}
-            onMouseEnter={(e) => (e.target.style.color = "#4ade80")}
-            onMouseLeave={(e) => (e.target.style.color = "#888")}
-          >
-            Forgot password?
-          </p>
-        )}
 
         {/* Submit */}
         <button
           onClick={tab === "login" ? handleLogin : handleSignup}
           disabled={loading}
-          className="w-full py-2.5 rounded-lg text-sm font-medium transition-all"
-          style={{
-            background: loading ? "#16a34a" : "#4ade80",
-            color: "#0f0f0f",
-            opacity: loading ? 0.7 : 1,
-          }}
+          className="mt-5 w-full py-2.5 bg-neutral-900 text-white text-[14px] font-medium rounded-xl hover:bg-neutral-700 active:scale-[0.98] disabled:bg-neutral-300 disabled:cursor-not-allowed transition-all duration-150"
         >
           {loading
             ? "Please wait…"
             : tab === "login"
-            ? "Sign in"
+            ? "Log in"
             : "Create account"}
         </button>
 
-        {/* Divider */}
-        <div className="flex items-center gap-2 my-4" style={{ color: "#555" }}>
-          <div className="flex-1 h-px" style={{ background: "#2a2a2a" }} />
-          <span className="text-xs">or</span>
-          <div className="flex-1 h-px" style={{ background: "#2a2a2a" }} />
-        </div>
+        {/* Feedback */}
+        {error && (
+          <p className="mt-3 text-[12.5px] text-[#993c1d] bg-[#faece7] rounded-lg px-3 py-2">
+            {error}
+          </p>
+        )}
+        {success && (
+          <p className="mt-3 text-[12.5px] text-[#0f6e56] bg-[#e1f5ee] rounded-lg px-3 py-2">
+            {success}
+          </p>
+        )}
 
+        {/* Sign-up terms */}
+        {tab === "signup" && (
+          <p className="mt-4 text-[11.5px] text-neutral-400 text-center">
+            By signing up you agree to our Terms of Service and Privacy Policy.
+          </p>
+        )}
       </div>
+    </div>
+  );
+}
+
+function Field({ label, children }) {
+  return (
+    <div>
+      <label className="block text-[11px] font-semibold text-neutral-500 uppercase tracking-wide mb-1.5">
+        {label}
+      </label>
+      {children}
     </div>
   );
 }

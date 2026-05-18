@@ -4,7 +4,7 @@ import { useScreenWidth } from "./widthHelper";
 import { useAuth } from "./authentication/AuthContext.jsx";
 import LoginSignupPopup from "../account/LoginSignupPopup.jsx";
 
-export default function TogglePage({ setPage, sidebarOpen }) {
+export default function TogglePage({ setPage, sidebarOpen, page }) {
   const width = useScreenWidth();
   const { user } = useAuth() ?? {};
   const [showLogin, setShowLogin] = useState(false);
@@ -13,7 +13,7 @@ export default function TogglePage({ setPage, sidebarOpen }) {
 
   const handleToggle = () => {
     if (user) {
-      setPage("account");
+      setPage(prev => prev === "account" ? "map" : "account");
     } else {
       setShowLogin(true);
     }
@@ -26,7 +26,7 @@ export default function TogglePage({ setPage, sidebarOpen }) {
       )}
       <button
         onClick={handleToggle}
-        className="fixed bottom-20 right-20 z-[9999] w-16 h-16 rounded-full bg-green-400 shadow-md flex items-center justify-center overflow-hidden"
+        className="fixed bottom-20 right-20 z-[10] w-16 h-16 rounded-full bg-green-400 shadow-md flex items-center justify-center overflow-hidden"
       >
         <img src={accountIcon} alt="Account" className="w-10 h-10 object-contain" />
       </button>
