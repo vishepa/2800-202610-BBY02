@@ -18,6 +18,9 @@ export function SimulationToolbar({
     setSelectedCategory,
     placedAssets,
     removePlacedAsset,
+    clearPlacedAssets,
+    simVisible,
+    setSimVisible,
     selectedItem,
 }) {
 
@@ -107,10 +110,27 @@ export function SimulationToolbar({
                 placedAssets={placedAssets}
                 removePlacedAsset={removePlacedAsset}
             />
+            <div className="mt-4 flex gap-2">
+                <button
+                    type="button"
+                    onClick={clearPlacedAssets}
+                    disabled={placedAssets.length === 0}
+                    className="flex-1 py-2 bg-red-100 hover:bg-red-200 text-red-600 font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    Clear All
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setSimVisible(v => !v)}
+                    className="flex-1 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-lg transition-colors"
+                >
+                    {simVisible ? "Hide" : "Show"} Simulation
+                </button>
+            </div>
             <button
                 type="button"
                 onClick={handleSaveClick}
-                className="mt-4 w-full py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors"
+                className="mt-2 w-full py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors"
             >
                 Save Simulation
             </button>
