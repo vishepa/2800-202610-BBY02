@@ -8,7 +8,7 @@ import { useDisseminationAreas } from "../../lib/hooks/useDisseminationAreas";
 import { applySimulation } from "../../lib/scoring";
 import { useScreenWidth } from "../shared/widthHelper";
 
-export default function MapPage({ setPage }) {
+export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [active, setActive] = useState("map");
 
@@ -24,7 +24,8 @@ export default function MapPage({ setPage }) {
     const [disseminationLayerVisible, setDisseminationLayerVisible] = useState(true);
 
     const [selectedCategory, setSelectedCategory] = useState(null); // null means "all types"
-    const [placedAssets, setPlacedAssets] = useState([]);
+    // placedAssets is lifted to App so a saved simulation can be restored
+    // from the account page — see App.jsx.
     // const [selectedDA, setSelectedDA] = useState(null); // clicked dissemination area
     const [selectedItem, setSelectedItem] = useState(null); // clicked dissemination area/food asset
 
@@ -58,11 +59,11 @@ export default function MapPage({ setPage }) {
      ]);
      // Deselect after placing — single-click placement mode.
         setSelectedCategory(null);
-    }, []);
+    }, [setPlacedAssets]);
 
     const removePlacedAsset = useCallback((id) => {
         setPlacedAssets(prev => prev.filter(a => a.id !== id));
-    }, []);
+    }, [setPlacedAssets]);
 
     const handleToggleSidebar = () => {
         const opening = !sidebarOpen;
