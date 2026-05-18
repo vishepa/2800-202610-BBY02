@@ -56,7 +56,7 @@ export default function MapPage({ setPage }) {
              lng,
          },
      ]);
-     // Deselect after placing single-click placement mode.
+     // Deselect after placing — single-click placement mode.
         setSelectedCategory(null);
     }, []);
 
@@ -92,8 +92,7 @@ export default function MapPage({ setPage }) {
 
     return (
         <>
-
-            <div className={`relative w-full h-full transition-all duration-300 ${sidebarOpen ? "pl-95" : "pl-0"}`}>
+            <div className="relative w-full h-full">
                 <Map
                     active={active}
                     setActive={handleSetActive}
@@ -113,7 +112,7 @@ export default function MapPage({ setPage }) {
                 />
             </div>
             
-            <TogglePage page={active} setPage={(p) => { console.log("setPage called with", p); setPage(p); }} sidebarOpen={sidebarOpen} />
+            <TogglePage page={active} setPage={setPage} sidebarOpen={sidebarOpen} />
 
             {/* Desktop: slide from left */}
             {isDesktop ? (
