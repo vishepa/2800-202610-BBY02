@@ -38,6 +38,7 @@ export function Map({
     selectedCategory,
     placedAssets,
     addPlacedAsset,
+    showSimulation,
     selectedDA,
     setSelectedDA,
     setSelectedFoodAsset,
@@ -146,9 +147,9 @@ export function Map({
             },
             onClusterClick: handleClusterClick,
         }),
-        ...getSimAssetLayers({ placedAssets }),
+        ...getSimAssetLayers({ placedAssets, visible: showSimulation }),
 
-    ], [foodClusterIndex, foodViewport, foodLayerVisible, handleClusterClick, inPlacementMode, transitData, transitLayerVisible, activeRoutes, disseminationLayerVisible, disseminationData, handleClick, placedAssets, setSelectedFoodAsset, setSidebarOpen]);
+    ], [foodClusterIndex, foodViewport, foodLayerVisible, handleClusterClick, inPlacementMode, transitData, transitLayerVisible, activeRoutes, disseminationLayerVisible, disseminationData, handleClick, placedAssets, showSimulation, setSelectedFoodAsset, setSidebarOpen]);
 
     // search bar
     const handleAssetSelect = (asset) => {

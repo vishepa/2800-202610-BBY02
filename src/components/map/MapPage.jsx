@@ -8,9 +8,11 @@ import { useDisseminationAreas } from "../../lib/hooks/useDisseminationAreas";
 import { applySimulation } from "../../lib/scoring";
 import { useScreenWidth } from "../shared/widthHelper";
 
-export default function MapPage({ setPage }) {
+export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [active, setActive] = useState("map");
+    // Manual show/hide toggle for the simulation, used while in Sim mode.
+    const [simVisible, setSimVisible] = useState(true);
 
     const [showWelcome, setShowWelcome] = useState(true);
     const [showSimPopup, setShowSimPopup] = useState(false);
@@ -24,14 +26,19 @@ export default function MapPage({ setPage }) {
     const [disseminationLayerVisible, setDisseminationLayerVisible] = useState(true);
 
     const [selectedCategory, setSelectedCategory] = useState(null); // null means "all types"
-    const [placedAssets, setPlacedAssets] = useState([]);
+    // placedAssets is lifted to App so a saved simulation can be restored
+    // from the account page — see App.jsx.
     // const [selectedDA, setSelectedDA] = useState(null); // clicked dissemination area
     const [selectedItem, setSelectedItem] = useState(null); // clicked dissemination area/food asset
 
     const { data: baselineDA } = useDisseminationAreas();
+    // The simulation (placed assets + recolored DA scores) only shows in Sim
+    // mode, and can be toggled off manually within it. In Map view the map
+    // falls back to the untouched baseline data.
+    const simShownOnMap = active === "sim" && simVisible;
     const disseminationData = useMemo(
-        () => applySimulation(baselineDA, placedAssets),
-        [baselineDA, placedAssets],
+        () => (simShownOnMap ? applySimulation(baselineDA, placedAssets) : baselineDA),
+        [baselineDA, placedAssets, simShownOnMap],
     );
 
     const handleSelectDA = useCallback((daProperties) => {
@@ -58,11 +65,15 @@ export default function MapPage({ setPage }) {
      ]);
      // Deselect after placing — single-click placement mode.
         setSelectedCategory(null);
-    }, []);
+    }, [setPlacedAssets]);
 
     const removePlacedAsset = useCallback((id) => {
         setPlacedAssets(prev => prev.filter(a => a.id !== id));
-    }, []);
+    }, [setPlacedAssets]);
+
+    const clearPlacedAssets = useCallback(() => {
+        setPlacedAssets([]);
+    }, [setPlacedAssets]);
 
     const handleToggleSidebar = () => {
         const opening = !sidebarOpen;
@@ -74,9 +85,14 @@ export default function MapPage({ setPage }) {
     };
 
     const handleSetActive = useCallback((mode) => {
-        if (mode === "sim" && !simPopupSeen) {
-            setShowSimPopup(true);
-            setSimPopupSeen(true);
+        if (mode === "sim") {
+            if (!simPopupSeen) {
+                setShowSimPopup(true);
+                setSimPopupSeen(true);
+            }
+            // Entering Sim mode opens the panel and reveals the simulation.
+            setSidebarOpen(true);
+            setSimVisible(true);
         }
         setActive(mode);
     }, [simPopupSeen]);
@@ -104,6 +120,7 @@ export default function MapPage({ setPage }) {
                     selectedCategory={selectedCategory}
                     placedAssets={placedAssets}
                     addPlacedAsset={addPlacedAsset}
+                    showSimulation={simShownOnMap}
                     selectedItem={selectedItem}
                     setSelectedDA={handleSelectDA}
                     setSelectedFoodAsset={handleSelectFoodAsset}
@@ -126,6 +143,9 @@ export default function MapPage({ setPage }) {
                                 setSelectedCategory={setSelectedCategory}
                                 placedAssets={placedAssets}
                                 removePlacedAsset={removePlacedAsset}
+                                clearPlacedAssets={clearPlacedAssets}
+                                simVisible={simVisible}
+                                setSimVisible={setSimVisible}
                                 selectedItem={selectedItem}
                             />
                         </div>
@@ -155,6 +175,9 @@ export default function MapPage({ setPage }) {
                                 setSelectedCategory={setSelectedCategory}
                                 placedAssets={placedAssets}
                                 removePlacedAsset={removePlacedAsset}
+                                clearPlacedAssets={clearPlacedAssets}
+                                simVisible={simVisible}
+                                setSimVisible={setSimVisible}
                                 selectedItem={selectedItem}
                             />
                         </div>
