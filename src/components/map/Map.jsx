@@ -21,7 +21,7 @@ import { useTransitStops } from '../../lib/hooks/useTransitStops.js';
 import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
 
 import FoodTypeFilter from "./FoodTypeFilter.jsx";
-import { getDisseminationAreaLayer } from '../../layers/disseminationAreaLayer.js';
+import { getDisseminationAreaLayer, getDAHighlightLayer } from '../../layers/disseminationAreaLayer.js';
 import {LayerPopup} from './popups/LayerPopup.jsx';
 import SearchBar from "./SearchBar";
 // import TestMarker from "testMarker";
@@ -99,7 +99,7 @@ export function Map({
         setSelected({object: info.object, coordinate:info.coordinate, layerId});
         // Send DA data to sidebar and open it
         if (layerId === 'dissemination-areas' && info.object?.properties) {
-            setSelectedDA(info.object.properties);
+            setSelectedDA(info.object);
             setSidebarOpen(true);
         }
         // Send transit stop data to sidebar and open it
@@ -122,9 +122,12 @@ export function Map({
             data: disseminationData,
             visible: disseminationLayerVisible,
             selectedDA,
-            onClick: info => {console.log("clicked properties: " + JSON.stringify(info.object?.properties)) ; 
-            handleClick(info, 'dissemination-areas')}
+            onClick: info => {handleClick(info, 'dissemination-areas')}
             }),
+        getDAHighlightLayer({
+            selectedDA,
+            visible: disseminationLayerVisible,
+        }),
         // Transit stops render below food assets/clusters so the food layer
         // stays the visual focus where the two overlap.
         getTransitAssetLayer({
