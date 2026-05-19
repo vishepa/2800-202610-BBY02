@@ -101,6 +101,16 @@ export function Map({
         if (layerId === 'dissemination-areas' && info.object?.properties) {
             setSelectedDA(info.object);
             setSidebarOpen(true);
+
+            // Fly/ Zoom to clicked DA
+            const [lng, lat] = info.coordinate;
+            mapRef.current?.easeTo({
+                center: [lng, lat],
+                zoom: 15,
+                duration: 1500,
+                // Necessary to prevent animation from being skipped
+                essential: true, 
+            });
         }
         // Send transit stop data to sidebar and open it
         if (layerId === 'transit-stops' && info.object?.properties) {
@@ -121,7 +131,6 @@ export function Map({
         getDisseminationAreaLayer({
             data: disseminationData,
             visible: disseminationLayerVisible,
-            selectedDA,
             onClick: info => {handleClick(info, 'dissemination-areas')}
             }),
         getDAHighlightLayer({
