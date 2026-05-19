@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { useScreenWidth } from "../shared/widthHelper";
-import MapSimButton from "./MapSimButton";
+import { useAuth } from "../shared/authentication/AuthContext.jsx";
 import MapSimButtonMobile from "./MapSimButtonMobile";
 import Tooltip from "./Tooltip";
 import IconPicker from "./simulation/IconPicker";
 import PlacedAssetList from "./simulation/PlacedAssetList";
+import SaveSimulationModal from "./simulation/SaveSimulationModal";
 import DAInfoPanel from "./DAInfoPanel";
 import FoodInfoPanel from "./FoodInfoPanel";
 import TransitInfoPanel from "./TransitInfoPanel";
+import LoginSignupPopup from "../account/LoginSignupPopup.jsx";
 
 export function SimulationToolbar({
     active,
@@ -16,6 +18,9 @@ export function SimulationToolbar({
     setSelectedCategory,
     placedAssets,
     removePlacedAsset,
+    clearPlacedAssets,
+    simVisible,
+    setSimVisible,
     selectedItem,
 }) {
 
@@ -29,6 +34,16 @@ export function SimulationToolbar({
     };
 
     const width = useScreenWidth();
+
+    const { user } = useAuth() ?? {};
+    const [showSaveModal, setShowSaveModal] = useState(false);
+    const [showLogin, setShowLogin] = useState(false);
+
+    // Logged-in users get the save dialog; everyone else is prompted to log in.
+    const handleSaveClick = () => {
+        if (user) setShowSaveModal(true);
+        else setShowLogin(true);
+    };
 
     const sliders = (
         <>
@@ -84,14 +99,6 @@ export function SimulationToolbar({
         </div>
     );
 
-    // const daInfoContent = selectedDA ? (
-    //     <div className="mt-4 pt-4 border-t border-gray-200">
-    //         <DAInfoPanel properties={selectedDA} />
-    //     </div>
-    // ) : (
-    //     <p className="mt-4 text-gray-400 text-sm italic">Click a dissemination area on the map to see details</p>
-    // );
-
     const simContent = (
         <>
             {sliders}
@@ -103,7 +110,41 @@ export function SimulationToolbar({
                 placedAssets={placedAssets}
                 removePlacedAsset={removePlacedAsset}
             />
+            <div className="mt-4 flex gap-2">
+                <button
+                    type="button"
+                    onClick={clearPlacedAssets}
+                    disabled={placedAssets.length === 0}
+                    className="flex-1 py-2 bg-red-100 hover:bg-red-200 text-red-600 font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    Clear All
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setSimVisible(v => !v)}
+                    className="flex-1 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-lg transition-colors"
+                >
+                    {simVisible ? "Hide" : "Show"} Simulation
+                </button>
+            </div>
+            <button
+                type="button"
+                onClick={handleSaveClick}
+                className="mt-2 w-full py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors"
+            >
+                Save Simulation
+            </button>
             {daInfoContent}
+
+            {showSaveModal && (
+                <SaveSimulationModal
+                    placedAssets={placedAssets}
+                    onClose={() => setShowSaveModal(false)}
+                />
+            )}
+            {showLogin && (
+                <LoginSignupPopup onClose={() => setShowLogin(false)} />
+            )}
         </>
     );
 
@@ -131,4 +172,4 @@ export function SimulationToolbar({
     }
 }
 
-export default SimulationToolbar;   
+export default SimulationToolbar;
