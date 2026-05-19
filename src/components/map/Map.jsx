@@ -39,7 +39,7 @@ export function Map({
     placedAssets,
     addPlacedAsset,
     showSimulation,
-    selectedDA,
+    selectedItem,
     setSelectedDA,
     setSelectedFoodAsset,
     setSelectedTransitStop,
@@ -59,7 +59,8 @@ export function Map({
     const [selected, setSelected] = useState(null);
 
     const mapRef = useRef(null);
-    const inPlacementMode = active === "sim" && selectedCategory !== null;
+    const inPlacementMode = active === 'sim' && selectedCategory !== null;
+    const selectedDA = selectedItem?.type === 'da' ? selectedItem.data : null;
 
     const [foodViewport, setFoodViewport] = useState(null);
     const handleMapMove = useCallback(() => {
@@ -95,7 +96,6 @@ export function Map({
         //  info.object: the GeoJSON feature that was clicked
         //  info.coordinate: [long, lat] of the click
         if (inPlacementMode) return;
-        console.log("LeftClick working");
         setSelected({object: info.object, coordinate:info.coordinate, layerId});
         // Send DA data to sidebar and open it
         if (layerId === 'dissemination-areas' && info.object?.properties) {
@@ -121,7 +121,9 @@ export function Map({
         getDisseminationAreaLayer({
             data: disseminationData,
             visible: disseminationLayerVisible,
-            onClick: info => handleClick(info, 'dissemination-areas'),
+            selectedDA,
+            onClick: info => {console.log("clicked properties: " + JSON.stringify(info.object?.properties)) ; 
+            handleClick(info, 'dissemination-areas')}
             }),
         // Transit stops render below food assets/clusters so the food layer
         // stays the visual focus where the two overlap.
@@ -149,7 +151,7 @@ export function Map({
         }),
         ...getSimAssetLayers({ placedAssets, visible: showSimulation }),
 
-    ], [foodClusterIndex, foodViewport, foodLayerVisible, handleClusterClick, inPlacementMode, transitData, transitLayerVisible, activeRoutes, disseminationLayerVisible, disseminationData, handleClick, placedAssets, showSimulation, setSelectedFoodAsset, setSidebarOpen]);
+    ], [foodClusterIndex, foodViewport, foodLayerVisible, handleClusterClick, inPlacementMode, transitData, transitLayerVisible, activeRoutes, disseminationLayerVisible, disseminationData, handleClick, placedAssets, showSimulation, setSelectedFoodAsset, setSidebarOpen, selectedDA]);
 
     // search bar
     const handleAssetSelect = (asset) => {

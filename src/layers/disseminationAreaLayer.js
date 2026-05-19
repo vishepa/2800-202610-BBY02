@@ -16,21 +16,27 @@ function scoreToColor(feature, alpha) {
   }
 }
 
-export function getDisseminationAreaLayer({ data, visible = true, onClick } = {}) {
+export function getDisseminationAreaLayer({ data, visible = true, onClick, selectedDA } = {}) {
+  const selectedId = selectedDA?.dauid;
+  console.log("selected DA: " + selectedDA);
+   console.log("selected Id: " + selectedId);
   return new GeoJsonLayer({
     id: 'dissemination-areas',
     data,
     filled: true,
     getFillColor: (feature) => scoreToColor(feature, 80),
     stroked: true,
-    getLineColor: [128, 128, 128], //(feature) => scoreToColor(feature, 255),
+    getLineColor: (feature) => 
+      feature.properties.dauid === selectedId ? [0, 0, 0, 255] : [128, 128, 128, 180],
     getLineWidth: 3,
     pickable: true,
     visible,
     onClick,
     updateTriggers: {
       getFillColor: [data],
-      getLineColor: [data],
+      getLineColor: [data, selectedId],
     },
+
   });
 }
+
