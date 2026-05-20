@@ -1,101 +1,6 @@
 DROP TABLE IF EXISTS temp_da_context;
 DROP TABLE IF EXISTS temp_accessible_food_assets;
-
--- ─────────────────────────────────────────────────────────────────────────────
--- Step 1: Pre-compute per-DA context multipliers from demographic data
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TEMPORARY TABLE temp_da_context AS
-WITH income_ranks AS (
-    SELECT
-        dauid,
-        median_household_income,
-        pct_low_income_lim_at,
-        PERCENT_RANK() OVER (ORDER BY median_household_income ASC NULLS LAST)  AS income_index,
-        PERCENT_RANK() OVER (ORDER BY pct_low_income_lim_at DESC NULLS LAST) AS hardship_index
-    FROM dissemination_areas
-    WHERE median_household_income IS NOT NULL
-       OR pct_low_income_lim_at IS NOT NULL
-)
-SELECT
-    dauid,
-    income_index,
-    hardship_index,
-    0.6 + (income_index * 0.4)                          AS retail_multiplier,
-    0.5 + (hardship_index * 0.5)                        AS program_multiplier
-FROM income_ranks;
-
--- ─────────────────────────────────────────────────────────────────────────────
--- Step 2: Categorise each asset into a scoring tier
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE OR REPLACE FUNCTION get_asset_tier(p_category TEXT)
-RETURNS TEXT AS $$
-BEGIN
-    RETURN CASE p_category
-        WHEN 'Supermarkets'                                           THEN 'retail'
-        WHEN 'Grocery Stores'                                         THEN 'retail'
-        WHEN 'Low Cost Grocery and Food Markets'                      THEN 'retail'
-        WHEN 'Specialty Food Stores'                                  THEN 'retail'
-        WHEN 'Small Food Stores'                                      THEN 'retail'
-        WHEN 'Small Cultural Food Business'                           THEN 'retail'
-        WHEN 'Public Markets'                                         THEN 'retail'
-        WHEN 'Food Shopping and Delivery'                             THEN 'retail'
-        WHEN 'No Cost or Low Cost Grocery Items'                      THEN 'program'
-        WHEN 'Free Grocery Items'                                     THEN 'program'
-        WHEN 'Free Meal'                                              THEN 'program'
-        WHEN 'Low Cost Meal'                                          THEN 'program'
-        WHEN 'Young Adult Free and low cost meals'                    THEN 'program'
-        WHEN 'Youth Free and low cost meals'                          THEN 'program'
-        WHEN 'Free Food Pantries'                                     THEN 'program'
-        WHEN 'Free Food Pantries / Community Fridges'                 THEN 'program'
-        ELSE 'neutral'
-    END;
-END;
-$$ LANGUAGE plpgsql IMMUTABLE;
-
--- ─────────────────────────────────────────────────────────────────────────────
--- Step 3: Build accessible assets table with context-adjusted scores
--- ─────────────────────────────────────────────────────────────────────────────
-CREATE TEMPORARY TABLE temp_accessible_food_assets AS
-SELECT
-    da.dauid,
-    da.geom                                                    AS da_geom,
-    iso.geom::geometry                                         AS iso_geom,
-    fa.category,
-    get_asset_score(fa.category)                               AS base_score,
-    get_asset_tier(fa.category)                                AS asset_tier,
-    get_asset_score(fa.category) * CASE get_asset_tier(fa.category)
-        WHEN 'retail'  THEN COALESCE(ctx.retail_multiplier,  1.0)
-        WHEN 'program' THEN COALESCE(ctx.program_multiplier, 1.0)
-        ELSE 1.0
-    END                                                        AS adjusted_score,
-    ST_Area(ST_Intersection(da.geom, iso.geom::geometry))
-        / NULLIF(ST_Area(da.geom), 0)                          AS coverage_fraction
-FROM dissemination_areas da
-JOIN isochrones iso
-    ON ST_Intersects(da.geom, iso.geom::geometry)
-JOIN food_assets fa
-    ON fa.id = iso.source_id::INTEGER
-LEFT JOIN temp_da_context ctx
-    ON ctx.dauid = da.dauid
-WHERE iso.source_type = 'food_asset'
-  AND iso.profile = 'foot-walking'
-  AND iso.range_seconds = 300;
-
--- ─────────────────────────────────────────────────────────────────────────────
--- Steps 4 & 5: Display computed raw and normalized DA scores
--- ─────────────────────────────────────────────────────────────────────────────
-SELECT
-    dauid,
-    total_score                                                         AS raw_da_score,
-    ROUND(1 + PERCENT_RANK() OVER (ORDER BY total_score ASC) * 9)::INT AS normalized_da_score
-FROM (
-    SELECT
-        dauid,
-        SUM(adjusted_score * coverage_fraction) AS total_score
-    FROM temp_accessible_food_assets
-    GROUP BY dauid
-) agg
-ORDER BY dauid;
+DROP TABLE IF EXISTS temp_da_raw_scores;
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Function to assign food scores
@@ -157,3 +62,130 @@ BEGIN
   END;
 END;
 $$ LANGUAGE plpgsql;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Step 1: Pre-compute per-DA context multipliers from demographic data
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TEMPORARY TABLE temp_da_context AS
+WITH income_ranks AS (
+    SELECT
+        dauid,
+        median_household_income,
+        pct_low_income_lim_at,
+        PERCENT_RANK() OVER (ORDER BY median_household_income ASC NULLS LAST)  AS income_index,
+        PERCENT_RANK() OVER (ORDER BY pct_low_income_lim_at DESC NULLS LAST) AS hardship_index
+    FROM dissemination_areas
+    WHERE median_household_income IS NOT NULL
+       OR pct_low_income_lim_at IS NOT NULL
+)
+SELECT
+    dauid,
+    income_index,
+    hardship_index,
+    0.6 + (income_index * 0.4)                          AS retail_multiplier,
+    0.5 + (hardship_index * 0.5)                        AS program_multiplier
+FROM income_ranks;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Step 2: Categorise each asset into a scoring tier
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE OR REPLACE FUNCTION get_asset_tier(p_category TEXT)
+RETURNS TEXT AS $$
+BEGIN
+    RETURN CASE p_category
+        WHEN 'Supermarkets'                                           THEN 'retail'
+        WHEN 'Grocery Stores'                                         THEN 'retail'
+        WHEN 'Low Cost Grocery and Food Markets'                      THEN 'retail'
+        WHEN 'Specialty Food Stores'                                  THEN 'retail'
+        WHEN 'Small Food Stores'                                      THEN 'retail'
+        WHEN 'Small Cultural Food Business'                           THEN 'retail'
+        WHEN 'Public Markets'                                         THEN 'retail'
+        WHEN 'Food Shopping and Delivery'                             THEN 'retail'
+        WHEN 'No Cost or Low Cost Grocery Items'                      THEN 'program'
+        WHEN 'Free Grocery Items'                                     THEN 'program'
+        WHEN 'Free Meal'                                              THEN 'program'
+        WHEN 'Low Cost Meal'                                          THEN 'program'
+        WHEN 'Young Adult Free and low cost meals'                    THEN 'program'
+        WHEN 'Youth Free and low cost meals'                          THEN 'program'
+        WHEN 'Free Food Pantries'                                     THEN 'program'
+        WHEN 'Free Food Pantries / Community Fridges'                 THEN 'program'
+        ELSE 'neutral'
+    END;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Step 3: Build accessible assets table with context-adjusted scores
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TEMPORARY TABLE temp_accessible_food_assets AS
+SELECT
+    da.dauid,
+    fa.id  AS asset_id,
+    iso.range_seconds AS iso_range,
+    da.geom                                                    AS da_geom,
+    iso.geom::geometry                                         AS iso_geom,
+    fa.category,
+    get_asset_score(fa.category)                               AS base_score,
+    get_asset_tier(fa.category)                                AS asset_tier,
+    get_asset_score(fa.category) * CASE get_asset_tier(fa.category)
+        WHEN 'retail'  THEN COALESCE(ctx.retail_multiplier,  1.0)
+        WHEN 'program' THEN COALESCE(ctx.program_multiplier, 1.0)
+        ELSE 1.0
+    END                                                        AS adjusted_score,
+    LEAST(
+    ST_Area(ST_Transform(ST_Intersection(da.geom, iso.geom::geometry), 3153))
+        / NULLIF(ST_Area(ST_Transform(da.geom, 3153)), 0),
+        1.0
+    ) AS coverage_fraction
+FROM dissemination_areas da
+JOIN isochrones iso
+    ON ST_Intersects(da.geom, iso.geom::geometry)
+JOIN food_assets fa
+    ON fa.id = iso.source_id::INTEGER
+LEFT JOIN temp_da_context ctx
+    ON ctx.dauid = da.dauid
+WHERE iso.source_type = 'food_asset' 
+  AND iso.profile = 'foot-walking' -- Update here to change the mode of transportation: 'foot-walking', 'driving-car'
+  AND iso.range_seconds IN (300, 600, 900); -- Update here to change isochrone walking distance: 300 = 5 minutes, 600 = 10 minutes, 900 = 15 minutes
+
+CREATE TEMPORARY TABLE temp_da_raw_scores AS
+SELECT 
+    dauid,
+    iso_range,
+    SUM(best_score) AS total_score
+FROM(
+    SELECT 
+        dauid,
+        iso_range,
+        asset_id,
+        MAX(adjusted_score * coverage_fraction) AS best_score
+    FROM temp_accessible_food_assets
+    GROUP BY dauid, iso_range, asset_id
+) best_per_asset
+GROUP BY dauid, iso_range;
+
+
+
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Steps 4 & 5: Display computed raw and normalized DA scores
+-- ─────────────────────────────────────────────────────────────────────────────
+SELECT
+    dauid,
+    iso_range,
+    total_score                                                         AS raw_da_score,
+    ROUND(1 + PERCENT_RANK() OVER (ORDER BY total_score ASC) * 9)::INT AS normalized_da_score
+FROM temp_da_raw_scores
+    -- SELECT
+    --     dauid,
+    --     SUM(best_score) AS total_score
+    -- FROM (
+    --     SELECT
+    --         dauid,
+    --         asset_id,
+    --         MAX(adjusted_score * coverage_fraction) AS best_score
+    --     FROM temp_accessible_food_assets
+    --     GROUP BY dauid, asset_id
+    -- ) best_per_asset
+ORDER BY dauid, iso_range;
+
