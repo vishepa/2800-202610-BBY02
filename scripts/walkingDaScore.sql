@@ -165,34 +165,83 @@ FROM(
 GROUP BY dauid, iso_range;
 
 
+ALTER TABLE dissemination_areas
+    ADD COLUMN IF NOT EXISTS walk_5min_score INTEGER,
+    ADD COLUMN IF NOT EXISTS walk_10min_score INTEGER,
+    ADD COLUMN IF NOT EXISTS walk_15min_score INTEGER;
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Steps 4 & 5: Display computed raw and normalized DA scores
 -- ─────────────────────────────────────────────────────────────────────────────
-SELECT
-    dauid,
-    iso_range,
-    raw_da_score,
-    CASE
-        WHEN raw_da_score = 0 THEN 0
-        ELSE ntile_score 
-    END AS normalized_da_score
-    --ROUND(1 + PERCENT_RANK() OVER (ORDER BY total_score ASC) * 9)::INT AS normalized_da_score
-FROM (
-    SELECT
-        da_ranges.dauid,
-        da_ranges.iso_range,
-        COALESCE(s.total_score, 0) AS raw_da_score,
-        NTILE(10) OVER (ORDER BY COALESCE(s.total_score, 0) ASC) AS ntile_score
-    FROM (
-        SELECT d.dauid, r.iso_range
-        FROM dissemination_areas d
-        CROSS JOIN (VALUES(300), (600), (900)) AS r(iso_range)
-    ) da_ranges
-    LEFT JOIN temp_da_raw_scores s
-        ON s.dauid = da_ranges.dauid
-        AND s.iso_range = da_ranges.iso_range
-) scored
+UPDATE dissemination_areas da
+SET 
+    walk_5min_score = scored.score_300,
+    walk_10min_score = scored.score_600,
+    walk_15min_score = scored.score_900
 
-ORDER BY dauid, iso_range;
+FROM (
+    SELECT 
+        dauid,
+        MAX(CASE WHEN iso_range = 300 THEN normalized_da_score END) AS score_300,
+        MAX(CASE WHEN iso_range = 600 THEN normalized_da_score END) AS score_600,
+        MAX(CASE WHEN iso_range = 900 THEN normalized_da_score END) AS score_900
+    FROM (
+        SELECT
+            dauid,
+            iso_range,
+            CASE
+                WHEN raw_da_score = 0 THEN 0
+                ELSE ntile_score 
+            END AS normalized_da_score
+        FROM (
+            SELECT
+                da_ranges.dauid,
+                da_ranges.iso_range,
+                COALESCE(s.total_score, 0) AS raw_da_score,
+                NTILE(10) OVER (ORDER BY COALESCE(s.total_score, 0) ASC) AS ntile_score
+            FROM (
+                SELECT d.dauid, r.iso_range
+                FROM dissemination_areas d
+                CROSS JOIN (VALUES(300), (600), (900)) AS r(iso_range)
+            ) da_ranges
+            LEFT JOIN temp_da_raw_scores s
+                ON s.dauid = da_ranges.dauid
+                AND s.iso_range = da_ranges.iso_range
+        ) inner_scored
+    ) scored_all
+    GROUP BY dauid
+) scored
+WHERE da.dauid = scored.dauid;
+
+-- SELECT
+--     dauid,
+--     iso_range,
+--     raw_da_score,
+--     CASE
+--         WHEN raw_da_score = 0 THEN 0
+--         ELSE ntile_score 
+--     END AS normalized_da_score
+--     --ROUND(1 + PERCENT_RANK() OVER (ORDER BY total_score ASC) * 9)::INT AS normalized_da_score
+-- FROM (
+--     SELECT
+--         da_ranges.dauid,
+--         da_ranges.iso_range,
+--         COALESCE(s.total_score, 0) AS raw_da_score,
+--         NTILE(10) OVER (ORDER BY COALESCE(s.total_score, 0) ASC) AS ntile_score
+--     FROM (
+--         SELECT d.dauid, r.iso_range
+--         FROM dissemination_areas d
+--         CROSS JOIN (VALUES(300), (600), (900)) AS r(iso_range)
+--     ) da_ranges
+--     LEFT JOIN temp_da_raw_scores s
+--         ON s.dauid = da_ranges.dauid
+--         AND s.iso_range = da_ranges.iso_range
+-- ) scored
+
+
+-- ALTER TABLE dissemination_areas
+--     ADD COLUMN IF NOT EXISTS walk_5min_score INTEGER,
+--     ADD COLUMN IF NOT EXISTS walk_10min_score INTEGER,
+--     ADD COLUMN IF NOT EXISTS walk_15min_score INTEGER,
+
