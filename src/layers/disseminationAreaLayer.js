@@ -24,22 +24,17 @@ export function getDisseminationAreaLayer({ data, visible = true, onClick } = {}
     getFillColor: (feature) => scoreToColor(feature, 80),
     stroked: true,
     getLineColor: [128, 128, 128],
-    // getLineColor: (feature) => 
-    //   feature.properties.dauid === selectedId ? [0, 0, 0, 255] : [128, 128, 128, 180],
     getLineWidth: 3,
     pickable: true,
     visible,
     onClick,
     updateTriggers: {
       getFillColor: [data],
-     // getLineColor: [data],
     },
   });
 }
 
-export function getDAHighlightLayer({ data, visible = true, onClick, selectedDA } = {}) {
-  console.log("selected DA: " + selectedDA);
-  
+export function getDAHighlightLayer({ visible = true, selectedDA } = {}) {
   if (!selectedDA) return null;
   
   return new GeoJsonLayer({

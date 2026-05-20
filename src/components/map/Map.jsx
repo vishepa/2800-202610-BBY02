@@ -43,7 +43,6 @@ export function Map({
     setSelectedDA,
     setSelectedFoodAsset,
     setSelectedTransitStop,
-    sidebarOpen,
     setSidebarOpen,
 }) {
     
@@ -107,7 +106,6 @@ export function Map({
             setSidebarOpen(true);
 
             // Fly/ Zoom to clicked DA
-            // if the sidebar is open then shift slightly up and zoom slightly out
             const [lng, lat] = info.coordinate;
             const zoom = isDesktop ? 15:14.18;
             const center = isDesktop ? [lng, lat] : [lng, lat - 0.005]; 
@@ -135,7 +133,6 @@ export function Map({
     }, [inPlacementMode, selectedCategory, addPlacedAsset]);
 
     const LAYERS = useMemo( () => [
-        // getTestLayer(),
         getDisseminationAreaLayer({
             data: disseminationData,
             visible: disseminationLayerVisible,
