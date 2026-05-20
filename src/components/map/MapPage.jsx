@@ -41,8 +41,8 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
         [baselineDA, placedAssets, simShownOnMap],
     );
 
-    const handleSelectDA = useCallback((daProperties) => {
-        setSelectedItem(daProperties ? { type: 'da', data: daProperties } : null);
+    const handleSelectDA = useCallback((daFeature) => {
+        setSelectedItem(daFeature ? { type: 'da', data: daFeature } : null);
     }, []);
 
     const handleSelectFoodAsset = useCallback((assetProperties) => {
@@ -125,6 +125,7 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
                     setSelectedDA={handleSelectDA}
                     setSelectedFoodAsset={handleSelectFoodAsset}
                     setSelectedTransitStop={handleSelectTransitStop}
+                    sidebarOpen={sidebarOpen}
                     setSidebarOpen={setSidebarOpen}
                 />
             </div>

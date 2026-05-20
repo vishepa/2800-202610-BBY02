@@ -21,7 +21,7 @@ import { useTransitStops } from '../../lib/hooks/useTransitStops.js';
 import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
 
 import FoodTypeFilter from "./FoodTypeFilter.jsx";
-import { getDisseminationAreaLayer } from '../../layers/disseminationAreaLayer.js';
+import { getDisseminationAreaLayer, getDAHighlightLayer } from '../../layers/disseminationAreaLayer.js';
 import {LayerPopup} from './popups/LayerPopup.jsx';
 import SearchBar from "./SearchBar";
 // import TestMarker from "testMarker";
@@ -39,12 +39,11 @@ export function Map({
     placedAssets,
     addPlacedAsset,
     showSimulation,
-    selectedDA,
+    selectedItem,
     setSelectedDA,
     setSelectedFoodAsset,
     setSelectedTransitStop,
     setSidebarOpen,
-
 }) {
     
     // Data fetching hooks
@@ -59,7 +58,12 @@ export function Map({
     const [selected, setSelected] = useState(null);
 
     const mapRef = useRef(null);
-    const inPlacementMode = active === "sim" && selectedCategory !== null;
+    const inPlacementMode = active === 'sim' && selectedCategory !== null;
+    const selectedDA = selectedItem?.type === 'da' ? selectedItem.data : null;
+
+    // Screen width constants
+    const width = useScreenWidth();
+    const isDesktop = width >= 760;
 
     const [foodViewport, setFoodViewport] = useState(null);
     const handleMapMove = useCallback(() => {
@@ -95,12 +99,24 @@ export function Map({
         //  info.object: the GeoJSON feature that was clicked
         //  info.coordinate: [long, lat] of the click
         if (inPlacementMode) return;
-        console.log("LeftClick working");
         setSelected({object: info.object, coordinate:info.coordinate, layerId});
         // Send DA data to sidebar and open it
         if (layerId === 'dissemination-areas' && info.object?.properties) {
-            setSelectedDA(info.object.properties);
+            setSelectedDA(info.object);
             setSidebarOpen(true);
+
+            // Fly/ Zoom to clicked DA
+            const [lng, lat] = info.coordinate;
+            const zoom = isDesktop ? 15:14.18;
+            const center = isDesktop ? [lng, lat] : [lng, lat - 0.005]; 
+
+            mapRef.current?.easeTo({
+                center: center,
+                zoom: zoom,
+                duration: 1500,
+                // Necessary to prevent animation from being skipped
+                essential: true, 
+            });
         }
         // Send transit stop data to sidebar and open it
         if (layerId === 'transit-stops' && info.object?.properties) {
@@ -117,12 +133,15 @@ export function Map({
     }, [inPlacementMode, selectedCategory, addPlacedAsset]);
 
     const LAYERS = useMemo( () => [
-        // getTestLayer(),
         getDisseminationAreaLayer({
             data: disseminationData,
             visible: disseminationLayerVisible,
-            onClick: info => handleClick(info, 'dissemination-areas'),
+            onClick: info => {handleClick(info, 'dissemination-areas')}
             }),
+        getDAHighlightLayer({
+            selectedDA,
+            visible: disseminationLayerVisible,
+        }),
         // Transit stops render below food assets/clusters so the food layer
         // stays the visual focus where the two overlap.
         getTransitAssetLayer({
@@ -149,7 +168,7 @@ export function Map({
         }),
         ...getSimAssetLayers({ placedAssets, visible: showSimulation }),
 
-    ], [foodClusterIndex, foodViewport, foodLayerVisible, handleClusterClick, inPlacementMode, transitData, transitLayerVisible, activeRoutes, disseminationLayerVisible, disseminationData, handleClick, placedAssets, showSimulation, setSelectedFoodAsset, setSidebarOpen]);
+    ], [foodClusterIndex, foodViewport, foodLayerVisible, handleClusterClick, inPlacementMode, transitData, transitLayerVisible, activeRoutes, disseminationLayerVisible, disseminationData, handleClick, placedAssets, showSimulation, setSelectedFoodAsset, setSidebarOpen, selectedDA]);
 
     // search bar
     const handleAssetSelect = (asset) => {
@@ -159,9 +178,6 @@ export function Map({
         setSelectedFoodAsset(asset);
         setSidebarOpen(true);
     };
-
-    const width = useScreenWidth();
-    const isDesktop = width >= 760;
 
     return (
         <div className="w-full h-full relative">

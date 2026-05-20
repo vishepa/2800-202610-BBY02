@@ -2,7 +2,7 @@ import { GeoJsonLayer } from '@deck.gl/layers';
 
 function scoreToColor(feature, alpha) {
   switch (feature.properties.normalized_da_score) {
-    case 1:  return [235, 40,  50,  alpha];
+    case 1:  return [235, 50,  60,  alpha];
     case 2:  return [220, 70,  40,  alpha];
     case 3:  return [230, 110, 35,  alpha];
     case 4:  return [235, 150, 40,  alpha];
@@ -17,20 +17,34 @@ function scoreToColor(feature, alpha) {
 }
 
 export function getDisseminationAreaLayer({ data, visible = true, onClick } = {}) {
-  return new GeoJsonLayer({
+   return new GeoJsonLayer({
     id: 'dissemination-areas',
     data,
     filled: true,
-    getFillColor: (feature) => scoreToColor(feature, 60),
+    getFillColor: (feature) => scoreToColor(feature, 80),
     stroked: true,
-    getLineColor: [128, 128, 128], //(feature) => scoreToColor(feature, 255),
+    getLineColor: [128, 128, 128],
     getLineWidth: 3,
     pickable: true,
     visible,
     onClick,
     updateTriggers: {
       getFillColor: [data],
-      getLineColor: [data],
     },
+  });
+}
+
+export function getDAHighlightLayer({ visible = true, selectedDA } = {}) {
+  if (!selectedDA) return null;
+  
+  return new GeoJsonLayer({
+    id: 'dissemination-highlight',
+    data: {type: 'FeatureCollection', features:[selectedDA]},
+    filled: false,
+    stroked: true,
+    getLineColor: [0, 0, 0, 255],
+    getLineWidth: 3,
+    pickable: false,
+    visible,
   });
 }
