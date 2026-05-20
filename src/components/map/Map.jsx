@@ -109,7 +109,7 @@ export function Map({
             // Fly/ Zoom to clicked DA
             // if the sidebar is open then shift slightly up and zoom slightly out
             const [lng, lat] = info.coordinate;
-            const zoom = (sidebarOpen && isDesktop) ? 15:14.18;
+            const zoom = isDesktop ? 15:14.18;
             const center = isDesktop ? [lng, lat] : [lng, lat - 0.005]; 
 
             mapRef.current?.easeTo({
