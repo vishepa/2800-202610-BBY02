@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import Map from "./Map.jsx";
 import SimulationToolbar from "./SimulationToolbar";
 import FilterDropdown from "./FilterDropdown";
@@ -7,8 +7,26 @@ import TogglePage from "../shared/TogglePage.jsx";
 import { useDisseminationAreas } from "../../lib/hooks/useDisseminationAreas";
 import { applySimulation } from "../../lib/scoring";
 import { useScreenWidth } from "../shared/widthHelper";
+import { useAuth } from "../shared/authentication/AuthContext";
+
+function tutorialKey(userId, name) {
+    return `tutorial_seen_${userId}_${name}`;
+}
+
+function hasSeen(userId, name) {
+    if (!userId) return false;
+    return localStorage.getItem(tutorialKey(userId, name)) === "1";
+}
+
+function markSeen(userId, name) {
+    if (!userId) return;
+    localStorage.setItem(tutorialKey(userId, name), "1");
+}
 
 export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
+    const { user } = useAuth();
+    const uid = user?.id;
+
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [active, setActive] = useState("map");
     // Manual show/hide toggle for the simulation, used while in Sim mode.
@@ -19,6 +37,13 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
     const [simPopupSeen, setSimPopupSeen] = useState(false);
     const [showSliderPopup, setShowSliderPopup] = useState(false);
     const [sliderPopupSeen, setSliderPopupSeen] = useState(false);
+
+    useEffect(() => {
+        if (!uid) return;
+        if (hasSeen(uid, "welcome")) setShowWelcome(false);
+        if (hasSeen(uid, "sim")) setSimPopupSeen(true);
+        if (hasSeen(uid, "slider")) setSliderPopupSeen(true);
+    }, [uid]);
 
     // Layer visibility state lifted up from map.jsx
     const [foodLayerVisible, setFoodLayerVisible] = useState(true);
@@ -80,6 +105,7 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
         if (opening && !sliderPopupSeen) {
             setShowSliderPopup(true);
             setSliderPopupSeen(true);
+            markSeen(uid, "slider");
         }
         setSidebarOpen(opening);
     };
@@ -89,13 +115,14 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
             if (!simPopupSeen) {
                 setShowSimPopup(true);
                 setSimPopupSeen(true);
+                markSeen(uid, "sim");
             }
             // Entering Sim mode opens the panel and reveals the simulation.
             setSidebarOpen(true);
             setSimVisible(true);
         }
         setActive(mode);
-    }, [simPopupSeen]);
+    }, [simPopupSeen, uid]);
 
     const width = useScreenWidth();
     const isDesktop = width >= 760;
@@ -191,7 +218,7 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
             </div>
 
             {showWelcome && (
-                <FeaturePopup title="Welcome to the Vancouver Food Accessibility Map" onClose={() => setShowWelcome(false)}>
+                <FeaturePopup title="Welcome to the Vancouver Food Accessibility Map" onClose={() => { setShowWelcome(false); markSeen(uid, "welcome"); }}>
                     <p className="mb-2">This interactive map visualizes food accessibility across Vancouver neighborhoods using a variety of layers.</p>
                     <p>Each area on the map represents a dissemination area scored by proximity to grocery stores, community gardens, farmers markets, and transit access.</p>
                 </FeaturePopup>
