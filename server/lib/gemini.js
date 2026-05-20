@@ -31,7 +31,9 @@ Rules:
 const cache = new Map();
 
 export async function generateDASummary(stats, nearbyFoodAssets, persona, simulatedAssets = []) {
-  const cacheKey = `${stats.dauid}-${persona}`;
+  const cacheKey = simulatedAssets.length > 0
+    ? `${stats.dauid}-${persona}-sim-${simulatedAssets.length}`
+    : `${stats.dauid}-${persona}`;
   if (cache.has(cacheKey)) {
     return cache.get(cacheKey);
   }
