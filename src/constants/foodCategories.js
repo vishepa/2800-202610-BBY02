@@ -12,3 +12,13 @@ export const FOOD_CATEGORIES = [
 ];
 
 export const FOOD_CATEGORY_IDS = FOOD_CATEGORIES.map(c => c.id);
+
+export const FOOD_CATEGORY_BY_ID = Object.fromEntries(
+  FOOD_CATEGORIES.map(c => [c.id, c])
+);
+
+export const DEFAULT_FOOD_ICON = 'https://cdn-icons-png.flaticon.com/512/3334/3334886.png';
+
+export function getFoodCategoryIcon(categoryId) {
+  return FOOD_CATEGORY_BY_ID[categoryId]?.icon ?? DEFAULT_FOOD_ICON;
+}
