@@ -25,17 +25,18 @@ Rules:
 - Be specific, mention actual numbers from the data.
 - If relevant, include recent local news about this Vancouver neighbourhood, prioritize food access news (grocery openings/closures, community food programs, farmers markets)
   but also include relevant infrastructure news (transit changes, new developments, housing projects, community services) that could impact food accessibility.
+- If proposed/simulated food assets are listed, comment on how they would improve or change this area's food accessibility compared to the current state.
 - Keep it concise (3-4 sentences max).`;
 
 const cache = new Map();
 
-export async function generateDASummary(stats, nearbyFoodAssets, persona) {
+export async function generateDASummary(stats, nearbyFoodAssets, persona, simulatedAssets = []) {
   const cacheKey = `${stats.dauid}-${persona}`;
   if (cache.has(cacheKey)) {
     return cache.get(cacheKey);
   }
 
-  const dataContext = `
+  let dataContext = `
 Dissemination Area: ${stats.dauid}
 Population Density: ${stats.population_density_per_km2} per km²
 Average Household Size: ${stats.avg_household_size}
@@ -54,6 +55,13 @@ ${nearbyFoodAssets.length === 0
       ).join('\n')
   }
 `;
+
+  if (simulatedAssets.length > 0) {
+    dataContext += `
+Proposed Food Assets (not yet built — part of a simulation):
+${simulatedAssets.map(a => `- ${a.category} at [${a.lat.toFixed(4)}, ${a.lng.toFixed(4)}]`).join('\n')}
+`;
+  }
 
   const prompt = SYSTEM_PROMPT.replace('{persona}', persona);
 
