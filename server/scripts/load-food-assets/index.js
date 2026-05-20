@@ -36,53 +36,17 @@ function sleep(ms) {
 }
 
 /**
- * Clean an address string to improve Nominatim hit rate.
- * Returns the cleaned string, or null if the address is un-geocodable.
+ * Validate an address string for geocoding.
+ * The CSV is pre-cleaned by clean-addresses.js, so this just does basic checks.
+ * Returns the trimmed string, or null if the address is un-geocodable.
  */
 function cleanAddress(raw) {
   if (!raw || !raw.trim()) return null;
 
-  let addr = raw;
+  let addr = raw.replace(/\r?\n/g, ', ').replace(/\s+/g, ' ').trim();
 
-  // Replace newlines with ", "
-  addr = addr.replace(/\r?\n/g, ', ').replace(/,\s*,/g, ',');
-
-  // Skip phone numbers (starts with digits and has dashes but no letters)
-  if (/^\d{3}[\s-]\d{3}[\s-]\d{4}$/.test(addr.trim())) return null;
-
-  // Skip PO Boxes — not physical locations
-  if (/^PO\s+Box/i.test(addr.trim())) return null;
-
-  // Strip unit/suite/room prefixes: "#59 – 2357 Main" → "2357 Main"
-  // Matches: #123 -, Suite 200 -, Unit 105 -, Room 001C, , 604 -
-  addr = addr.replace(/^(?:#\s*\d+\s*[–-]\s*|Suite\s+\d+\s*[–,-]\s*|Unit\s+\d+\s*[–,-]\s*|Room\s+\w+\s*[–,-]\s*)/i, '');
-
-  // Strip trailing unit in "1661 Duranleau Street, Unit 125, Vancouver"
-  addr = addr.replace(/,\s*(?:Suite|Unit|Ste)\s+\d+\s*/i, ', ');
-
-  // Strip leading floor info: "1669 East Broadway, 2nd floor," → "1669 East Broadway,"
-  addr = addr.replace(/,\s*\d+(?:st|nd|rd|th)\s+floor\s*/i, ', ');
-
-  // Strip parenthetical notes: "(Head Office)", "(DTES)", "(other pickups...)"
-  addr = addr.replace(/\s*\([^)]*\)\s*/g, ' ');
-
-  // Strip postal codes (V5N 5X2 pattern)
-  addr = addr.replace(/\b[A-Z]\d[A-Z]\s*\d[A-Z]\d\b/g, '');
-
-  // Strip "DTES", "South Van", "Main St" neighborhood labels after city
-  addr = addr.replace(/,\s*Vancouver\s*,?\s*(?:DTES|South Van|Main St)\s*/i, ', Vancouver');
-
-  // Strip UBC building codes: "LIFE 0023 (OLD SUB)", "Room 0001C,"
-  addr = addr.replace(/^[A-Z]{2,}\s+\d+\w*\s*/i, '');
-
-  // Common typos
-  addr = addr.replace(/\bHasting\b/g, 'Hastings');
-  addr = addr.replace(/\bVancouve\b/g, 'Vancouver');
-
-  // Clean up whitespace and trailing commas
-  addr = addr.replace(/\s+/g, ' ').replace(/,\s*$/, '').trim();
-
-  // If what's left is too short or has no digits (no street number), skip
+  if (/^\d{3}[\s-]\d{3}[\s-]\d{4}$/.test(addr)) return null;
+  if (/^PO\s+Box/i.test(addr)) return null;
   if (addr.length < 5 || !/\d/.test(addr)) return null;
 
   return addr;

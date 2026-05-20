@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useAISummary } from '../../lib/hooks/useAISummary';
 
-export default function DAInfoPanel({ properties }) {
+export default function DAInfoPanel({ properties, placedAssets = [], active = 'map' }) {
     const [persona, setPersona] = useState('resident');
+    const simulatedAssets = active === 'sim' ? placedAssets : [];
     const { data: summary, loading, error, generate, regenerate } = useAISummary(
         properties.dauid,
-        persona
+        persona,
+        simulatedAssets
     );
 
     return (

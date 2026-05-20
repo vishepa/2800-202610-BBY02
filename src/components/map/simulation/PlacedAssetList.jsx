@@ -1,8 +1,5 @@
-import { FOOD_CATEGORIES } from "../../../constants/foodCategories";
+import { FOOD_CATEGORY_BY_ID } from "../../../constants/foodCategories";
 
-// Build a lookup map once at module load instead of per-render.
-const CATEGORY_BY_ID = Object.fromEntries(FOOD_CATEGORIES.map(c => [c.id, c]));
- 
 export function PlacedAssetList({ placedAssets, removePlacedAsset }) {
     return (
         <div className="mt-4">
@@ -16,7 +13,7 @@ export function PlacedAssetList({ placedAssets, removePlacedAsset }) {
             ) : (
                 <ul className="space-y-1">
                     {placedAssets.map(asset => {
-                        const category = CATEGORY_BY_ID[asset.category];
+                        const category = FOOD_CATEGORY_BY_ID[asset.category];
                         return (
                             <li
                                 key={asset.id}
