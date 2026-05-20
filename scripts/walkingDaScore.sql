@@ -15,14 +15,6 @@ BEGIN
     WHEN 'Free Grocery Items'                                  THEN 9
     WHEN 'Public Markets'                                      THEN 8
     WHEN 'Specialty Food Stores'                               THEN 8
-    WHEN 'Specialty East Asian Food Stores'                    THEN 8
-    WHEN 'Specialty European Food Stores'                      THEN 8
-    WHEN 'Specialty Filipino Food Stores'                      THEN 8
-    WHEN 'Specialty Halal Food Stores'                         THEN 8
-    WHEN 'Specialty Japanese Food Stores'                      THEN 8
-    WHEN 'Specialty Latin American Food Stores'                THEN 8
-    WHEN 'Specialty Mediterranean and Middle Eastern Food Stores' THEN 7
-    WHEN 'Specialty South Asian Food Stores'                   THEN 8
     WHEN 'Small Food Stores'                                   THEN 7
     WHEN 'Small Cultural Food Business'                        THEN 7
     WHEN 'Free Meal'                                           THEN 6
@@ -100,7 +92,6 @@ BEGIN
         WHEN 'Small Food Stores'                                      THEN 'retail'
         WHEN 'Small Cultural Food Business'                           THEN 'retail'
         WHEN 'Public Markets'                                         THEN 'retail'
-        WHEN 'Food Shopping and Delivery'                             THEN 'retail'
         WHEN 'No Cost or Low Cost Grocery Items'                      THEN 'program'
         WHEN 'Free Grocery Items'                                     THEN 'program'
         WHEN 'Free Meal'                                              THEN 'program'
@@ -109,6 +100,13 @@ BEGIN
         WHEN 'Youth Free and low cost meals'                          THEN 'program'
         WHEN 'Free Food Pantries'                                     THEN 'program'
         WHEN 'Free Food Pantries / Community Fridges'                 THEN 'program'
+        WHEN 'Indigenous Food Program'                                THEN 'program'
+        -- Growing tier
+        WHEN 'Community Gardens'                                      THEN 'growing'
+        WHEN 'Community Orchards'                                     THEN 'growing'
+        WHEN 'Indigenous Gardens'                                     THEN 'growing'
+        WHEN 'Urban Farms'                                            THEN 'growing'
+        WHEN 'Urban Forests'                                          THEN 'growing'
         ELSE 'neutral'
     END;
 END;

@@ -1,7 +1,7 @@
 import { GeoJsonLayer } from '@deck.gl/layers';
 
 function scoreToColor(feature, alpha) {
-  switch (feature.properties.walk_15min_score) {
+  switch (feature.properties.walk_10min_score) {
     case 0:  return [160, 0,  30,  alpha];
     case 1:  return [235, 50,  60,  alpha];
     case 2:  return [220, 70,  40,  alpha];
