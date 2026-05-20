@@ -125,6 +125,7 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
                     setSelectedDA={handleSelectDA}
                     setSelectedFoodAsset={handleSelectFoodAsset}
                     setSelectedTransitStop={handleSelectTransitStop}
+                    sidebarOpen={sidebarOpen}
                     setSidebarOpen={setSidebarOpen}
                 />
             </div>

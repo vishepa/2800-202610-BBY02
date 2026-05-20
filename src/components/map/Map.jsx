@@ -43,8 +43,8 @@ export function Map({
     setSelectedDA,
     setSelectedFoodAsset,
     setSelectedTransitStop,
+    sidebarOpen,
     setSidebarOpen,
-
 }) {
     
     // Data fetching hooks
@@ -61,6 +61,10 @@ export function Map({
     const mapRef = useRef(null);
     const inPlacementMode = active === 'sim' && selectedCategory !== null;
     const selectedDA = selectedItem?.type === 'da' ? selectedItem.data : null;
+
+    // Screen width constants
+    const width = useScreenWidth();
+    const isDesktop = width >= 760;
 
     const [foodViewport, setFoodViewport] = useState(null);
     const handleMapMove = useCallback(() => {
@@ -103,10 +107,14 @@ export function Map({
             setSidebarOpen(true);
 
             // Fly/ Zoom to clicked DA
+            // if the sidebar is open then shift slightly up and zoom slightly out
             const [lng, lat] = info.coordinate;
+            const zoom = (sidebarOpen && isDesktop) ? 15:14.18;
+            const center = isDesktop ? [lng, lat] : [lng, lat - 0.005]; 
+
             mapRef.current?.easeTo({
-                center: [lng, lat],
-                zoom: 15,
+                center: center,
+                zoom: zoom,
                 duration: 1500,
                 // Necessary to prevent animation from being skipped
                 essential: true, 
@@ -173,9 +181,6 @@ export function Map({
         setSelectedFoodAsset(asset);
         setSidebarOpen(true);
     };
-
-    const width = useScreenWidth();
-    const isDesktop = width >= 760;
 
     return (
         <div className="w-full h-full relative">
