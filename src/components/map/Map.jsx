@@ -35,6 +35,7 @@ export function Map({
     disseminationLayerVisible,
     disseminationData,
     selectedCategory,
+    activeFoodCategories,
     scoreWeights,
     isochroneMinutes,
     placedAssets,
@@ -47,7 +48,6 @@ export function Map({
     setSelectedFoodAsset,
     setSelectedTransitStop,
     setSidebarOpen,
-    activeFoodCategories,
 }) {
     
     // Data fetching hooks
@@ -396,10 +396,11 @@ export function Map({
                     onLoad={handleMapLoad}
                     onMove={handleMapMove}
                 >
-                    <NavigationControl
-                        position="top-right"
-                        style={{ marginTop: '50px' }}
-                    />
+                    {/* Moved to bottom-left so it doesn't sit under the
+                        always-visible layer panel pinned to top-right.
+                        The previous marginTop:50px hack was there to
+                        clear that panel — no longer needed. */}
+                    <NavigationControl position="bottom-left" />
                     <DeckGLOverlay layers = {LAYERS} onClick={handleMapClick}/>
                     {/* <LayerPopup id='layer-popup'
                         selected={selected}

@@ -45,7 +45,11 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
     const [showSliderPopup, setShowSliderPopup] = useState(false);
     const [sliderPopupSeen, setSliderPopupSeen] = useState(false);
 
-    const [activeFoodCategories, setActiveFoodCategories] = useState(null); // null means "all types" 
+    // null = every category visible; an array narrows the food-asset
+    // cluster index. Lifted here so the FoodTypeFilter UI (rendered
+    // inside SimulationToolbar) and the Map's data layer share one
+    // source of truth.
+    const [activeFoodCategories, setActiveFoodCategories] = useState(null);
 
     const [scoreWeights, setScoreWeights] = useState({
         incomeWeight: 1,
@@ -202,6 +206,7 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
                     disseminationLayerVisible={disseminationLayerVisible}
                     disseminationData={disseminationData}
                     selectedCategory={selectedCategory}
+                    activeFoodCategories={activeFoodCategories}
                     scoreWeights={scoreWeights}
                     isochroneMinutes={isochroneMinutes}
                     setIsochroneMinutes={setIsochroneMinutes}
@@ -216,7 +221,6 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
                     setSelectedTransitStop={handleSelectTransitStop}
                     sidebarOpen={sidebarOpen}
                     setSidebarOpen={setSidebarOpen}
-                    activeFoodCategories={activeFoodCategories}
                 />
                 {heritageMode && (
                     <div
@@ -227,7 +231,15 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
                 )}
             </div>
 
-            <TogglePage page={active} setPage={setPage} sidebarOpen={sidebarOpen} />
+            {/* Mobile-only floating account button. Header renders the
+                desktop variant with placement="header"; CSS hides
+                whichever doesn't match the viewport. */}
+            <TogglePage
+                page={active}
+                setPage={setPage}
+                sidebarOpen={sidebarOpen}
+                placement="floating"
+            />
 
             {/* Side panels + toggles pick up cream / sepia in heritage mode
                 so the chrome stays cohesive with the parchment map. Colour
@@ -317,7 +329,15 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
                 </>
             )}
 
-            <div className="absolute top-0 right-0 z-30">
+            {/* Layer toggles live in a click-to-expand pill at the top-
+                right. On mobile the SearchBar (w-full max-w-sm at top-4
+                left-4) stretches under the pill, so we drop the pill to
+                top-16 (~64px, clears the ~54px tall SearchBar). At md+
+                the SearchBar caps at 384px and there's room beside it,
+                so we restore top-4 and the two sit on the same row.
+                The food category filter that used to nest here is in
+                SimulationToolbar now. */}
+            <div className="absolute top-16 right-4 z-30 md:top-4">
                 <FilterDropdown toggles={toggles} heritageMode={heritageMode} />
             </div>
 

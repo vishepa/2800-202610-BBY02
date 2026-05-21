@@ -61,7 +61,13 @@ export default function Header({  sidebarOpen, page, setPage, onSecretToggle, he
             >
                 The Map
             </h1>
-            <TogglePage page={page} setPage={setPage} sidebarOpen={sidebarOpen} />
+            <TogglePage
+                page={page}
+                setPage={setPage}
+                sidebarOpen={sidebarOpen}
+                placement="header"
+                heritageMode={heritageMode}
+            />
         </div>
     );
 }
