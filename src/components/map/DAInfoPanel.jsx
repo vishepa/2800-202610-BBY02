@@ -11,14 +11,14 @@ export default function DAInfoPanel({ properties, placedAssets = [], active = 'm
     );
 
     return (
-        <div className="text-sm">
+        <div className="text-sm" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
             {/* Header */}
             <h3 className="font-semibold text-base mb-3">
                 Area {properties.dauid}
             </h3>
 
             {/* Key Stats */}
-            <div className="mb-3" style={{ fontFamily: "playfair display" }}>
+            <div className="mb-3">
                 <h4 className="font-medium text-gray-700 mb-1">Key Stats</h4>
                 <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-gray-600">
                     <span>Density</span>
@@ -50,7 +50,7 @@ export default function DAInfoPanel({ properties, placedAssets = [], active = 'm
             {/* AI Summary */}
             <div>
                 <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium text-gray-700">AI Insight</h4>
+                    <h4 className="font-medium text-gray-700" style={{ fontFamily: 'Playfair Display, serif' }}>AI Insight</h4>
                     <div className="flex gap-1">
                         <button
                             onClick={() => setPersona('resident')}
