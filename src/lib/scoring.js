@@ -12,17 +12,12 @@ import { featureCollection } from '@turf/helpers';
 // of the city.
 const WALK_BUFFER_KM = 0.55;
 
-// Visual amplification for sim deltas before the V3 percentile rerank.
-// V3's percentile rank is deliberately outlier-resistant — in dense
-// neighborhoods a single hypothetical supermarket only nudges raw_da_score
-// by ~10 against a baseline of 30-80, so the touched DA often doesn't
-// even cross into the next 1-10 bucket and the color appears unchanged.
-// Multiplying the sim delta lets a single placed asset produce a clear,
-// visible bump while keeping the underlying V3 algorithm intact. This is
-// a planning-tool concession, not a real-world claim — one placed
-// supermarket in the UI ≈ N real supermarkets' worth of raw contribution.
-// Tune up for stronger feedback, down for subtler. 5 is a good middle.
-const SIM_DELTA_AMPLIFY = 8;
+// How many 1-10 score steps one unit of raw sim_delta shifts a DA's display.
+// Tuned so a supermarket (fa_score=10) at full coverage of a high-income DA
+// (retail tierMult=1.0) lifts the DA by ~2 score steps (10 × 1.0 × 0.2 = 2).
+// Stacking 3-5 supermarkets is enough to flip a red DA green. Lower values
+// feel inert; higher values make a single asset dominate.
+const SIM_NORMALIZED_PER_RAW = 0.2;
 
 // Category → asset score weights. Mirrors get_asset_score() in
 // scripts/daScoreSQL.sql — keep the two in sync.
@@ -149,37 +144,38 @@ function bboxesOverlap(a, b) {
 
 /**
  * Apply hypothetical placed assets to the baseline DA scores and return a new
- * FeatureCollection with updated `normalized_da_score` values. Mirrors the V3
- * SQL pipeline (scripts/daScoreSQLV3.sql) end-to-end so the sim view matches
- * what the DB would compute if those assets actually existed:
+ * FeatureCollection with updated `normalized_da_score` values.
+ *
+ * Mirrors the Map view's coloring logic so Sim view stays visually anchored
+ * to it: each DA starts from its precomputed `walk_${isochroneMinutes}min_score`
+ * (same column the Map view layer reads), then gets an additive bump from
+ * any placed-asset coverage, then the income/program weight sliders nudge
+ * it via computeWeightedScore. No global percentile rerank — untouched DAs
+ * keep their iso-baseline color, and a placed asset only recolors the DAs
+ * its walk-buffer actually reaches.
  *
  *   1. sim_delta per DA = Σ over placed assets of
  *        fa_score(category) × tier_multiplier(asset_tier, DA_context)
  *                            × coverage_fraction(asset_buffer, DA)
- *      (computeSimDeltas — mirrors V3 raw_score sum at SQL:113-126, with a
- *       circular buffer standing in for the real walk isochrone since placed
- *       assets are hypothetical and have no precomputed isochrone)
+ *      (computeSimDeltas — V3-fidelity raw delta, but consumed per-feature
+ *       rather than fed into a global rerank)
  *
- *   2. simulated_raw_da_score = baseline raw_da_score + sim_delta
+ *   2. display_base = iso_score + sim_delta × SIM_NORMALIZED_PER_RAW
+ *      (clamped 1-10)
  *
- *   3. normalized_da_score = ROUND(1 + PERCENT_RANK(simulated_raw) × 9)
- *      across all DAs (rerankByPercentile — mirrors V3 normalization at
- *      SQL:142-151)
+ *   3. normalized_da_score = computeWeightedScore(display_base, weights)
  *
  * Pure client-side. The DB is never written; `baselineFC` is not mutated.
  *
- * When `placedAssets` is empty and `scoreWeights` are at defaults, every DA's
- * sim_delta is zero, the percentile rerank reproduces V3's normalized scores
- * exactly, and the output is visually identical to baseline — Sim view
- * matches Map view.
+ * When `placedAssets` is empty and weight sliders are at defaults, the
+ * function early-returns `baselineFC` unchanged; the layer reads
+ * `walk_${N}min_score` directly. Identical paint to Map view.
  *
  * @param {object} baselineFC GeoJSON FC from /api/dissemination-areas
  * @param {Array<{category,lat,lng}>} placedAssets hypothetical assets
  * @param {{incomeWeight,programWeight}} scoreWeights user-tunable weights
- * @param {number} isochroneMinutes plumbed through; currently unused in the
- *   V3 fidelity path (walk_*_score columns are not consumed). The slider's
- *   value flows in so a future iteration can hook it up without changing
- *   the signature.
+ * @param {number} isochroneMinutes 5 / 10 / 15 — picks which precomputed
+ *   `walk_${N}min_score` column serves as the per-DA baseline.
  * @returns {object} new FeatureCollection (mutates only the copies)
  */
 export function applySimulation(baselineFC, placedAssets, scoreWeights, isochroneMinutes) {
@@ -190,77 +186,28 @@ export function applySimulation(baselineFC, placedAssets, scoreWeights, isochron
     weights.incomeWeight !== 1 || weights.programWeight !== 1;
   const hasAssets = (placedAssets?.length ?? 0) > 0;
 
-  // Defense in depth — MapPage already gates the call via hasActiveSim, but
-  // if nothing's active there's no work to do.
+  // Nothing to project. Layer reads the iso column off the baseline data.
   if (!hasAssets && !slidersTouched) return baselineFC;
 
-  // Pass 1: per-DA sim delta in V3 raw-score units.
+  // Pass 1: per-DA sim delta in raw-score units (zero for DAs no asset reaches).
   const features = hasAssets
     ? computeSimDeltas(baselineFC.features, placedAssets)
     : baselineFC.features.map(f => ({ ...f, properties: { ...f.properties, sim_delta: 0 } }));
 
-  // Pass 2: percentile-rank simulated_raw across all DAs → 1–10.
-  rerankByPercentile(features);
-
-  // Pass 3 (optional): weight-slider shift on top of the re-ranked score.
-  // V3 itself has no user-controllable weights — the SQL bakes default
-  // retail/program multipliers into raw_da_score. Slider movement here is a
-  // post-hoc approximation: it can't retroactively rebuild raw_da_score from
-  // component assets (we don't have that data client-side), so it nudges the
-  // final normalized score. At default sliders the math is identity, so we
-  // skip the loop entirely to keep the no-slider case bit-identical.
-  if (slidersTouched) {
-    for (const f of features) {
-      f.properties.normalized_da_score = computeWeightedScore(f.properties, weights);
-    }
+  // Pass 2: per-feature projection. Each DA: iso baseline → bump → weight tweak.
+  const isoKey = `walk_${isochroneMinutes}min_score`;
+  for (const f of features) {
+    const props = f.properties;
+    const isoScore = props[isoKey] ?? props.normalized_da_score ?? 5;
+    const bumped = isoScore + (props.sim_delta ?? 0) * SIM_NORMALIZED_PER_RAW;
+    const clamped = Math.max(1, Math.min(10, bumped));
+    props.normalized_da_score = computeWeightedScore(
+      { ...props, normalized_da_score: clamped },
+      weights,
+    );
   }
-
-  void isochroneMinutes; // plumbed through; see JSDoc
 
   return { ...baselineFC, features };
-}
-
-/**
- * Compute simulated_raw_da_score per feature (baseline_raw + sim_delta) and
- * assign normalized_da_score by percentile rank across the dataset. Mirrors
- *   ROUND(1 + PERCENT_RANK() OVER (ORDER BY raw_da_score ASC) * 9)::INT
- * from scripts/daScoreSQLV3.sql:142-151. Ties get the same percent rank
- * (matches PostgreSQL PERCENT_RANK semantics: rank = min rank in tie group).
- *
- * Mutates each feature's `properties.normalized_da_score` in place. Features
- * are already fresh copies coming from computeSimDeltas / the no-assets
- * spread, so the original baselineFC is untouched.
- */
-function rerankByPercentile(features) {
-  const n = features.length;
-  if (n === 0) return;
-
-  for (const f of features) {
-    const baseRaw = f.properties.raw_da_score ?? 0;
-    const delta = f.properties.sim_delta ?? 0;
-    f.properties.simulated_raw_da_score = baseRaw + delta * SIM_DELTA_AMPLIFY;
-  }
-
-  // Sort ascending by simulated_raw. .slice() shares feature references with
-  // the input array, so writes below land on the same objects.
-  const sorted = features.slice().sort(
-    (a, b) => a.properties.simulated_raw_da_score - b.properties.simulated_raw_da_score
-  );
-
-  // Walk sorted runs of equal raw scores, assigning each run the PostgreSQL
-  // PERCENT_RANK = i/(n-1) where i is the first index of the run.
-  let i = 0;
-  while (i < n) {
-    const v = sorted[i].properties.simulated_raw_da_score;
-    let j = i;
-    while (j < n && sorted[j].properties.simulated_raw_da_score === v) j++;
-    const pctRank = n > 1 ? i / (n - 1) : 0;
-    const score = Math.round(1 + pctRank * 9);
-    for (let k = i; k < j; k++) {
-      sorted[k].properties.normalized_da_score = score;
-    }
-    i = j;
-  }
 }
 
 /**

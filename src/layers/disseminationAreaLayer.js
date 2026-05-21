@@ -3,8 +3,14 @@ import { computeWeightedScore } from '../lib/scoring';
 import { getDAZoneColor } from '../lib/heritage';
 
 function getIsochroneScore(properties, isochroneMinutes){
+  // applySimulation tags every feature it touches with sim_delta (0 when no
+  // asset reaches the DA). Its presence means normalized_da_score has been
+  // rewritten by the V3 rerank and should win over the precomputed iso
+  // baseline columns; otherwise we're on the raw baseline and the slider
+  // picks which precomputed walk-isochrone score to color by.
+  if (properties.sim_delta !== undefined) return properties.normalized_da_score ?? 5;
   const key = `walk_${isochroneMinutes}min_score`;
-  return properties[key] ?? properties.normalized_da_score ?? 5;
+  return properties[key] ?? properties.walk_10min_score ?? 5;
 }
 
 function scoreToColor(score, alpha) {
@@ -30,10 +36,7 @@ export function getDisseminationAreaLayer({ data, visible = true, onClick, score
     filled: true,
     getFillColor: heritageMode
       ? f => getDAZoneColor(f.properties?.dauid, 210)
-      : f => scoreToColor(f.properties.normalized_da_score, 80),
-    updateTriggers: {
-      getFillColor: [data, heritageMode],
-    },
+      : f => scoreToColor(getIsochroneScore(f.properties, isochroneMinutes), 80),
     stroked: true,
     // Darker, thinner pixel-unit borders in heritage mode so adjacent
     // zones read with the same hand-printed weight as the reference map.
