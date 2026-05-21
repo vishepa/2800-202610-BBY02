@@ -83,7 +83,7 @@ export function SimulationToolbar({
             );
         }
         if (selectedItem.type === 'da') {
-            return <DAInfoPanel properties={selectedItem.data.properties} />;
+            return <DAInfoPanel properties={selectedItem.data.properties} placedAssets={placedAssets} active={active} />;
         }
         if (selectedItem.type === 'foodAsset') {
             return <FoodInfoPanel properties={selectedItem.data} />;

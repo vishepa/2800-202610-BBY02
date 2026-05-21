@@ -1,6 +1,6 @@
 import { IconLayer, ScatterplotLayer, TextLayer } from "@deck.gl/layers";
 import Supercluster from "supercluster";
-import { FOOD_CATEGORY_IDS } from "../constants/foodCategories";
+import { FOOD_CATEGORY_IDS, getFoodCategoryIcon } from "../constants/foodCategories";
 
 const CLUSTER_OPTIONS = {
     radius: 60,
@@ -60,7 +60,7 @@ export function getFoodAssetLayers({
         visible,
         getPosition: f => f.geometry.coordinates,
         getIcon: f => ({
-            url: getIconUrlForCategory(f.properties.category),
+            url: getFoodCategoryIcon(f.properties.category),
             width: 100,
             height: 100,
             anchorY: 128,
@@ -138,16 +138,3 @@ function computeSpreadOffsets(features) {
     return offsets;
 }
 
-function getIconUrlForCategory(category) {
-    const icons = {
-    'Grocery Stores':       'https://cdn-icons-png.flaticon.com/512/3724/3724788.png',
-    'Supermarkets':       'https://cdn-icons-png.flaticon.com/512/3724/3724788.png',
-    'Commissary Kitchens':        'https://cdn-icons-png.flaticon.com/512/10630/10630027.png',
-    'Kitchen Access':        'https://cdn-icons-png.flaticon.com/512/2728/2728879.png',
-    'Community Gardens':  'https://cdn-icons-png.flaticon.com/512/628/628324.png',
-    'Free Meal':         'https://cdn-icons-png.flaticon.com/512/6188/6188570.png',
-    'Low Cost Meal':     'https://cdn-icons-png.flaticon.com/512/1027/1027943.png',
-    'Specialty Food Stores':     'https://cdn-icons-png.flaticon.com/512/3724/3724788.png',
-    };
-    return icons[category] || 'https://cdn-icons-png.flaticon.com/512/3334/3334886.png'; // Default icon
-}
