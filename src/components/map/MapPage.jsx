@@ -60,7 +60,9 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
 
     // Layer visibility state lifted up from map.jsx
     const [foodLayerVisible, setFoodLayerVisible] = useState(true);
-    const [transitLayerVisible, setTransitLayerVisible] = useState(true);
+    // Transit starts hidden — most users care about food access first, and
+    // the transit stop layer is dense enough to crowd the map on entry.
+    const [transitLayerVisible, setTransitLayerVisible] = useState(false);
     const [disseminationLayerVisible, setDisseminationLayerVisible] = useState(true);
 
     const [selectedCategory, setSelectedCategory] = useState(null); // null means "all types"
