@@ -1,109 +1,86 @@
-import { useState, useEffect, useRef } from "react"
-import FeaturePopup from "./FeaturePopup"
-import Tooltip from "./Tooltip"
-
-const FilterDropdown = ({ toggles, buttonLabel = "Layers", heritageMode = false}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  // const [selected, setSelected] = useState("Filters")
-  const rootRef = useRef(null)
-
-  const [showFilterPopup, setShowFilterPopup] = useState(false)
-  const [filterPopupSeen, setFilterPopupSeen] = useState(false)
-
-  // Close on outside click
-  useEffect(() => {
-    const handler = (e) => {
-      if (rootRef.current && !rootRef.current.contains(e.target)) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handler)
-    return () => document.removeEventListener("mousedown", handler)
-  }, [])
-
-  // Close on Escape
-  useEffect(() => {
-    const handler = (e) => { if (e.key === "Escape") setIsOpen(false) }
-    document.addEventListener("keydown", handler)
-    return () => document.removeEventListener("keydown", handler)
-  }, [])
-
-
-  const handleToggle = () => {
-    const opening = !isOpen
-    if (opening && !filterPopupSeen) {
-      setShowFilterPopup(true)
-      setFilterPopupSeen(true)
-    }
-    setIsOpen(opening)
-
-  }
-
-
-  const visibleCount = toggles.filter(t => t.visible).length;
-  // const options = ["Filter 1", "Filter 2", "Filter 3","Filter 4","Filter 5 ","Filter 6"]
+// Always-visible layer toggle panel pinned to the top-right of the map.
+// The collapsible-button incarnation was retired so the toggles never
+// hide what the user just changed; sub-panels (like the food category
+// filter) slot in as `children` and unfold via `childrenOpen`.
+//
+// Filename kept as FilterDropdown for now to avoid churn in callers;
+// rename is fair game in a follow-up.
+const FilterDropdown = ({
+  toggles,
+  heritageMode = false,
+  children,
+  childrenOpen = false,
+}) => {
+  const visibleCount = toggles.filter((t) => t.visible).length;
 
   return (
-    <>
-      <div ref={rootRef} className="relative inline-block">
-        <button
-          type="button"
-          onClick={handleToggle}
-          className={`flex items-center gap-2 px-4 h-10 rounded-bl-xl text-sm cursor-pointer transition-colors duration-700 ${
-            heritageMode ? "bg-[#f4ebd8] text-[#3e2723] border-l border-b border-[#5d4037]/30" : "bg-white"
-          }`}
-        >
-          {buttonLabel} ({visibleCount} / {toggles.length})
-          <svg
-            className={`w-2.5 h-2.5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 10 6"
+    <div
+      className={`rounded-bl-xl shadow-md w-64 transition-colors duration-700 ${
+        heritageMode
+          ? "bg-[#f4ebd8] text-[#3e2723] border-l border-b border-[#5d4037]/30"
+          : "bg-white"
+      }`}
+    >
+      {/* Layers section — permanent. */}
+      <div className="px-4 pt-3 pb-2">
+        <div className="flex items-baseline justify-between mb-2">
+          <span className="text-sm font-semibold">Layers</span>
+          <span
+            className={`text-xs ${
+              heritageMode ? "text-[#5d4037]/70" : "text-gray-500"
+            }`}
           >
-            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-          </svg>
-        </button>
-
-        {isOpen && (
-          <div className={`absolute top-full right-0 min-w-45 rounded-b-xl rounded-tl-xl z-50 ${
-            heritageMode ? "bg-[#f4ebd8] border border-[#5d4037]/30 text-[#3e2723]" : "bg-white"
-          }`}>
-            <ul className="p-1">
-              {toggles.map((toggle) => (
-                <li key={toggle.id}>
-                  <label
-                    className={`flex items-center gap-2 w-full px-3 py-2 text-sm rounded-lg transition-colors cursor-pointer ${
-                      heritageMode ? "hover:bg-[#e8dcc4]" : "hover:bg-gray-100"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={toggle.visible}
-                      onChange={() => toggle.onToggle(v => !v)}
-                    />
-                    <span>{toggle.label}</span>
-                  </label>
-                  {/*<button
-                  type="button"
-                  onClick={() => { toggle.onClick(); setIsOpen(false) }}
-                  className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  {toggle.label}
-                </button>*/}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+            {visibleCount} / {toggles.length}
+          </span>
+        </div>
+        <ul className="space-y-0.5">
+          {toggles.map((toggle) => (
+            <li key={toggle.id}>
+              <label
+                className={`flex items-center gap-2 w-full px-2 py-1.5 text-sm rounded-md transition-colors cursor-pointer ${
+                  heritageMode ? "hover:bg-[#e8dcc4]" : "hover:bg-gray-100"
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={toggle.visible}
+                  onChange={() => toggle.onToggle((v) => !v)}
+                />
+                <span>{toggle.label}</span>
+              </label>
+            </li>
+          ))}
+        </ul>
       </div>
 
-      {showFilterPopup && (
-        <FeaturePopup title="Map Filters" onClose={() => setShowFilterPopup(false)}>
-          <p>Toggle between different data layers to view grocery stores, community gardens, farmers markets, and other food sources on the map.</p>
-        </FeaturePopup>
+      {/* Unfolding sub-section. Uses the `grid-template-rows: 0fr → 1fr`
+          collapse trick so the animation runs off the child's natural
+          height — no need to pin a pixel max. The inner overflow-hidden
+          + min-h-0 pair keeps content from leaking while collapsed.
+          Children stay mounted while closed so any selection state
+          (e.g. active food categories) is preserved across toggles. */}
+      {children && (
+        <div
+          aria-hidden={!childrenOpen}
+          className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
+            childrenOpen
+              ? "grid-rows-[1fr] opacity-100"
+              : "grid-rows-[0fr] opacity-0"
+          }`}
+        >
+          <div className="overflow-hidden min-h-0">
+            <div
+              className={`border-t ${
+                heritageMode ? "border-[#5d4037]/30" : "border-gray-200"
+              }`}
+            >
+              {children}
+            </div>
+          </div>
+        </div>
       )}
-    </>
-  )
-}
+    </div>
+  );
+};
 
 export default FilterDropdown;

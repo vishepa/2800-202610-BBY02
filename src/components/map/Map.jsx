@@ -20,7 +20,6 @@ import { getSimAssetLayers } from "../../layers/SimAssetLayer.js";
 import { useTransitStops } from '../../lib/hooks/useTransitStops.js';
 import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
 
-import FoodTypeFilter from "./FoodTypeFilter.jsx";
 import { getDisseminationAreaLayer, getDAHighlightLayer } from '../../layers/disseminationAreaLayer.js';
 import {LayerPopup} from './popups/LayerPopup.jsx';
 import SearchBar from "./SearchBar";
@@ -36,6 +35,7 @@ export function Map({
     disseminationLayerVisible,
     disseminationData,
     selectedCategory,
+    activeFoodCategories,
     scoreWeights,
     isochroneMinutes,
     placedAssets,
@@ -55,8 +55,6 @@ export function Map({
     const { data: transitData } = useTransitStops();
 
     const [activeRoutes, setActiveRoutes] = useState(null);
-
-    const [activeFoodCategories, setActiveFoodCategories] = useState(null); // null means "all types" 
 
     // Selected state for the popups
     const [selected, setSelected] = useState(null);
@@ -398,10 +396,11 @@ export function Map({
                     onLoad={handleMapLoad}
                     onMove={handleMapMove}
                 >
-                    <NavigationControl
-                        position="top-right"
-                        style={{ marginTop: '50px' }}
-                    />
+                    {/* Moved to bottom-left so it doesn't sit under the
+                        always-visible layer panel pinned to top-right.
+                        The previous marginTop:50px hack was there to
+                        clear that panel — no longer needed. */}
+                    <NavigationControl position="bottom-left" />
                     <DeckGLOverlay layers = {LAYERS} onClick={handleMapClick}/>
                     {/* <LayerPopup id='layer-popup'
                         selected={selected}

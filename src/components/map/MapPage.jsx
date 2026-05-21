@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, useEffect } from "react";
 import Map from "./Map.jsx";
 import SimulationToolbar from "./SimulationToolbar";
 import FilterDropdown from "./FilterDropdown";
+import FoodTypeFilter from "./FoodTypeFilter.jsx";
 import FeaturePopup from "./FeaturePopup";
 import TogglePage from "../shared/TogglePage.jsx";
 import { useDisseminationAreas } from "../../lib/hooks/useDisseminationAreas";
@@ -68,6 +69,11 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
     const [disseminationLayerVisible, setDisseminationLayerVisible] = useState(true);
 
     const [selectedCategory, setSelectedCategory] = useState(null); // null means "all types"
+    // null = every category visible; an array narrows the food-asset cluster
+    // index. Lifted to MapPage so the FoodTypeFilter UI (rendered next to
+    // FilterDropdown below) and the Map's data layer share one source of
+    // truth.
+    const [activeFoodCategories, setActiveFoodCategories] = useState(null);
     // placedAssets is lifted to App so a saved simulation can be restored
     // from the account page — see App.jsx.
     // const [selectedDA, setSelectedDA] = useState(null); // clicked dissemination area
@@ -200,6 +206,7 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
                     disseminationLayerVisible={disseminationLayerVisible}
                     disseminationData={disseminationData}
                     selectedCategory={selectedCategory}
+                    activeFoodCategories={activeFoodCategories}
                     scoreWeights={scoreWeights}
                     isochroneMinutes={isochroneMinutes}
                     setIsochroneMinutes={setIsochroneMinutes}
@@ -310,8 +317,23 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
                 </>
             )}
 
+            {/* Layer panel is always visible (no collapse). The food category
+                sub-filter is nested as children and unfolds when the food
+                layer is on; gated on !heritageMode too since that mode
+                forces the food layer off visually (Map.jsx). The state stays
+                mounted while collapsed so reselected categories survive a
+                layer-toggle flip. */}
             <div className="absolute top-0 right-0 z-30">
-                <FilterDropdown toggles={toggles} heritageMode={heritageMode} />
+                <FilterDropdown
+                    toggles={toggles}
+                    heritageMode={heritageMode}
+                    childrenOpen={foodLayerVisible && !heritageMode}
+                >
+                    <FoodTypeFilter
+                        activeCategories={activeFoodCategories}
+                        onChange={setActiveFoodCategories}
+                    />
+                </FilterDropdown>
             </div>
 
             {/* Heritage easter egg: centered intro card + persistent exit pill.
