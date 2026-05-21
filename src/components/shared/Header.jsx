@@ -56,10 +56,10 @@ export default function Header({  sidebarOpen, page, setPage, onSecretToggle, he
                 Onion
             </h1>
             <h1
-                className={`hidden sm:flex ml-2 text-3xl font-bold text-center items-center transition-colors duration-700 ${titleColor}`}
+                className={`hidden sm:flex ml-2 text-xl font-bold text-center items-center transition-colors duration-700 ${titleColor}`}
                 style={{ fontFamily: 'Playfair Display, serif' }}
             >
-                The Map
+                Vancouver's Interactive Food Access Planning Platform
             </h1>
             <TogglePage
                 page={page}
