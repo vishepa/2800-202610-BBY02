@@ -11,6 +11,49 @@ import FoodInfoPanel from "./FoodInfoPanel";
 import TransitInfoPanel from "./TransitInfoPanel";
 import LoginSignupPopup from "../account/LoginSignupPopup.jsx";
 
+function SliderRow({ label, tooltip, value, onChange }) {
+    const [showTip, setShowTip] = useState(false);
+
+    return (
+        <div className="relative">
+            <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium text-gray-700">{label}</span>
+                    <button
+                        type="button"
+                        className="w-4 h-4 rounded-full bg-gray-200 text-gray-500 text-xs flex items-center justify-center hover:bg-gray-300"
+                        onMouseEnter={() => setShowTip(true)}
+                        onMouseLeave={() => setShowTip(false)}
+                    >
+                        ?
+                    </button>
+                    {showTip && (
+                        <div className="absolute left-0 top-6 z-50 w-56 bg-gray-800 text-white text-xs rounded px-2 py-1.5 shadow-lg pointer-events-none">
+                            {tooltip}
+                        </div>
+                    )}
+                </div>
+                <span className="text-xs text-gray-500 tabular-nums">{value.toFixed(2)}×</span>
+            </div>
+            <input
+                type="range"
+                min={0} max={200}
+                value={value * 100}
+                onChange={e => onChange(Number(e.target.value) / 100)}
+                className="w-full h-1 rounded-full cursor-pointer accent-blue-600"
+                style={{
+                    background: `linear-gradient(to right, #2563eb ${value * 50}%, #bfdbfe ${value * 50}%)`
+                }}
+            />
+            <div className="flex justify-between text-xs text-gray-400 mt-0.5">
+                <span>0×</span>
+                <span>1×</span>
+                <span>2×</span>
+            </div>
+        </div>
+    );
+}
+
 export function SimulationToolbar({
     active,
     setActive,
@@ -46,19 +89,18 @@ export function SimulationToolbar({
 
     const sliders = (
         <>
-            <p><Tooltip text="How much median household income affects retail food access">
-            Income Weight: {scoreWeights.incomeWeight.toFixed(2)}
-            </Tooltip></p>
-            <input type="range" min={0} max={200} value={scoreWeights.incomeWeight * 100}
-            onChange={e => setScoreWeights(w => ({ ...w, incomeWeight: e.target.value / 100 }))}
-            className="accent-blue-600 w-full h-1 rounded-full cursor-pointer" />
-
-            <p><Tooltip text="How much food program access (pantries, free meals) affects the score">
-            Food Programs Weight: {scoreWeights.programWeight.toFixed(2)}
-            </Tooltip></p>
-            <input type="range" min={0} max={200} value={scoreWeights.programWeight * 100}
-            onChange={e => setScoreWeights(w => ({ ...w, programWeight: e.target.value / 100 }))}
-            className="accent-blue-600 w-full h-1 rounded-full cursor-pointer" />
+            <SliderRow
+                label="Income Weight"
+                tooltip="How much median household income affects retail food access"
+                value={scoreWeights.incomeWeight}
+                onChange={v => setScoreWeights(w => ({ ...w, incomeWeight: v }))}
+            />
+            <SliderRow
+                label="Food Programs Weight"
+                tooltip="How much food program access (pantries, free meals) affects the score"
+                value={scoreWeights.programWeight}
+                onChange={v => setScoreWeights(w => ({ ...w, programWeight: v }))}
+            />
         </>
     );
 
