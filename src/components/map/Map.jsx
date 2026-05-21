@@ -417,7 +417,7 @@ export function Map({
             )}
             <SearchBar
                 onSelect={handleAssetSelect}
-                className="absolute top-4 left-4 z-10"
+                className="absolute top-4 left-4 z-5"
             />
 
             {/* Map — always rendered */}
