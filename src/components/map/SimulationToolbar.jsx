@@ -11,11 +11,56 @@ import FoodInfoPanel from "./FoodInfoPanel";
 import TransitInfoPanel from "./TransitInfoPanel";
 import LoginSignupPopup from "../account/LoginSignupPopup.jsx";
 
+function SliderRow({ label, tooltip, value, onChange }) {
+    const [showTip, setShowTip] = useState(false);
+
+    return (
+        <div className="relative">
+            <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-1">
+                    <span className="text-sm font-medium text-gray-700">{label}</span>
+                    <button
+                        type="button"
+                        className="w-4 h-4 rounded-full bg-gray-200 text-gray-500 text-xs flex items-center justify-center hover:bg-gray-300"
+                        onMouseEnter={() => setShowTip(true)}
+                        onMouseLeave={() => setShowTip(false)}
+                    >
+                        ?
+                    </button>
+                    {showTip && (
+                        <div className="absolute left-0 top-6 z-50 w-56 bg-gray-800 text-white text-xs rounded px-2 py-1.5 shadow-lg pointer-events-none">
+                            {tooltip}
+                        </div>
+                    )}
+                </div>
+                <span className="text-xs text-gray-500 tabular-nums">{value.toFixed(2)}×</span>
+            </div>
+            <input
+                type="range"
+                min={0} max={200}
+                value={value * 100}
+                onChange={e => onChange(Number(e.target.value) / 100)}
+                className="w-full h-1 rounded-full cursor-pointer accent-blue-600"
+                style={{
+                    background: `linear-gradient(to right, #2563eb ${value * 50}%, #bfdbfe ${value * 50}%)`
+                }}
+            />
+            <div className="flex justify-between text-xs text-gray-400 mt-0.5">
+                <span>0×</span>
+                <span>1×</span>
+                <span>2×</span>
+            </div>
+        </div>
+    );
+}
+
 export function SimulationToolbar({
     active,
     setActive,
     selectedCategory,
     setSelectedCategory,
+    scoreWeights,
+    setScoreWeights,
     placedAssets,
     removePlacedAsset,
     clearPlacedAssets,
@@ -25,9 +70,6 @@ export function SimulationToolbar({
 }) {
 
     const [pct, setPct] = useState(50);
-    const [something, setSomething] = useState(50);
-    const [another, setAnother] = useState(50);
-    const [yetAnother, setYetAnother] = useState(50);
 
     const trackStyle = {
         background: `linear-gradient(to right, #2563eb ${pct}%, #bfdbfe ${pct}%)`,
@@ -47,29 +89,18 @@ export function SimulationToolbar({
 
     const sliders = (
         <>
-            <p><Tooltip text="How important nearby transit stops are to the accessibility score">slider1 : {pct}</Tooltip></p>
-            <input type="range" min={0} max={100} value={pct}
-                onChange={(e) => setPct(Number(e.target.value))}
-                className="accent-blue-600 w-full h-1 rounded-full cursor-pointer"
-                style={trackStyle} />
-
-            <p><Tooltip text="How much food price and affordability affect the score">slider2 : {something}</Tooltip></p>
-            <input type="range" min={0} max={100} value={something}
-                onChange={(e) => setSomething(Number(e.target.value))}
-                className="accent-blue-600 w-full h-1 rounded-full cursor-pointer"
-                style={trackStyle} />
-
-            <p><Tooltip text="How much walking distance to food sources matters">slider3 : {another}</Tooltip></p>
-            <input type="range" min={0} max={100} value={another}
-                onChange={(e) => setAnother(Number(e.target.value))}
-                className="accent-blue-600 w-full h-1 rounded-full cursor-pointer"
-                style={trackStyle} />
-
-            <p><Tooltip text="How much neighborhood population density factors in">slider4 : {yetAnother}</Tooltip></p>
-            <input type="range" min={0} max={100} value={yetAnother}
-                onChange={(e) => setYetAnother(Number(e.target.value))}
-                className="accent-blue-600 w-full h-1 rounded-full cursor-pointer"
-                style={trackStyle} />
+            <SliderRow
+                label="Income Weight"
+                tooltip="How much median household income affects retail food access"
+                value={scoreWeights.incomeWeight}
+                onChange={v => setScoreWeights(w => ({ ...w, incomeWeight: v }))}
+            />
+            <SliderRow
+                label="Food Programs Weight"
+                tooltip="How much food program access (pantries, free meals) affects the score"
+                value={scoreWeights.programWeight}
+                onChange={v => setScoreWeights(w => ({ ...w, programWeight: v }))}
+            />
         </>
     );
 
