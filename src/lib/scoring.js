@@ -178,3 +178,52 @@ export function applySimulation(baselineFC, placedAssets) {
 
   return { ...baselineFC, features };
 }
+
+/**
+ * Recompute a normalized score for a single DA feature using adjustable weights.
+ * Called per-feature inside getDisseminationAreaLayer, so it must be fast.
+ *
+ * @param {object} props - feature.properties from the DA GeoJSON
+ * @param {object} weights - { incomeWeight, programWeight, transitWeight }
+ *   each in [0, 2], where 1.0 = baseline (no change)
+ * @returns {number} adjusted score, clamped to 1–10
+ */
+export function computeWeightedScore(props, weights) {
+  const { incomeWeight = 1, programWeight = 1, transitWeight = 1 } = weights;
+
+  // Base food-proximity score (already normalized 1-10 server-side)
+  const base = props.normalized_da_score ?? 5;
+
+  // --- Income adjustment ---
+  // income_index isn't in the API, so we approximate from the raw income value.
+  // Median income in Vancouver DAs roughly spans $30k–$150k.
+  const income = props.median_household_income ?? 75000;
+  const incomeIndex = Math.min(Math.max((income - 30000) / 120000, 0), 1);
+  // retail_multiplier from your SQL: 0.6 + index * 0.4 → range [0.6, 1.0]
+  const baseRetailMult = 0.6 + incomeIndex * 0.4;
+  // incomeWeight=1 → no change; <1 → downweight high-income advantage; >1 → amplify
+  const incomeFactor = baseRetailMult * incomeWeight;
+
+  // --- Program (food program) adjustment ---
+  const pctLowIncome = props.pct_low_income_lim_at ?? 0;
+  // hardship_index from your SQL: higher low-income % → higher program multiplier
+  const hardshipIndex = Math.min(pctLowIncome / 100, 1);
+  const baseProgramMult = 0.5 + hardshipIndex * 0.5; // [0.5, 1.0]
+  const programFactor = baseProgramMult * programWeight;
+
+  // --- Transit adjustment ---
+  // pct_commute_transit + pct_commute_walk combined as "non-car" accessibility
+  const transitPct = (props.pct_commute_transit ?? 0) + (props.pct_commute_walk ?? 0);
+  const transitIndex = Math.min(transitPct / 100, 1);
+  const transitFactor = 0.7 + transitIndex * 0.3; // [0.7, 1.0] baseline, scaled by weight
+  const adjustedTransitFactor = transitFactor * transitWeight;
+
+  // Combine: nudge the base score by the weighted factors relative to their baseline
+  // Deltas are kept small so sliders feel like tuning, not overriding the food score.
+  const incomeDelta   = (incomeFactor   - baseRetailMult)   * 2;
+  const programDelta  = (programFactor  - baseProgramMult)  * 2;
+  const transitDelta  = (adjustedTransitFactor - transitFactor) * 2;
+
+  const adjusted = base + incomeDelta + programDelta + transitDelta;
+  return Math.max(1, Math.min(10, Math.round(adjusted)));
+}
