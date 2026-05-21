@@ -2,8 +2,13 @@ import { GeoJsonLayer } from '@deck.gl/layers';
 import { computeWeightedScore } from '../lib/scoring';
 import { getDAZoneColor } from '../lib/heritage';
 
-function scoreToColor(feature, alpha) {
-  switch (feature.properties.normalized_da_score) {
+function getIsochroneScore(properties, isochroneMinutes){
+  const key = `walk_${isochroneMinutes}min_score`;
+  return properties[key] ?? properties.normalized_da_score ?? 5;
+}
+
+function scoreToColor(score, alpha) {
+  switch (score){
     case 1:  return [235, 50,  60,  alpha];
     case 2:  return [220, 70,  40,  alpha];
     case 3:  return [230, 110, 35,  alpha];
@@ -18,24 +23,19 @@ function scoreToColor(feature, alpha) {
   }
 }
 
-export function getDisseminationAreaLayer({ data, visible = true, onClick, scoreWeights, heritageMode = false } = {}) {
+export function getDisseminationAreaLayer({ data, visible = true, onClick, scoreWeights, isochroneMinutes, heritageMode = false } = {}) {
    return new GeoJsonLayer({
     id: 'dissemination-areas',
     data,
     filled: true,
-    // Heritage mode wins over weighted scoring: while the easter egg is
-    // active each DA is repainted with a stable 1974 zoning colour keyed
-    // off its dauid, hiding the food-access ramp entirely. When off, the
-    // normal develop path re-scores the DA against the user's sliders.
     getFillColor: heritageMode
       ? f => getDAZoneColor(f.properties?.dauid, 210)
       : (feature) => {
-          const score = computeWeightedScore(feature.properties, scoreWeights);
-          return scoreToColor(
-            { ...feature, properties: { ...feature.properties, normalized_da_score: score } },
-            80,
-          );
-        },
+      const isoScore = getIsochroneScore(feature.properties, isochroneMinutes);
+      
+      const score = computeWeightedScore({...feature.properties, normalized_da_score: isoScore}, scoreWeights);
+      return scoreToColor(score, 80);
+    },
     stroked: true,
     // Darker, thinner pixel-unit borders in heritage mode so adjacent
     // zones read with the same hand-printed weight as the reference map.
@@ -46,18 +46,19 @@ export function getDisseminationAreaLayer({ data, visible = true, onClick, score
     visible,
     onClick,
     updateTriggers: {
-      getFillColor: [data, scoreWeights, heritageMode],
+      getFillColor: [data, scoreWeights, heritageMode, isochroneMinutes],
       getLineColor: [heritageMode],
       getLineWidth: [heritageMode],
     },
   });
 }
 
-export function getDAHighlightLayer({ visible = true, selectedDA } = {}) {
+export function getDAHighlightLayer({ visible = true, selectedDA, isochroneMinutes } = {}) {
   if (!selectedDA) return null;
 
   const highlightData = {type: 'FeatureCollection', features:[selectedDA]};
-  const [r, g, b] = scoreToColor(selectedDA, 255);
+  const isoScore = getIsochroneScore(selectedDA.properties, isochroneMinutes);
+  const [r, g, b] = scoreToColor(isoScore, 255);
 
   return [
     new GeoJsonLayer({
