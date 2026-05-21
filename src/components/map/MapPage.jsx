@@ -38,6 +38,12 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
     const [showSliderPopup, setShowSliderPopup] = useState(false);
     const [sliderPopupSeen, setSliderPopupSeen] = useState(false);
 
+    const [scoreWeights, setScoreWeights] = useState({
+        incomeWeight: 1,
+        programWeight: 1,
+        transitWeight: 1,
+    });
+
     useEffect(() => {
         if (!uid) return;
         if (hasSeen(uid, "welcome")) setShowWelcome(false);
@@ -145,6 +151,7 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
                     disseminationLayerVisible={disseminationLayerVisible}
                     disseminationData={disseminationData}
                     selectedCategory={selectedCategory}
+                    scoreWeights={scoreWeights}
                     placedAssets={placedAssets}
                     addPlacedAsset={addPlacedAsset}
                     showSimulation={simShownOnMap}
@@ -169,6 +176,8 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
                                 setActive={handleSetActive}
                                 selectedCategory={selectedCategory}
                                 setSelectedCategory={setSelectedCategory}
+                                scoreWeights={scoreWeights}
+                                setScoreWeights={setScoreWeights}
                                 placedAssets={placedAssets}
                                 removePlacedAsset={removePlacedAsset}
                                 clearPlacedAssets={clearPlacedAssets}
@@ -201,6 +210,8 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
                                 setActive={handleSetActive}
                                 selectedCategory={selectedCategory}
                                 setSelectedCategory={setSelectedCategory}
+                                scoreWeights={scoreWeights}
+                                setScoreWeights={setScoreWeights}
                                 placedAssets={placedAssets}
                                 removePlacedAsset={removePlacedAsset}
                                 clearPlacedAssets={clearPlacedAssets}

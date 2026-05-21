@@ -1,4 +1,5 @@
 import { GeoJsonLayer } from '@deck.gl/layers';
+import { computeWeightedScore } from '../lib/scoring';
 
 function scoreToColor(feature, alpha) {
   switch (feature.properties.normalized_da_score) {
@@ -16,12 +17,15 @@ function scoreToColor(feature, alpha) {
   }
 }
 
-export function getDisseminationAreaLayer({ data, visible = true, onClick } = {}) {
+export function getDisseminationAreaLayer({ data, visible = true, onClick, scoreWeights } = {}) {
    return new GeoJsonLayer({
     id: 'dissemination-areas',
     data,
     filled: true,
-    getFillColor: (feature) => scoreToColor(feature, 80),
+    getFillColor: (feature) => {
+      const score = computeWeightedScore(feature.properties, scoreWeights);
+      return scoreToColor({ ...feature, properties: { ...feature.properties, normalized_da_score: score } }, 80);
+    },
     stroked: true,
     getLineColor: [128, 128, 128],
     getLineWidth: 3,
@@ -29,7 +33,7 @@ export function getDisseminationAreaLayer({ data, visible = true, onClick } = {}
     visible,
     onClick,
     updateTriggers: {
-      getFillColor: [data],
+      getFillColor: [data, scoreWeights],
     },
   });
 }

@@ -16,6 +16,8 @@ export function SimulationToolbar({
     setActive,
     selectedCategory,
     setSelectedCategory,
+    scoreWeights,
+    setScoreWeights,
     placedAssets,
     removePlacedAsset,
     clearPlacedAssets,
@@ -25,9 +27,6 @@ export function SimulationToolbar({
 }) {
 
     const [pct, setPct] = useState(50);
-    const [something, setSomething] = useState(50);
-    const [another, setAnother] = useState(50);
-    const [yetAnother, setYetAnother] = useState(50);
 
     const trackStyle = {
         background: `linear-gradient(to right, #2563eb ${pct}%, #bfdbfe ${pct}%)`,
@@ -47,29 +46,19 @@ export function SimulationToolbar({
 
     const sliders = (
         <>
-            <p><Tooltip text="How important nearby transit stops are to the accessibility score">slider1 : {pct}</Tooltip></p>
-            <input type="range" min={0} max={100} value={pct}
-                onChange={(e) => setPct(Number(e.target.value))}
-                className="accent-blue-600 w-full h-1 rounded-full cursor-pointer"
-                style={trackStyle} />
+            <p><Tooltip text="How much median household income affects retail food access">
+            Income Weight: {scoreWeights.incomeWeight.toFixed(2)}
+            </Tooltip></p>
+            <input type="range" min={0} max={200} value={scoreWeights.incomeWeight * 100}
+            onChange={e => setScoreWeights(w => ({ ...w, incomeWeight: e.target.value / 100 }))}
+            className="accent-blue-600 w-full h-1 rounded-full cursor-pointer" />
 
-            <p><Tooltip text="How much food price and affordability affect the score">slider2 : {something}</Tooltip></p>
-            <input type="range" min={0} max={100} value={something}
-                onChange={(e) => setSomething(Number(e.target.value))}
-                className="accent-blue-600 w-full h-1 rounded-full cursor-pointer"
-                style={trackStyle} />
-
-            <p><Tooltip text="How much walking distance to food sources matters">slider3 : {another}</Tooltip></p>
-            <input type="range" min={0} max={100} value={another}
-                onChange={(e) => setAnother(Number(e.target.value))}
-                className="accent-blue-600 w-full h-1 rounded-full cursor-pointer"
-                style={trackStyle} />
-
-            <p><Tooltip text="How much neighborhood population density factors in">slider4 : {yetAnother}</Tooltip></p>
-            <input type="range" min={0} max={100} value={yetAnother}
-                onChange={(e) => setYetAnother(Number(e.target.value))}
-                className="accent-blue-600 w-full h-1 rounded-full cursor-pointer"
-                style={trackStyle} />
+            <p><Tooltip text="How much food program access (pantries, free meals) affects the score">
+            Food Programs Weight: {scoreWeights.programWeight.toFixed(2)}
+            </Tooltip></p>
+            <input type="range" min={0} max={200} value={scoreWeights.programWeight * 100}
+            onChange={e => setScoreWeights(w => ({ ...w, programWeight: e.target.value / 100 }))}
+            className="accent-blue-600 w-full h-1 rounded-full cursor-pointer" />
         </>
     );
 

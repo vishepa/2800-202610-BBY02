@@ -36,6 +36,7 @@ export function Map({
     disseminationLayerVisible,
     disseminationData,
     selectedCategory,
+    scoreWeights,
     placedAssets,
     addPlacedAsset,
     showSimulation,
@@ -136,7 +137,8 @@ export function Map({
         getDisseminationAreaLayer({
             data: disseminationData,
             visible: disseminationLayerVisible,
-            onClick: info => {handleClick(info, 'dissemination-areas')}
+            onClick: info => {handleClick(info, 'dissemination-areas')},
+            scoreWeights,
             }),
         getDAHighlightLayer({
             selectedDA,
@@ -168,7 +170,11 @@ export function Map({
         }),
         ...getSimAssetLayers({ placedAssets, visible: showSimulation }),
 
-    ], [foodClusterIndex, foodViewport, foodLayerVisible, handleClusterClick, inPlacementMode, transitData, transitLayerVisible, activeRoutes, disseminationLayerVisible, disseminationData, handleClick, placedAssets, showSimulation, setSelectedFoodAsset, setSidebarOpen, selectedDA]);
+    ], [foodClusterIndex, foodViewport, foodLayerVisible, handleClusterClick, 
+        inPlacementMode, transitData, transitLayerVisible, activeRoutes,
+        disseminationLayerVisible, disseminationData, handleClick, placedAssets, 
+        showSimulation, setSelectedFoodAsset, setSidebarOpen, 
+        selectedDA, scoreWeights]);
 
     // search bar
     const handleAssetSelect = (asset) => {
