@@ -10,7 +10,7 @@ function getIsochroneScore(properties, isochroneMinutes){
   // picks which precomputed walk-isochrone score to color by.
   if (properties.sim_delta !== undefined) return properties.normalized_da_score ?? 5;
   const key = `walk_${isochroneMinutes}min_score`;
-  return properties[key] ?? properties.normalized_da_score ?? 5;
+  return properties[key] ?? properties.walk_10min_score ?? 5;
 }
 
 function scoreToColor(score, alpha) {
