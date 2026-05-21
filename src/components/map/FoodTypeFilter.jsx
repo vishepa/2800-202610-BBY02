@@ -40,7 +40,7 @@ export default function FoodTypeFilter({ activeCategories, onChange }) {
                     checked={isActive(cat.id)}
                     onChange={() => toggle(cat.id)}
                     />
-                    <span class="text-sm">{cat.label}</span>
+                    <span className="text-sm">{cat.label}</span>
                 </label>
                 ))}
             </div>
