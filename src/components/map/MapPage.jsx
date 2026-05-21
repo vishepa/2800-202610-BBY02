@@ -268,7 +268,7 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
             {isDesktop ? (
                 <>
                     {/* Desktop: slide from left */}
-                    <div className={`absolute top-0 left-0 h-full w-95 z-10 shadow-lg transition-[transform,background-color,border-color] duration-700 will-change-transform ${
+                    <div className={`absolute top-0 left-0 h-full w-95 z-30 shadow-lg transition-[transform,background-color,border-color] duration-700 will-change-transform ${
                         sidebarOpen ? "translate-x-0" : "-translate-x-full"
                     } ${heritageMode ? "bg-[#f4ebd8] border-r-2 border-[#5d4037]/30" : "bg-white"}`}>
                         <div
@@ -301,7 +301,7 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
                     </div>
                     <button
                         onClick={handleToggleSidebar}
-                        className={`absolute top-1/2 z-20 shadow-md rounded-r-lg px-1 py-3 transition-[left,background-color,color] duration-300 ${
+                        className={`absolute top-1/2 z-5 shadow-md rounded-r-lg px-1 py-3 transition-[left,background-color,color] duration-300 ${
                             sidebarOpen ? "left-95" : "left-0"
                         } ${heritageMode ? "bg-[#f4ebd8] text-[#3e2723]" : "bg-white"}`}
                     >
@@ -357,7 +357,7 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
                 so we restore top-4 and the two sit on the same row.
                 The food category filter that used to nest here is in
                 SimulationToolbar now. */}
-            <div className="absolute top-16 right-4 z-30 md:top-4">
+            <div className="absolute top-16 right-4 z-5 md:top-4">
                 <FilterDropdown toggles={toggles} heritageMode={heritageMode} />
             </div>
 

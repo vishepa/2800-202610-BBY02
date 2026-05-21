@@ -69,7 +69,7 @@ const FilterDropdown = ({ toggles, buttonLabel = "Layers", heritageMode = false 
 
             {isOpen && (
                 <div
-                    className={`absolute right-0 mt-1 min-w-52 rounded-xl shadow-md z-50 ${
+                    className={`absolute right-0 mt-1 min-w-52 rounded-xl shadow-md z-[5] ${
                         heritageMode
                             ? "bg-[#f4ebd8] text-[#3e2723] border border-[#5d4037]/30"
                             : "bg-white"
