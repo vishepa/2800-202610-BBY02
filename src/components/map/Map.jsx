@@ -22,7 +22,6 @@ import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
 
 import FoodTypeFilter from "./FoodTypeFilter.jsx";
 import { getDisseminationAreaLayer, getDAHighlightLayer } from '../../layers/disseminationAreaLayer.js';
-import { getCoverageBufferLayer, getCoverageDALayer } from '../../layers/coverageLayer.js';
 import {LayerPopup} from './popups/LayerPopup.jsx';
 import SearchBar from "./SearchBar";
 // import TestMarker from "testMarker";
@@ -41,8 +40,6 @@ export function Map({
     placedAssets,
     addPlacedAsset,
     showSimulation,
-    coverageMode,
-    foodFCForCoverage,
     selectedItem,
     setSelectedDA,
     setSelectedFoodAsset,
@@ -137,28 +134,14 @@ export function Map({
     }, [inPlacementMode, selectedCategory, addPlacedAsset]);
 
     const LAYERS = useMemo( () => [
-        // In easter-egg mode, swap the score-coloured DA layer
-        // for the coverage-ratio-coloured one and draw the 400m walking
-        // rings underneath the food icons. Non-coverage branch carries
-        // develop's `scoreWeights` so the weighted scoring still drives
-        // the DA colours when the easter egg is off.
-        coverageMode
-            ? getCoverageDALayer({
-                data: disseminationData,
-                visible: disseminationLayerVisible,
-                onClick: info => {handleClick(info, 'dissemination-areas')},
-            })
-            : getDisseminationAreaLayer({
-                data: disseminationData,
-                visible: disseminationLayerVisible,
-                onClick: info => {handleClick(info, 'dissemination-areas')},
-                scoreWeights,
-            }),
-        coverageMode
-            ? getCoverageBufferLayer({ foodFC: foodFCForCoverage, visible: foodLayerVisible })
-            : null,
-        // getDAHighlightLayer now returns an array of layers (glow + fill)
-        // or null — spread with a null-safe fallback to flatten into LAYERS.
+        getDisseminationAreaLayer({
+            data: disseminationData,
+            visible: disseminationLayerVisible,
+            onClick: info => {handleClick(info, 'dissemination-areas')},
+            scoreWeights,
+        }),
+        // getDAHighlightLayer returns an array of layers (glow + fill) or
+        // null — spread with a null-safe fallback to flatten into LAYERS.
         ...(getDAHighlightLayer({
             selectedDA,
             visible: disseminationLayerVisible,
@@ -192,8 +175,7 @@ export function Map({
     ], [foodClusterIndex, foodViewport, foodLayerVisible, handleClusterClick,
         inPlacementMode, transitData, transitLayerVisible, activeRoutes,
         disseminationLayerVisible, disseminationData, handleClick, placedAssets,
-        showSimulation, coverageMode, foodFCForCoverage, setSelectedFoodAsset,
-        setSidebarOpen, selectedDA, scoreWeights]);
+        showSimulation, setSelectedFoodAsset, setSidebarOpen, selectedDA, scoreWeights]);
 
     // search bar
     const handleAssetSelect = (asset) => {

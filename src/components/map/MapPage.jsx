@@ -5,9 +5,7 @@ import FilterDropdown from "./FilterDropdown";
 import FeaturePopup from "./FeaturePopup";
 import TogglePage from "../shared/TogglePage.jsx";
 import { useDisseminationAreas } from "../../lib/hooks/useDisseminationAreas";
-import { useFoodAssets } from "../../lib/hooks/useFoodAssets";
 import { applySimulation } from "../../lib/scoring";
-import { applyCoverage, COVERAGE_BUFFER_KM } from "../../lib/coverage";
 import { useScreenWidth } from "../shared/widthHelper";
 import { useAuth } from "../shared/authentication/AuthContext";
 
@@ -25,7 +23,7 @@ function markSeen(userId, name) {
     localStorage.setItem(tutorialKey(userId, name), "1");
 }
 
-export default function MapPage({ setPage, placedAssets, setPlacedAssets, coverageMode, onExitCoverage }) {
+export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
     const { user } = useAuth();
     const uid = user?.id;
 
@@ -65,46 +63,14 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, covera
     const [selectedItem, setSelectedItem] = useState(null); // clicked dissemination area/food asset
 
     const { data: baselineDA } = useDisseminationAreas();
-    // Also fetched in Map.jsx for clustering. Browser-side this dedupes
-    // to a single response thanks to HTTP caching
-    // The duplicate hook keeps the easter egg additive without restructuring Map's props.
-    const { data: foodData } = useFoodAssets();
-
-    // In Map view the map falls back to the untouched baseline data.
-    const simShownOnMap = active === "sim" && simVisible && !coverageMode;
-
-    // Deferring the calculation lets the click register and the banner appear in the
-    // same frame the recoloured DAs follow a sec later
-    const [coverageDA, setCoverageDA] = useState(null);
-    const [coverageComputing, setCoverageComputing] = useState(false);
-
-    // Deliberately don't reset coverageDA when coverageMode flips
-    // off, keeping it lets a quick off to on toggle
-    // reuse the previous result for one frame before the recompute lands.
-    useEffect(() => {
-        if (!coverageMode || !baselineDA || !foodData) return undefined;
-
-        let cancelled = false;
-        setCoverageComputing(true);
-        const handle = setTimeout(() => {
-            if (cancelled) return;
-            const result = applyCoverage(baselineDA, foodData);
-            if (cancelled) return;
-            setCoverageDA(result);
-            setCoverageComputing(false);
-        }, 0);
-
-        return () => {
-            cancelled = true;
-            clearTimeout(handle);
-        };
-    }, [coverageMode, baselineDA, foodData]);
-
-    const disseminationData = useMemo(() => {
-        if (coverageMode) return coverageDA ?? baselineDA;
-        if (simShownOnMap) return applySimulation(baselineDA, placedAssets);
-        return baselineDA;
-    }, [coverageMode, coverageDA, baselineDA, placedAssets, simShownOnMap]);
+    // The simulation (placed assets + recolored DA scores) only shows in Sim
+    // mode, and can be toggled off manually within it. In Map view the map
+    // falls back to the untouched baseline data.
+    const simShownOnMap = active === "sim" && simVisible;
+    const disseminationData = useMemo(
+        () => (simShownOnMap ? applySimulation(baselineDA, placedAssets) : baselineDA),
+        [baselineDA, placedAssets, simShownOnMap],
+    );
 
     const handleSelectDA = useCallback((daFeature) => {
         setSelectedItem(daFeature ? { type: 'da', data: daFeature } : null);
@@ -189,8 +155,6 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, covera
                     placedAssets={placedAssets}
                     addPlacedAsset={addPlacedAsset}
                     showSimulation={simShownOnMap}
-                    coverageMode={coverageMode}
-                    foodFCForCoverage={coverageMode ? foodData : null}
                     selectedItem={selectedItem}
                     setSelectedDA={handleSelectDA}
                     setSelectedFoodAsset={handleSelectFoodAsset}
@@ -263,32 +227,6 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, covera
             <div className="absolute top-0 right-0 z-30">
                 <FilterDropdown toggles={toggles} />
             </div>
-
-            {/* Easter egg banner — top-center on mobile  and bottom-center on desktop . Subtitle collapses to icons on small screens. */}
-            {coverageMode && (
-                <div className="absolute md:bottom-4 md:top-auto top-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 sm:gap-3 bg-white/95 backdrop-blur shadow-lg rounded-full px-3 sm:px-4 py-2 border border-green-500/50 max-w-[calc(100vw-1rem)]">
-                    <span className={`text-xl shrink-0 ${coverageComputing ? "animate-pulse" : ""}`}>🧅</span>
-                    <div className="text-sm leading-tight min-w-0">
-                        <div className="font-semibold text-gray-800 whitespace-nowrap">15-Minute City</div>
-                        <div className="hidden sm:block text-gray-500 text-xs">
-                            {coverageComputing
-                                ? "Calculating walking reach…"
-                                : `${Math.round(COVERAGE_BUFFER_KM * 1000)}m walk · green = fully reached · red = food desert`}
-                        </div>
-                        <div className="sm:hidden text-gray-500 text-xs">
-                            {coverageComputing ? "Calculating…" : `${Math.round(COVERAGE_BUFFER_KM * 1000)}m walking reach`}
-                        </div>
-                    </div>
-                    <button
-                        onClick={onExitCoverage}
-                        aria-label="Exit 15-minute city view"
-                        className="ml-1 sm:ml-2 px-2.5 sm:px-3 py-1 text-xs font-medium rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 cursor-pointer shrink-0"
-                    >
-                        <span className="hidden sm:inline">Back to normal</span>
-                        <span className="sm:hidden">Exit</span>
-                    </button>
-                </div>
-            )}
 
             {showWelcome && (
                 <FeaturePopup title="Welcome to the Vancouver Food Accessibility Map" onClose={() => { setShowWelcome(false); markSeen(uid, "welcome"); }}>
