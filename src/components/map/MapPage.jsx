@@ -321,11 +321,15 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
                 </>
             )}
 
-            {/* Always-visible layer toggle panel (no collapse button).
-                The food category filter that used to nest here now
-                lives inside SimulationToolbar — see that component
-                for the icon-grouped checkbox list. */}
-            <div className="absolute top-0 right-0 z-30">
+            {/* Layer toggles live in a click-to-expand pill at the top-
+                right. On mobile the SearchBar (w-full max-w-sm at top-4
+                left-4) stretches under the pill, so we drop the pill to
+                top-16 (~64px, clears the ~54px tall SearchBar). At md+
+                the SearchBar caps at 384px and there's room beside it,
+                so we restore top-4 and the two sit on the same row.
+                The food category filter that used to nest here is in
+                SimulationToolbar now. */}
+            <div className="absolute top-16 right-4 z-30 md:top-4">
                 <FilterDropdown toggles={toggles} heritageMode={heritageMode} />
             </div>
 
