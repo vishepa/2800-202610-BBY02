@@ -10,7 +10,7 @@ import SaveSimulationModal from "./simulation/SaveSimulationModal";
 import DAInfoPanel from "./DAInfoPanel";
 import FoodInfoPanel from "./FoodInfoPanel";
 import TransitInfoPanel from "./TransitInfoPanel";
-import LoginSignupPopup from "../account/LoginSignupPopup.jsx";
+import LoginSignupPopup from "../account/loginSignupPopup.jsx";
 
 function SliderRow({ label, tooltip, value, onChange }) {
     const [showTip, setShowTip] = useState(false);

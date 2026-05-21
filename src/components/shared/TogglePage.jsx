@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import accountIcon from "../../../public/user.png";
 import { useScreenWidth } from "./widthHelper";
 import { useAuth } from "./authentication/AuthContext.jsx";
-import LoginSignupPopup from "../account/LoginSignupPopup.jsx";
+import LoginSignupPopup from "../account/loginSignupPopup.jsx";
 
 // Two placements share the same auth/popup machinery:
 //   - "floating": fixed bottom-right circular button (mobile map view)
