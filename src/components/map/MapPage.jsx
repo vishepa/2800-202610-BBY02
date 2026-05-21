@@ -231,7 +231,15 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
                 )}
             </div>
 
-            <TogglePage page={active} setPage={setPage} sidebarOpen={sidebarOpen} />
+            {/* Mobile-only floating account button. Header renders the
+                desktop variant with placement="header"; CSS hides
+                whichever doesn't match the viewport. */}
+            <TogglePage
+                page={active}
+                setPage={setPage}
+                sidebarOpen={sidebarOpen}
+                placement="floating"
+            />
 
             {/* Side panels + toggles pick up cream / sepia in heritage mode
                 so the chrome stays cohesive with the parchment map. Colour
