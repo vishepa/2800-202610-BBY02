@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAISummary } from '../../lib/hooks/useAISummary';
+import { useDAFactsFor } from '../../lib/disseminationFacts';
 
 export default function DAInfoPanel({ properties, placedAssets = [], active = 'map' }) {
     const [persona, setPersona] = useState('resident');
@@ -10,12 +11,37 @@ export default function DAInfoPanel({ properties, placedAssets = [], active = 'm
         simulatedAssets
     );
 
+    // Easter-egg superlatives: empty array for most DAs;
+    // winners get one or more "Did you know?" badges shown above the stats.
+    const facts = useDAFactsFor(properties.dauid);
+
     return (
         <div className="text-sm">
             {/* Header */}
             <h3 className="font-semibold text-base mb-3">
                 Area {properties.dauid}
             </h3>
+
+            {/* "Did you know?" — only renders when this DA is a city-wide
+                superlative on one of the dimensions in disseminationFacts.js. */}
+            {facts.length > 0 && (
+                <div className="mb-3 p-3 rounded-lg bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200">
+                    <h4 className="font-medium text-amber-900 mb-2 text-xs uppercase tracking-wide">
+                        ✨ Did you know?
+                    </h4>
+                    <ul className="space-y-1.5">
+                        {facts.map(fact => (
+                            <li key={fact.key} className="flex items-start gap-2 text-xs text-amber-900 leading-snug">
+                                <span className="text-base leading-none shrink-0">{fact.emoji}</span>
+                                <span>
+                                    <strong className="font-semibold">{fact.title}</strong>
+                                    <span className="text-amber-800/80"> — {fact.value}</span>
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
 
             {/* Key Stats */}
             <div className="mb-3">

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import FeaturePopup from "./FeaturePopup"
 import Tooltip from "./Tooltip"
 
-const FilterDropdown = ({ toggles, buttonLabel = "Layers"}) => {
+const FilterDropdown = ({ toggles, buttonLabel = "Layers", heritageMode = false}) => {
   const [isOpen, setIsOpen] = useState(false);
   // const [selected, setSelected] = useState("Filters")
   const rootRef = useRef(null)
@@ -49,7 +49,9 @@ const FilterDropdown = ({ toggles, buttonLabel = "Layers"}) => {
         <button
           type="button"
           onClick={handleToggle}
-          className="flex items-center gap-2 px-4 h-10 bg-white rounded-bl-xl text-sm cursor-pointer"
+          className={`flex items-center gap-2 px-4 h-10 rounded-bl-xl text-sm cursor-pointer transition-colors duration-700 ${
+            heritageMode ? "bg-[#f4ebd8] text-[#3e2723] border-l border-b border-[#5d4037]/30" : "bg-white"
+          }`}
         >
           {buttonLabel} ({visibleCount} / {toggles.length})
           <svg
@@ -63,12 +65,16 @@ const FilterDropdown = ({ toggles, buttonLabel = "Layers"}) => {
         </button>
 
         {isOpen && (
-          <div className="absolute top-full right-0 min-w-45 bg-white rounded-b-xl rounded-tl-xl z-50">
+          <div className={`absolute top-full right-0 min-w-45 rounded-b-xl rounded-tl-xl z-50 ${
+            heritageMode ? "bg-[#f4ebd8] border border-[#5d4037]/30 text-[#3e2723]" : "bg-white"
+          }`}>
             <ul className="p-1">
               {toggles.map((toggle) => (
                 <li key={toggle.id}>
                   <label
-                    className="flex items-center gap-2 w-full px-3 py-2 text-sm rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                    className={`flex items-center gap-2 w-full px-3 py-2 text-sm rounded-lg transition-colors cursor-pointer ${
+                      heritageMode ? "hover:bg-[#e8dcc4]" : "hover:bg-gray-100"
+                    }`}
                   >
                     <input
                       type="checkbox"

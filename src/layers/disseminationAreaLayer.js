@@ -1,5 +1,6 @@
 import { GeoJsonLayer } from '@deck.gl/layers';
 import { computeWeightedScore } from '../lib/scoring';
+import { getDAZoneColor } from '../lib/heritage';
 
 function getIsochroneScore(properties, isochroneMinutes){
   const key = `walk_${isochroneMinutes}min_score`;
@@ -7,7 +8,6 @@ function getIsochroneScore(properties, isochroneMinutes){
 }
 
 function scoreToColor(score, alpha) {
-  //switch (feature.properties.normalized_da_score) {
   switch (score){
     case 1:  return [235, 50,  60,  alpha];
     case 2:  return [220, 70,  40,  alpha];
@@ -23,25 +23,32 @@ function scoreToColor(score, alpha) {
   }
 }
 
-export function getDisseminationAreaLayer({ data, visible = true, onClick, scoreWeights, isochroneMinutes } = {}) {
+export function getDisseminationAreaLayer({ data, visible = true, onClick, scoreWeights, isochroneMinutes, heritageMode = false } = {}) {
    return new GeoJsonLayer({
     id: 'dissemination-areas',
     data,
     filled: true,
-    getFillColor: (feature) => {
+    getFillColor: heritageMode
+      ? f => getDAZoneColor(f.properties?.dauid, 210)
+      : (feature) => {
       const isoScore = getIsochroneScore(feature.properties, isochroneMinutes);
       
       const score = computeWeightedScore({...feature.properties, normalized_da_score: isoScore}, scoreWeights);
       return scoreToColor(score, 80);
     },
     stroked: true,
-    getLineColor: [128, 128, 128],
-    getLineWidth: 3,
+    // Darker, thinner pixel-unit borders in heritage mode so adjacent
+    // zones read with the same hand-printed weight as the reference map.
+    getLineColor: heritageMode ? [78, 52, 36, 220] : [128, 128, 128],
+    getLineWidth: heritageMode ? 1.5 : 3,
+    lineWidthUnits: heritageMode ? 'pixels' : 'meters',
     pickable: true,
     visible,
     onClick,
     updateTriggers: {
-      getFillColor: [data, scoreWeights, isochroneMinutes],
+      getFillColor: [data, scoreWeights, heritageMode, isochroneMinutes],
+      getLineColor: [heritageMode],
+      getLineWidth: [heritageMode],
     },
   });
 }

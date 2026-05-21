@@ -23,7 +23,14 @@ function markSeen(userId, name) {
     localStorage.setItem(tutorialKey(userId, name), "1");
 }
 
-export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
+// Lighter, cream-paper filter for heritage mode — the previous heavier
+// sepia read as "stained" rather than "old printed paper". Paired with
+// the cream multiply-blend overlay below to land on the parchment look
+// from the 1974 reference map.
+const HERITAGE_FILTER = "sepia(0.35) saturate(0.9) brightness(1.05) contrast(0.95) hue-rotate(-5deg)";
+const TYPEWRITER_FONT = "'Special Elite', 'Courier New', Courier, monospace";
+
+export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusSignal, heritageMode, onExitHeritage }) {
     const { user } = useAuth();
     const uid = user?.id;
 
@@ -55,7 +62,9 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
 
     // Layer visibility state lifted up from map.jsx
     const [foodLayerVisible, setFoodLayerVisible] = useState(true);
-    const [transitLayerVisible, setTransitLayerVisible] = useState(true);
+    // Transit starts hidden — most users care about food access first, and
+    // the transit stop layer is dense enough to crowd the map on entry.
+    const [transitLayerVisible, setTransitLayerVisible] = useState(false);
     const [disseminationLayerVisible, setDisseminationLayerVisible] = useState(true);
 
     const [selectedCategory, setSelectedCategory] = useState(null); // null means "all types"
@@ -73,6 +82,20 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
         () => (simShownOnMap ? applySimulation(baselineDA, placedAssets) : baselineDA),
         [baselineDA, placedAssets, simShownOnMap],
     );
+
+    // Brief "Vancouver, if planners had MapLibre in 1974." card. Fades in
+    // when the mode flips on, holds for a few seconds, then fades out
+    // while the heritage view itself stays active.
+    const [heritageOverlayVisible, setHeritageOverlayVisible] = useState(false);
+    useEffect(() => {
+        if (!heritageMode) {
+            setHeritageOverlayVisible(false);
+            return undefined;
+        }
+        setHeritageOverlayVisible(true);
+        const t = setTimeout(() => setHeritageOverlayVisible(false), 3500);
+        return () => clearTimeout(t);
+    }, [heritageMode]);
 
     const handleSelectDA = useCallback((daFeature) => {
         setSelectedItem(daFeature ? { type: 'da', data: daFeature } : null);
@@ -132,6 +155,21 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
         setActive(mode);
     }, [simPopupSeen, uid]);
 
+    // Loading a saved simulation from the account page bumps focusSignal.
+    // Drop the user straight into Sim mode so the placed assets are visible.
+    // We intentionally bypass handleSetActive here so the one-time "Simulation
+    // Mode" tutorial popup doesn't fire — the user is loading a saved sim,
+    // they already know what Sim mode is.
+    useEffect(() => {
+        if (!focusSignal) return;
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- responding to a parent signal
+        setActive("sim");
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- responding to a parent signal
+        setSidebarOpen(true);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- responding to a parent signal
+        setSimVisible(true);
+    }, [focusSignal]);
+
     const width = useScreenWidth();
     const isDesktop = width >= 760;
 
@@ -143,7 +181,16 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
 
     return (
         <>
-            <div className="relative w-full h-full">
+            {/* Cream-paper filter is applied to this wrapper only, so the
+                basemap and deck.gl canvas both pick it up while the sidebar
+                / overlay / exit pill sit outside and stay crisp. The
+                multiply-blend cream overlay tints the basemap toward
+                parchment without dulling the DA polygons' 1974 fills,
+                which are painted at a higher alpha. */}
+            <div
+                className="relative w-full h-full transition-[filter] duration-700 ease-out"
+                style={{ filter: heritageMode ? HERITAGE_FILTER : "none" }}
+            >
                 <Map
                     active={active}
                     setActive={handleSetActive}
@@ -159,6 +206,8 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
                     placedAssets={placedAssets}
                     addPlacedAsset={addPlacedAsset}
                     showSimulation={simShownOnMap}
+                    focusSignal={focusSignal}
+                    heritageMode={heritageMode}
                     selectedItem={selectedItem}
                     setSelectedDA={handleSelectDA}
                     setSelectedFoodAsset={handleSelectFoodAsset}
@@ -166,15 +215,35 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
                     sidebarOpen={sidebarOpen}
                     setSidebarOpen={setSidebarOpen}
                 />
+                {heritageMode && (
+                    <div
+                        aria-hidden
+                        className="absolute inset-0 pointer-events-none transition-opacity duration-700"
+                        style={{ backgroundColor: '#f4ebd8', mixBlendMode: 'multiply', opacity: 0.35 }}
+                    />
+                )}
             </div>
-            
+
             <TogglePage page={active} setPage={setPage} sidebarOpen={sidebarOpen} />
 
-            {/* Desktop: slide from left */}
+            {/* Side panels + toggles pick up cream / sepia in heritage mode
+                so the chrome stays cohesive with the parchment map. Colour
+                transition matches the map filter's 700ms ease-out so they
+                morph together. */}
             {isDesktop ? (
                 <>
-                    <div className={`absolute top-0 left-0 h-full w-95 z-10 bg-white shadow-lg transition-transform duration-300 will-change-transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
-                        <div className="h-full overflow-y-auto">
+                    {/* Desktop: slide from left */}
+                    <div className={`absolute top-0 left-0 h-full w-95 z-10 shadow-lg transition-[transform,background-color,border-color] duration-700 will-change-transform ${
+                        sidebarOpen ? "translate-x-0" : "-translate-x-full"
+                    } ${heritageMode ? "bg-[#f4ebd8] border-r-2 border-[#5d4037]/30" : "bg-white"}`}>
+                        <div
+                            className="h-full overflow-y-auto"
+                            // Typewriter font inherits down through the entire toolbar
+                            // (info panels, sliders, buttons, AI summary text). None of
+                            // those children set font-family explicitly, so the cascade
+                            // hits them automatically.
+                            style={heritageMode ? { fontFamily: TYPEWRITER_FONT } : undefined}
+                        >
                             <SimulationToolbar
                                 active={active}
                                 setActive={handleSetActive}
@@ -195,7 +264,9 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
                     </div>
                     <button
                         onClick={handleToggleSidebar}
-                        className={`absolute top-1/2 z-20 bg-white shadow-md rounded-r-lg px-1 py-3 transition-all duration-300 ${sidebarOpen ? "left-95" : "left-0"}`}
+                        className={`absolute top-1/2 z-20 shadow-md rounded-r-lg px-1 py-3 transition-[left,background-color,color] duration-300 ${
+                            sidebarOpen ? "left-95" : "left-0"
+                        } ${heritageMode ? "bg-[#f4ebd8] text-[#3e2723]" : "bg-white"}`}
                     >
                         {sidebarOpen ? "<<" : ">>"}
                     </button>
@@ -203,12 +274,19 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
             ) : (
                 <>
                     {/* Mobile: slide from bottom */}
-                    <div className={`absolute bottom-0 left-0 w-full h-2/3 z-10 bg-white shadow-lg rounded-t-2xl transition-transform duration-300 will-change-transform ${sidebarOpen ? "translate-y-0" : "translate-y-full"}`}>
-                        <div className="h-full overflow-y-auto p-4">
+                    <div className={`absolute bottom-0 left-0 w-full h-2/3 z-10 shadow-lg rounded-t-2xl transition-[transform,background-color,border-color] duration-700 will-change-transform ${
+                        sidebarOpen ? "translate-y-0" : "translate-y-full"
+                    } ${heritageMode ? "bg-[#f4ebd8] border-t-2 border-[#5d4037]/30" : "bg-white"}`}>
+                        <div
+                            className="h-full overflow-y-auto p-4"
+                            style={heritageMode ? { fontFamily: TYPEWRITER_FONT } : undefined}
+                        >
                             <div className="flex justify-center mb-2">
                                 <button
                                     onClick={handleToggleSidebar}
-                                    className="w-10 h-1.5 bg-gray-300 rounded-full"
+                                    className={`w-10 h-1.5 rounded-full transition-colors duration-700 ${
+                                        heritageMode ? "bg-[#5d4037]/40" : "bg-gray-300"
+                                    }`}
                                 />
                             </div>
                             <SimulationToolbar
@@ -233,8 +311,41 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
             )}
 
             <div className="absolute top-0 right-0 z-30">
-                <FilterDropdown toggles={toggles} />
+                <FilterDropdown toggles={toggles} heritageMode={heritageMode} />
             </div>
+
+            {/* Heritage easter egg: centered intro card + persistent exit pill.
+                The card auto-dismisses after a few seconds; the pill stays
+                so users who didn't trip the Konami on purpose can get out. */}
+            {heritageMode && (
+                <>
+                    <div
+                        className={`pointer-events-none absolute inset-0 z-30 flex items-center justify-center transition-opacity duration-1000 ${
+                            heritageOverlayVisible ? "opacity-100" : "opacity-0"
+                        }`}
+                    >
+                        <div
+                            className="bg-[#f5e9d3]/95 border-2 border-[#5d4037]/40 rounded-md px-6 py-4 shadow-2xl max-w-[90%] text-center"
+                            style={{ fontFamily: TYPEWRITER_FONT }}
+                        >
+                            <p className="text-lg sm:text-xl text-[#3e2723] italic leading-snug">
+                                Vancouver Zoning Map, if planners had MapLibre in 1974.
+                            </p>
+                            <p className="mt-1 text-xs text-[#5d4037]/70 tracking-wider uppercase">
+                                — Heatmap Heritage —
+                            </p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={onExitHeritage}
+                        aria-label="Exit Heatmap Heritage view"
+                        className="absolute bottom-4 left-4 z-30 px-3 py-1.5 text-xs rounded-full bg-[#f5e9d3] border border-[#5d4037]/40 text-[#3e2723] shadow-md hover:bg-[#ecdfc4] cursor-pointer"
+                        style={{ fontFamily: TYPEWRITER_FONT }}
+                    >
+                        ← Back to {new Date().getFullYear()}
+                    </button>
+                </>
+            )}
 
             {showWelcome && (
                 <FeaturePopup title="Welcome to the Vancouver Food Accessibility Map" onClose={() => { setShowWelcome(false); markSeen(uid, "welcome"); }}>
