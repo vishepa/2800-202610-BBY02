@@ -30,11 +30,9 @@ export function getDisseminationAreaLayer({ data, visible = true, onClick, score
     filled: true,
     getFillColor: heritageMode
       ? f => getDAZoneColor(f.properties?.dauid, 210)
-      : (feature) => {
-      const isoScore = getIsochroneScore(feature.properties, isochroneMinutes);
-      
-      const score = computeWeightedScore({...feature.properties, normalized_da_score: isoScore}, scoreWeights);
-      return scoreToColor(score, 80);
+      : f => scoreToColor(f.properties.normalized_da_score, 80),
+    updateTriggers: {
+      getFillColor: [data, heritageMode],
     },
     stroked: true,
     // Darker, thinner pixel-unit borders in heritage mode so adjacent

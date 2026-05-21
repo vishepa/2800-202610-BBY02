@@ -79,8 +79,8 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
     // falls back to the untouched baseline data.
     const simShownOnMap = active === "sim" && simVisible;
     const disseminationData = useMemo(
-        () => (simShownOnMap ? applySimulation(baselineDA, placedAssets) : baselineDA),
-        [baselineDA, placedAssets, simShownOnMap],
+        () => (simShownOnMap ? applySimulation(baselineDA, placedAssets, scoreWeights, isochroneMinutes) : baselineDA),
+        [baselineDA, placedAssets, simShownOnMap, scoreWeights, isochroneMinutes],
     );
 
     // Brief "Vancouver, if planners had MapLibre in 1974." card. Fades in

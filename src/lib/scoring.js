@@ -29,14 +29,6 @@ const ASSET_SCORE_BY_CATEGORY = {
 
   // Specialty stores
   'Specialty Food Stores': 8,
-  'Specialty East Asian Food Stores': 8,
-  'Specialty European Food Stores': 8,
-  'Specialty Filipino Food Stores': 8,
-  'Specialty Halal Food Stores': 8,
-  'Specialty Japanese Food Stores': 8,
-  'Specialty Latin American Food Stores': 8,
-  'Specialty Mediterranean and Middle Eastern Food Stores': 7,
-  'Specialty South Asian Food Stores': 8,
   'Small Food Stores': 7,
   'Small Cultural Food Business': 7,
 
@@ -104,76 +96,103 @@ function bboxesOverlap(a, b) {
  * @param {Array<{category:string,lat:number,lng:number}>} placedAssets
  * @returns {object} new FeatureCollection (baseline returned unchanged if no assets)
  */
-export function applySimulation(baselineFC, placedAssets) {
+// export function applySimulation(baselineFC, placedAssets) {
+//   if (!baselineFC?.features?.length) return baselineFC;
+//   if (!placedAssets?.length) return baselineFC;
+
+//   const assetBuffers = placedAssets
+//     .map(a => {
+//       const fa_score = getAssetScore(a.category);
+//       if (!fa_score) return null;
+//       const point = {
+//         type: 'Feature',
+//         geometry: { type: 'Point', coordinates: [a.lng, a.lat] },
+//         properties: {},
+//       };
+//       const buf = buffer(point, WALK_BUFFER_KM, { units: 'kilometers' });
+//       return { fa_score, point, buf, bbox: bbox(buf) };
+//     })
+//     .filter(Boolean);
+
+//   if (!assetBuffers.length) return baselineFC;
+
+//   // Pass 1: add deltas to raw_da_score, recording new sim_raw value.
+//   const features = baselineFC.features.map(f => {
+//     const props = f.properties ?? {};
+//     const daArea = props.da_area_m2;
+//     const baseRaw = props.raw_da_score ?? 0;
+//     let delta = 0;
+
+//     if (daArea > 0 && f.geometry) {
+//       const daBbox = bbox(f);
+//       for (const { fa_score, point, buf, bbox: bBbox } of assetBuffers) {
+//         if (!bboxesOverlap(daBbox, bBbox)) continue;
+
+//         const inter = intersect(featureCollection([f, buf]));
+//         if (inter) {
+//           delta += (fa_score * area(inter)) / daArea;
+//           continue;
+//         }
+
+//         // intersect (polyclip-ts) returns null when one polygon fully
+//         // contains the other — which is exactly the DA the user clicked
+//         // into, since WALK_BUFFER_KM dwarfs a Vancouver DA. Detect via
+//         // point-in-polygon and treat the DA as fully covered.
+//         if (booleanPointInPolygon(point, f)) {
+//           delta += fa_score;
+//         }
+//       }
+//     }
+
+//     return {
+//       ...f,
+//       properties: {
+//         ...props,
+//         baseline_raw_da_score: baseRaw,
+//         baseline_normalized_da_score: props.normalized_da_score,
+//         sim_delta: delta,
+//         sim_raw_da_score: baseRaw + delta,
+//       },
+//     };
+//   });
+
+//   // Pass 2: shift each DA's existing normalized score by its delta. Direct
+//   // additive shift keeps untouched DAs at their baseline color and gives
+//   // touched DAs a proportional, visible bump.
+//   for (const f of features) {
+//     const delta = f.properties.sim_delta;
+//     const baselineNorm = f.properties.baseline_normalized_da_score;
+//     if (!Number.isFinite(delta) || delta === 0) continue;
+//     if (!Number.isFinite(baselineNorm)) continue;
+//     const shifted = baselineNorm + delta * SIM_NORMALIZED_PER_RAW;
+//     f.properties.normalized_da_score = Math.max(1, Math.min(10, Math.round(shifted)));
+//   }
+
+//   return { ...baselineFC, features };
+// }
+
+
+export function applySimulation(baselineFC, placedAssets, scoreWeights, isochroneMinutes) {
   if (!baselineFC?.features?.length) return baselineFC;
-  if (!placedAssets?.length) return baselineFC;
 
-  const assetBuffers = placedAssets
-    .map(a => {
-      const fa_score = getAssetScore(a.category);
-      if (!fa_score) return null;
-      const point = {
-        type: 'Feature',
-        geometry: { type: 'Point', coordinates: [a.lng, a.lat] },
-        properties: {},
-      };
-      const buf = buffer(point, WALK_BUFFER_KM, { units: 'kilometers' });
-      return { fa_score, point, buf, bbox: bbox(buf) };
-    })
-    .filter(Boolean);
+  // Pass 1: compute sim deltas (same as before, skip if no placed assets)
+  const features = placedAssets?.length
+    ? computeSimDeltas(baselineFC.features, placedAssets)
+    : baselineFC.features.map(f => ({ ...f, properties: { ...f.properties } }));
 
-  if (!assetBuffers.length) return baselineFC;
-
-  // Pass 1: add deltas to raw_da_score, recording new sim_raw value.
-  const features = baselineFC.features.map(f => {
-    const props = f.properties ?? {};
-    const daArea = props.da_area_m2;
-    const baseRaw = props.raw_da_score ?? 0;
-    let delta = 0;
-
-    if (daArea > 0 && f.geometry) {
-      const daBbox = bbox(f);
-      for (const { fa_score, point, buf, bbox: bBbox } of assetBuffers) {
-        if (!bboxesOverlap(daBbox, bBbox)) continue;
-
-        const inter = intersect(featureCollection([f, buf]));
-        if (inter) {
-          delta += (fa_score * area(inter)) / daArea;
-          continue;
-        }
-
-        // intersect (polyclip-ts) returns null when one polygon fully
-        // contains the other — which is exactly the DA the user clicked
-        // into, since WALK_BUFFER_KM dwarfs a Vancouver DA. Detect via
-        // point-in-polygon and treat the DA as fully covered.
-        if (booleanPointInPolygon(point, f)) {
-          delta += fa_score;
-        }
-      }
-    }
-
-    return {
-      ...f,
-      properties: {
-        ...props,
-        baseline_raw_da_score: baseRaw,
-        baseline_normalized_da_score: props.normalized_da_score,
-        sim_delta: delta,
-        sim_raw_da_score: baseRaw + delta,
-      },
-    };
-  });
-
-  // Pass 2: shift each DA's existing normalized score by its delta. Direct
-  // additive shift keeps untouched DAs at their baseline color and gives
-  // touched DAs a proportional, visible bump.
+  // Pass 2: apply isochrone score + weighted adjustments to every feature
   for (const f of features) {
-    const delta = f.properties.sim_delta;
-    const baselineNorm = f.properties.baseline_normalized_da_score;
-    if (!Number.isFinite(delta) || delta === 0) continue;
-    if (!Number.isFinite(baselineNorm)) continue;
-    const shifted = baselineNorm + delta * SIM_NORMALIZED_PER_RAW;
-    f.properties.normalized_da_score = Math.max(1, Math.min(10, Math.round(shifted)));
+    const props = f.properties;
+    const isoKey = `walk_${isochroneMinutes}min_score`;
+    const isoScore = props[isoKey] ?? props.normalized_da_score ?? 5;
+    // Layer sim delta on top of isochrone score
+    const simDelta = props.sim_delta ?? 0;
+    const simAdjusted = isoScore + simDelta * SIM_NORMALIZED_PER_RAW;
+    const clamped = Math.max(1, Math.min(10, Math.round(simAdjusted)));
+    f.properties.normalized_da_score = computeWeightedScore(
+      { ...props, normalized_da_score: clamped },
+      scoreWeights ?? { incomeWeight: 1, programWeight: 1 }
+    );
   }
 
   return { ...baselineFC, features };
@@ -184,12 +203,12 @@ export function applySimulation(baselineFC, placedAssets) {
  * Called per-feature inside getDisseminationAreaLayer, so it must be fast.
  *
  * @param {object} props - feature.properties from the DA GeoJSON
- * @param {object} weights - { incomeWeight, programWeight, transitWeight }
+ * @param {object} weights - { incomeWeight, programWeight }
  *   each in [0, 2], where 1.0 = baseline (no change)
  * @returns {number} adjusted score, clamped to 1–10
  */
 export function computeWeightedScore(props, weights) {
-  const { incomeWeight = 1, programWeight = 1, transitWeight = 1 } = weights;
+  const { incomeWeight = 1, programWeight = 1 } = weights;
 
   // Base food-proximity score (already normalized 1-10 server-side)
   const base = props.normalized_da_score ?? 5;
@@ -211,19 +230,41 @@ export function computeWeightedScore(props, weights) {
   const baseProgramMult = 0.5 + hardshipIndex * 0.5; // [0.5, 1.0]
   const programFactor = baseProgramMult * programWeight;
 
-  // --- Transit adjustment ---
-  // pct_commute_transit + pct_commute_walk combined as "non-car" accessibility
-  const transitPct = (props.pct_commute_transit ?? 0) + (props.pct_commute_walk ?? 0);
-  const transitIndex = Math.min(transitPct / 100, 1);
-  const transitFactor = 0.7 + transitIndex * 0.3; // [0.7, 1.0] baseline, scaled by weight
-  const adjustedTransitFactor = transitFactor * transitWeight;
-
   // Combine: nudge the base score by the weighted factors relative to their baseline
   // Deltas are kept small so sliders feel like tuning, not overriding the food score.
   const incomeDelta   = (incomeFactor   - baseRetailMult)   * 2;
   const programDelta  = (programFactor  - baseProgramMult)  * 2;
-  const transitDelta  = (adjustedTransitFactor - transitFactor) * 2;
 
-  const adjusted = base + incomeDelta + programDelta + transitDelta;
+  const adjusted = base + incomeDelta + programDelta;
   return Math.max(1, Math.min(10, Math.round(adjusted)));
+}
+
+function computeSimDeltas(baseFeatures, placedAssets) {
+  const assetBuffers = placedAssets
+    .map(a => {
+      const fa_score = getAssetScore(a.category);
+      if (!fa_score) return null;
+      const point = { type: 'Feature', geometry: { type: 'Point', coordinates: [a.lng, a.lat] }, properties: {} };
+      const buf = buffer(point, WALK_BUFFER_KM, { units: 'kilometers' });
+      return { fa_score, point, buf, bbox: bbox(buf) };
+    })
+    .filter(Boolean);
+
+  if (!assetBuffers.length) return baseFeatures.map(f => ({ ...f, properties: { ...f.properties, sim_delta: 0 } }));
+
+  return baseFeatures.map(f => {
+    const props = f.properties ?? {};
+    const daArea = props.da_area_m2;
+    let delta = 0;
+    if (daArea > 0 && f.geometry) {
+      const daBbox = bbox(f);
+      for (const { fa_score, point, buf, bbox: bBbox } of assetBuffers) {
+        if (!bboxesOverlap(daBbox, bBbox)) continue;
+        const inter = intersect(featureCollection([f, buf]));
+        if (inter) { delta += (fa_score * area(inter)) / daArea; continue; }
+        if (booleanPointInPolygon(point, f)) delta += fa_score;
+      }
+    }
+    return { ...f, properties: { ...props, sim_delta: delta } };
+  });
 }
