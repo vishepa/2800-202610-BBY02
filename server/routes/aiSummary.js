@@ -5,7 +5,7 @@ import { generateDASummary, clearCacheEntry } from "../lib/gemini.js";
 const router = Router();
 
 router.post('/', async (req, res) => {
-    const {dauid, persona = 'resident', regenerate = false} = req.body;
+    const {dauid, persona = 'resident', regenerate = false, simulatedAssets = []} = req.body;
 
     if (!dauid) {
         return res.status(400).json({error: 'dauid required'});
@@ -51,7 +51,7 @@ router.post('/', async (req, res) => {
             ORDER BY i.range_seconds ASC
             `, [dauid]);
         
-        const summary = await generateDASummary(stats, foodResult, persona);
+        const summary = await generateDASummary(stats, foodResult, persona, simulatedAssets);
 
         res.json({summary, stats});
     } catch (err) {

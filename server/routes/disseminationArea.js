@@ -25,7 +25,10 @@ router.get('/', async (req, res) => {
             'da_accessible_area', da_accessible_area,
             'raw_da_score', raw_da_score,
             'da_area_m2', ST_Area(geom::geography),
-            'normalized_da_score', normalized_da_score
+            'normalized_da_score', normalized_da_score,
+            'walk_5min_score', walk_5min_score,
+            'walk_10min_score', walk_10min_score,
+            'walk_15min_score', walk_15min_score
           ) 
         )
       )

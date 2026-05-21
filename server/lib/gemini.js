@@ -2,8 +2,7 @@ const API_KEY = process.env.GROQ_API_KEY;
 const MODEL = 'llama-3.3-70b-versatile';
 const API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
-// Placeholder prompt
-// TODO: discuss with team a better prompt.
+// AI prompt
 const SYSTEM_PROMPT = `You are a food accessibility analyst for Vancouver, BC.
 You are given statistics about a dissemination area and its nearby food assets
 (grocery stores, community gardens, farmers markets, etc.) based on walking distance.
@@ -25,17 +24,34 @@ Rules:
 - Be specific, mention actual numbers from the data.
 - If relevant, include recent local news about this Vancouver neighbourhood, prioritize food access news (grocery openings/closures, community food programs, farmers markets)
   but also include relevant infrastructure news (transit changes, new developments, housing projects, community services) that could impact food accessibility.
+- If proposed/simulated food assets are listed, comment on how they would improve or change this area's food accessibility compared to the current state.
 - Keep it concise (3-4 sentences max).`;
 
 const cache = new Map();
 
-export async function generateDASummary(stats, nearbyFoodAssets, persona) {
-  const cacheKey = `${stats.dauid}-${persona}`;
+// Reverse geocode lat/lng to a street name via Nominatim
+async function reverseGeocode(lat, lng) {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=17`,
+      { headers: { 'User-Agent': 'VancouverFoodAccessApp/1.0' } }
+    );
+    const data = await res.json();
+    return data.address?.road || data.display_name?.split(',')[0] || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  } catch {
+    return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  }
+}
+
+export async function generateDASummary(stats, nearbyFoodAssets, persona, simulatedAssets = []) {
+  const cacheKey = simulatedAssets.length > 0
+    ? `${stats.dauid}-${persona}-sim-${simulatedAssets.length}`
+    : `${stats.dauid}-${persona}`;
   if (cache.has(cacheKey)) {
     return cache.get(cacheKey);
   }
 
-  const dataContext = `
+  let dataContext = `
 Dissemination Area: ${stats.dauid}
 Population Density: ${stats.population_density_per_km2} per km²
 Average Household Size: ${stats.avg_household_size}
@@ -54,6 +70,20 @@ ${nearbyFoodAssets.length === 0
       ).join('\n')
   }
 `;
+
+  if (simulatedAssets.length > 0) {
+    // Geocode all simulated assets in parallel
+    const geocoded = await Promise.all(
+      simulatedAssets.map(async (a) => {
+        const street = await reverseGeocode(a.lat, a.lng);
+        return `- ${a.category} near ${street}`;
+      })
+    );
+    dataContext += `
+Proposed Food Assets (not yet built — part of a simulation):
+${geocoded.join('\n')}
+`;
+  }
 
   const prompt = SYSTEM_PROMPT.replace('{persona}', persona);
 

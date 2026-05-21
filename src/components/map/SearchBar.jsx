@@ -182,7 +182,7 @@ export default function SearchBar({
       {open && (
         <ul
           role="listbox"
-          className="absolute z-50 mt-1.5 w-full rounded-lg bg-white border border-zinc-200 shadow-lg overflow-hidden text-sm"
+          className="absolute z-4 mt-1.5 w-full rounded-lg bg-white border border-zinc-200 shadow-lg overflow-hidden text-sm"
         >
           {error && (
             <li className="px-4 py-3 text-red-500 text-xs">{error}</li>

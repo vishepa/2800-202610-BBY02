@@ -3,13 +3,17 @@ import { useState, useCallback, useEffect } from 'react';
 // Client-side cache persists across DA switches
 const summaryCache = new Map();
 
-export function useAISummary(dauid, persona = 'resident') {
-    const cacheKey = `${dauid}-${persona}`;
+export function useAISummary(dauid, persona = 'resident', simulatedAssets = []) {
+    const hasSimulation = simulatedAssets.length > 0;
+    // Different cache keys for real vs simulated summaries
+    const cacheKey = hasSimulation
+        ? `${dauid}-${persona}-sim-${simulatedAssets.length}`
+        : `${dauid}-${persona}`;
     const [data, setData] = useState(() => summaryCache.get(cacheKey) || null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // When DA or persona changes, restore from cache or reset
+    // When DA, persona, or simulation changes, restore from cache or reset
     useEffect(() => {
         const cached = summaryCache.get(cacheKey);
         setData(cached || null);
@@ -30,6 +34,7 @@ export function useAISummary(dauid, persona = 'resident') {
                 dauid,
                 persona,
                 regenerate: isRegenerate,
+                simulatedAssets: hasSimulation ? simulatedAssets : undefined,
             }),
         })
             .then(res => {
@@ -45,7 +50,7 @@ export function useAISummary(dauid, persona = 'resident') {
                 setError(error);
                 setLoading(false);
             });
-    }, [dauid, persona, cacheKey]);
+    }, [dauid, persona, cacheKey, hasSimulation, simulatedAssets]);
 
     function regenerate() {
         generate(true);
