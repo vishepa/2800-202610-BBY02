@@ -77,7 +77,7 @@ export function SimulationToolbar({
     const infoContent = (() => {
         if (!selectedItem) {
             return (
-                <p className="text-gray-400 text-sm italic" style={{fontFamily: "playfair display"}}>
+                <p className="text-gray-400 text-sm italic">
                     Click a dissemination area, food asset, or transit stop to see details
                 </p>
             );
@@ -153,7 +153,7 @@ export function SimulationToolbar({
     if (width >= 760) {
         return (
             <div className="p-4"
-                style={{ fontFamily: "playfair display", height: "100%", boxSizing: "border-box" }}>
+                style={{ height: "100%", boxSizing: "border-box" }}>
                 <h2 className="text-xl font-bold mb-4 pl-5">
                     {active === "sim" ? "Simulation Toolbar" : "Map Data Display"}
                 </h2>
@@ -162,7 +162,7 @@ export function SimulationToolbar({
         );
     } else {
         return (
-            <div className="flex flex-col h-full p-4" style={{ fontFamily: "playfair display" }}>
+            <div className="flex flex-col h-full p-4">
                 <div className="flex-1 pl-10">
                     <h2 className="text-xl font-bold mb-4 pl-5">
                         {active === "sim" ? "Simulation Toolbar" : "Map Data Display"}
