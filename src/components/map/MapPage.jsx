@@ -30,6 +30,12 @@ function markSeen(userId, name) {
 const HERITAGE_FILTER = "sepia(0.35) saturate(0.9) brightness(1.05) contrast(0.95) hue-rotate(-5deg)";
 const TYPEWRITER_FONT = "'Special Elite', 'Courier New', Courier, monospace";
 
+// Default starting value for the isochrone slider. Used both to initialize
+// state below and to detect "user hasn't touched the slider" in the
+// simulation gating logic — staying at this value keeps Sim view colors
+// identical to Map view.
+const DEFAULT_ISOCHRONE_MINUTES = 10;
+
 export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusSignal, heritageMode, onExitHeritage }) {
     const { user } = useAuth();
     const uid = user?.id;
@@ -57,7 +63,7 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
         transitWeight: 1,
     });
 
-    const [isochroneMinutes, setIsochroneMinutes] = useState(10);
+    const [isochroneMinutes, setIsochroneMinutes] = useState(DEFAULT_ISOCHRONE_MINUTES);
 
     useEffect(() => {
         if (!uid) return;
@@ -84,9 +90,23 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
     // mode, and can be toggled off manually within it. In Map view the map
     // falls back to the untouched baseline data.
     const simShownOnMap = active === "sim" && simVisible;
+    // Entering Sim mode shouldn't repaint the map on its own — applySimulation
+    // reads walk_Nmin_score as the base, which differs from baseline
+    // normalized_da_score even at default weights/iso. So we only run the
+    // simulation transform when the user has actually changed something:
+    // placed an asset, moved a weight slider, or moved the isochrone slider
+    // off DEFAULT_ISOCHRONE_MINUTES. Otherwise the baseline data flows
+    // through and Sim view matches Map view exactly.
+    const hasActiveSim =
+        (placedAssets?.length ?? 0) > 0 ||
+        scoreWeights.incomeWeight !== 1 ||
+        scoreWeights.programWeight !== 1 ||
+        isochroneMinutes !== DEFAULT_ISOCHRONE_MINUTES;
     const disseminationData = useMemo(
-        () => (simShownOnMap ? applySimulation(baselineDA, placedAssets, scoreWeights, isochroneMinutes) : baselineDA),
-        [baselineDA, placedAssets, simShownOnMap, scoreWeights, isochroneMinutes],
+        () => (simShownOnMap && hasActiveSim
+            ? applySimulation(baselineDA, placedAssets, scoreWeights, isochroneMinutes)
+            : baselineDA),
+        [baselineDA, placedAssets, simShownOnMap, hasActiveSim, scoreWeights, isochroneMinutes],
     );
 
     // Brief "Vancouver, if planners had MapLibre in 1974." card. Fades in
