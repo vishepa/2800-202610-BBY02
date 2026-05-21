@@ -49,7 +49,7 @@ function AccountPage({ page, setPage, loadSimulation }) {
             style={{ fontFamily: 'Playfair Display, serif' }}>Profile</h2>
           <div className="flex flex-col gap-4 bg-gray-100 p-5 rounded-lg shadow-lg">
             <div className="flex items-center gap-4">
-              <img src="../../public/user.png" alt="Profile" className="ml-5 w-15 h-15 rounded-full" />
+              <img src="../../../public/user.png" alt="Profile" className="ml-5 w-15 h-15 rounded-full" />
               <h2 className="text-2xl">You</h2>
             </div>
             <div>
