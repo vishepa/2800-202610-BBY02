@@ -7,15 +7,19 @@ export default function FoodTypeFilter({ activeCategories, onChange }) {
     const isActive = (id) => activeCategories === null || activeCategories === undefined || activeCategories?.includes(id);
 
     const toggle = (id) => {
-        if (activeCategories === null) {
+        // Treat undefined the same as null ("all selected"). Mirrors the
+        // guard in isActive above so a caller that forgets to pass the
+        // prop renders as "everything on" and degrades gracefully on the
+        // first click instead of throwing on .includes().
+        if (activeCategories == null) {
             // first toggle from "all" - uncheck this one
-            onChange(FOOD_CATEGORIES.filter(c => c.id !== id).map(c => c.id));
+            onChange?.(FOOD_CATEGORIES.filter(c => c.id !== id).map(c => c.id));
         } else if (activeCategories.includes(id)) {
-            onChange(activeCategories.filter(t => t !== id));
+            onChange?.(activeCategories.filter(t => t !== id));
         } else {
             const next = [...activeCategories, id];
             // if everything is selected, collapse back to "all selected" state (null)
-            onChange(next.length === FOOD_CATEGORIES.length ? null : next);
+            onChange?.(next.length === FOOD_CATEGORIES.length ? null : next);
         }
     };
 
@@ -40,7 +44,7 @@ export default function FoodTypeFilter({ activeCategories, onChange }) {
                     checked={isActive(cat.id)}
                     onChange={() => toggle(cat.id)}
                     />
-                    <span class="text-sm">{cat.label}</span>
+                    <span className="text-sm">{cat.label}</span>
                 </label>
                 ))}
             </div>

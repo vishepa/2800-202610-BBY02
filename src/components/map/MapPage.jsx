@@ -309,6 +309,8 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
                                 simVisible={simVisible}
                                 setSimVisible={setSimVisible}
                                 selectedItem={selectedItem}
+                                activeFoodCategories={activeFoodCategories}
+                                setActiveFoodCategories={setActiveFoodCategories}
                             />
                         </div>
                     </div>
