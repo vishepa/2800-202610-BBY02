@@ -30,7 +30,7 @@ function markSeen(userId, name) {
 const HERITAGE_FILTER = "sepia(0.35) saturate(0.9) brightness(1.05) contrast(0.95) hue-rotate(-5deg)";
 const TYPEWRITER_FONT = "'Special Elite', 'Courier New', Courier, monospace";
 
-export default function MapPage({ setPage, placedAssets, setPlacedAssets, heritageMode, onExitHeritage }) {
+export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusSignal, heritageMode, onExitHeritage }) {
     const { user } = useAuth();
     const uid = user?.id;
 
@@ -60,7 +60,9 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, herita
 
     // Layer visibility state lifted up from map.jsx
     const [foodLayerVisible, setFoodLayerVisible] = useState(true);
-    const [transitLayerVisible, setTransitLayerVisible] = useState(true);
+    // Transit starts hidden — most users care about food access first, and
+    // the transit stop layer is dense enough to crowd the map on entry.
+    const [transitLayerVisible, setTransitLayerVisible] = useState(false);
     const [disseminationLayerVisible, setDisseminationLayerVisible] = useState(true);
 
     const [selectedCategory, setSelectedCategory] = useState(null); // null means "all types"
@@ -151,6 +153,21 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, herita
         setActive(mode);
     }, [simPopupSeen, uid]);
 
+    // Loading a saved simulation from the account page bumps focusSignal.
+    // Drop the user straight into Sim mode so the placed assets are visible.
+    // We intentionally bypass handleSetActive here so the one-time "Simulation
+    // Mode" tutorial popup doesn't fire — the user is loading a saved sim,
+    // they already know what Sim mode is.
+    useEffect(() => {
+        if (!focusSignal) return;
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- responding to a parent signal
+        setActive("sim");
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- responding to a parent signal
+        setSidebarOpen(true);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- responding to a parent signal
+        setSimVisible(true);
+    }, [focusSignal]);
+
     const width = useScreenWidth();
     const isDesktop = width >= 760;
 
@@ -185,6 +202,7 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, herita
                     placedAssets={placedAssets}
                     addPlacedAsset={addPlacedAsset}
                     showSimulation={simShownOnMap}
+                    focusSignal={focusSignal}
                     heritageMode={heritageMode}
                     selectedItem={selectedItem}
                     setSelectedDA={handleSelectDA}
