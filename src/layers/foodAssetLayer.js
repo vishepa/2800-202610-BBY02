@@ -1,6 +1,6 @@
 import { IconLayer, ScatterplotLayer, TextLayer } from "@deck.gl/layers";
 import Supercluster from "supercluster";
-import { FOOD_CATEGORY_IDS, getFoodCategoryIcon } from "../constants/foodCategories";
+import { FOOD_CATEGORY_IDS, getFoodCategoryMapPin } from "../constants/foodCategories";
 
 const CLUSTER_OPTIONS = {
     radius: 60,
@@ -60,12 +60,12 @@ export function getFoodAssetLayers({
         visible,
         getPosition: f => f.geometry.coordinates,
         getIcon: f => ({
-            url: getFoodCategoryIcon(f.properties.category),
+            url: getFoodCategoryMapPin(f.properties.category),
             width: 100,
             height: 100,
             anchorY: 128,
         }),
-        getSize: 32,
+        getSize: 48,
         sizeUnits: 'pixels',
         getPixelOffset: (f, { index: i }) => pixelOffsets[i],
         pickable: true,
