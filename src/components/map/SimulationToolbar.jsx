@@ -61,6 +61,8 @@ export function SimulationToolbar({
     setSelectedCategory,
     scoreWeights,
     setScoreWeights,
+    isochroneMinutes,
+    setIsochroneMinutes,
     placedAssets,
     removePlacedAsset,
     clearPlacedAssets,
@@ -101,6 +103,24 @@ export function SimulationToolbar({
                 value={scoreWeights.programWeight}
                 onChange={v => setScoreWeights(w => ({ ...w, programWeight: v }))}
             />
+            <div>
+                <div className="flex justify-between">
+                    <span className="text-sm font-medium text-gray-700">Walk Distance</span>
+                    <span className="text-xs text-gray-500">{isochroneMinutes} min</span>
+                </div>
+                <input
+                    type="range"
+                    min={0} max={2} step={1}
+                    value={[5, 10, 15].indexOf(isochroneMinutes)}
+                    onChange={e => setIsochroneMinutes([5, 10, 15][Number(e.target.value)])}
+                    className="w-full cursor-pointer accent-blue-600"
+                />
+                <div className="flex justify-between text-xs text-gray-400">
+                    <span>5 min</span>
+                    <span>10 min</span>
+                    <span>15 min</span>
+                </div>
+            </div>
         </>
     );
 
