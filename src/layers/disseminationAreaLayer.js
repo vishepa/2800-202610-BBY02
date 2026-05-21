@@ -36,15 +36,33 @@ export function getDisseminationAreaLayer({ data, visible = true, onClick } = {}
 
 export function getDAHighlightLayer({ visible = true, selectedDA } = {}) {
   if (!selectedDA) return null;
-  
-  return new GeoJsonLayer({
-    id: 'dissemination-highlight',
-    data: {type: 'FeatureCollection', features:[selectedDA]},
-    filled: false,
-    stroked: true,
-    getLineColor: [0, 0, 0, 255],
-    getLineWidth: 3,
-    pickable: false,
-    visible,
-  });
+
+  const highlightData = {type: 'FeatureCollection', features:[selectedDA]};
+  const [r, g, b] = scoreToColor(selectedDA, 255);
+
+  return [
+    new GeoJsonLayer({
+      id: 'dissemination-highlight-glow',
+      data: highlightData,
+      filled: false,
+      stroked: true,
+      getLineColor: [r, g, b, 140],
+      getLineWidth: 14,
+      lineWidthUnits: 'pixels',
+      pickable: false,
+      visible,
+    }),
+    new GeoJsonLayer({
+      id: 'dissemination-highlight-fill',
+      data: highlightData,
+      filled: true,
+      getFillColor: [r, g, b, 60],
+      stroked: true,
+      getLineColor: [r, g, b, 240],
+      getLineWidth: 3,
+      lineWidthUnits: 'pixels',
+      pickable: false,
+      visible,
+    }),
+  ];
 }
