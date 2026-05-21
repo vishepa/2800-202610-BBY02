@@ -1,5 +1,6 @@
 import { GeoJsonLayer } from '@deck.gl/layers';
 import { computeWeightedScore } from '../lib/scoring';
+import { getDAZoneColor } from '../lib/heritage';
 
 function scoreToColor(feature, alpha) {
   switch (feature.properties.normalized_da_score) {
@@ -17,23 +18,37 @@ function scoreToColor(feature, alpha) {
   }
 }
 
-export function getDisseminationAreaLayer({ data, visible = true, onClick, scoreWeights } = {}) {
+export function getDisseminationAreaLayer({ data, visible = true, onClick, scoreWeights, heritageMode = false } = {}) {
    return new GeoJsonLayer({
     id: 'dissemination-areas',
     data,
     filled: true,
-    getFillColor: (feature) => {
-      const score = computeWeightedScore(feature.properties, scoreWeights);
-      return scoreToColor({ ...feature, properties: { ...feature.properties, normalized_da_score: score } }, 80);
-    },
+    // Heritage mode wins over weighted scoring: while the easter egg is
+    // active each DA is repainted with a stable 1974 zoning colour keyed
+    // off its dauid, hiding the food-access ramp entirely. When off, the
+    // normal develop path re-scores the DA against the user's sliders.
+    getFillColor: heritageMode
+      ? f => getDAZoneColor(f.properties?.dauid, 210)
+      : (feature) => {
+          const score = computeWeightedScore(feature.properties, scoreWeights);
+          return scoreToColor(
+            { ...feature, properties: { ...feature.properties, normalized_da_score: score } },
+            80,
+          );
+        },
     stroked: true,
-    getLineColor: [128, 128, 128],
-    getLineWidth: 3,
+    // Darker, thinner pixel-unit borders in heritage mode so adjacent
+    // zones read with the same hand-printed weight as the reference map.
+    getLineColor: heritageMode ? [78, 52, 36, 220] : [128, 128, 128],
+    getLineWidth: heritageMode ? 1.5 : 3,
+    lineWidthUnits: heritageMode ? 'pixels' : 'meters',
     pickable: true,
     visible,
     onClick,
     updateTriggers: {
-      getFillColor: [data, scoreWeights],
+      getFillColor: [data, scoreWeights, heritageMode],
+      getLineColor: [heritageMode],
+      getLineWidth: [heritageMode],
     },
   });
 }
