@@ -138,10 +138,10 @@ export function Map({
             visible: disseminationLayerVisible,
             onClick: info => {handleClick(info, 'dissemination-areas')}
             }),
-        getDAHighlightLayer({
+        ...(getDAHighlightLayer({
             selectedDA,
             visible: disseminationLayerVisible,
-        }),
+        }) ?? []),
         // Transit stops render below food assets/clusters so the food layer
         // stays the visual focus where the two overlap.
         getTransitAssetLayer({
