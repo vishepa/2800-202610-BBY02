@@ -20,7 +20,6 @@ import { getSimAssetLayers } from "../../layers/SimAssetLayer.js";
 import { useTransitStops } from '../../lib/hooks/useTransitStops.js';
 import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
 
-import FoodTypeFilter from "./FoodTypeFilter.jsx";
 import { getDisseminationAreaLayer, getDAHighlightLayer } from '../../layers/disseminationAreaLayer.js';
 import {LayerPopup} from './popups/LayerPopup.jsx';
 import SearchBar from "./SearchBar";
@@ -48,6 +47,7 @@ export function Map({
     setSelectedFoodAsset,
     setSelectedTransitStop,
     setSidebarOpen,
+    activeFoodCategories,
 }) {
     
     // Data fetching hooks
@@ -55,8 +55,6 @@ export function Map({
     const { data: transitData } = useTransitStops();
 
     const [activeRoutes, setActiveRoutes] = useState(null);
-
-    const [activeFoodCategories, setActiveFoodCategories] = useState(null); // null means "all types" 
 
     // Selected state for the popups
     const [selected, setSelected] = useState(null);

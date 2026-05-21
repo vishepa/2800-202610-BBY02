@@ -45,6 +45,8 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
     const [showSliderPopup, setShowSliderPopup] = useState(false);
     const [sliderPopupSeen, setSliderPopupSeen] = useState(false);
 
+    const [activeFoodCategories, setActiveFoodCategories] = useState(null); // null means "all types" 
+
     const [scoreWeights, setScoreWeights] = useState({
         incomeWeight: 1,
         programWeight: 1,
@@ -214,6 +216,7 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
                     setSelectedTransitStop={handleSelectTransitStop}
                     sidebarOpen={sidebarOpen}
                     setSidebarOpen={setSidebarOpen}
+                    activeFoodCategories={activeFoodCategories}
                 />
                 {heritageMode && (
                     <div
@@ -259,6 +262,8 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
                                 simVisible={simVisible}
                                 setSimVisible={setSimVisible}
                                 selectedItem={selectedItem}
+                                activeFoodCategories={activeFoodCategories}
+                                setActiveFoodCategories={setActiveFoodCategories}
                             />
                         </div>
                     </div>
@@ -313,6 +318,7 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
             <div className="absolute top-0 right-0 z-30">
                 <FilterDropdown toggles={toggles} heritageMode={heritageMode} />
             </div>
+
 
             {/* Heritage easter egg: centered intro card + persistent exit pill.
                 The card auto-dismisses after a few seconds; the pill stays

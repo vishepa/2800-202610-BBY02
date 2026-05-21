@@ -3,6 +3,7 @@ import { useScreenWidth } from "../shared/widthHelper";
 import { useAuth } from "../shared/authentication/AuthContext.jsx";
 import MapSimButtonMobile from "./MapSimButtonMobile";
 import Tooltip from "./Tooltip";
+import FoodTypeFilter from "./FoodTypeFilter.jsx";
 import IconPicker from "./simulation/IconPicker";
 import PlacedAssetList from "./simulation/PlacedAssetList";
 import SaveSimulationModal from "./simulation/SaveSimulationModal";
@@ -69,6 +70,8 @@ export function SimulationToolbar({
     simVisible,
     setSimVisible,
     selectedItem,
+    activeFoodCategories,
+    setActiveFoodCategories,
 }) {
 
     const [pct, setPct] = useState(50);
@@ -208,17 +211,33 @@ export function SimulationToolbar({
                 <h2 className="text-xl font-bold mb-4 pl-5">
                     {active === "sim" ? "Simulation Toolbar" : "Map Data Display"}
                 </h2>
-                {active === "sim" ? simContent : daInfoContent}
+                {active === "sim" ? simContent : (
+                    <div>
+                        {daInfoContent}
+                        <FoodTypeFilter
+                            activeCategories={activeFoodCategories}
+                            onChange={setActiveFoodCategories}
+                        />
+                    </div>
+                )}
             </div>
         );
     } else {
         return (
             <div className="flex flex-col h-full p-4">
-                <div className="flex-1 pl-10">
+                <div className="flex-1">
                     <h2 className="text-xl font-bold mb-4 pl-5">
                         {active === "sim" ? "Simulation Toolbar" : "Map Data Display"}
                     </h2>
-                    {active === "sim" ? simContent : daInfoContent}
+                    {active === "sim" ? simContent : (
+                    <div>
+                        {daInfoContent}
+                        <FoodTypeFilter
+                            activeCategories={activeFoodCategories}
+                            onChange={setActiveFoodCategories}
+                        />
+                    </div>
+                )}
                 </div>
                 <MapSimButtonMobile active={active} setActive={setActive} />
             </div>
