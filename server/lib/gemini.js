@@ -2,8 +2,7 @@ const API_KEY = process.env.GROQ_API_KEY;
 const MODEL = 'llama-3.3-70b-versatile';
 const API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
-// Placeholder prompt
-// TODO: discuss with team a better prompt.
+// AI prompt
 const SYSTEM_PROMPT = `You are a food accessibility analyst for Vancouver, BC.
 You are given statistics about a dissemination area and its nearby food assets
 (grocery stores, community gardens, farmers markets, etc.) based on walking distance.
@@ -29,6 +28,20 @@ Rules:
 - Keep it concise (3-4 sentences max).`;
 
 const cache = new Map();
+
+// Reverse geocode lat/lng to a street name via Nominatim
+async function reverseGeocode(lat, lng) {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=17`,
+      { headers: { 'User-Agent': 'VancouverFoodAccessApp/1.0' } }
+    );
+    const data = await res.json();
+    return data.address?.road || data.display_name?.split(',')[0] || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  } catch {
+    return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  }
+}
 
 export async function generateDASummary(stats, nearbyFoodAssets, persona, simulatedAssets = []) {
   const cacheKey = simulatedAssets.length > 0
@@ -59,9 +72,16 @@ ${nearbyFoodAssets.length === 0
 `;
 
   if (simulatedAssets.length > 0) {
+    // Geocode all simulated assets in parallel
+    const geocoded = await Promise.all(
+      simulatedAssets.map(async (a) => {
+        const street = await reverseGeocode(a.lat, a.lng);
+        return `- ${a.category} near ${street}`;
+      })
+    );
     dataContext += `
 Proposed Food Assets (not yet built — part of a simulation):
-${simulatedAssets.map(a => `- ${a.category} at [${a.lat.toFixed(4)}, ${a.lng.toFixed(4)}]`).join('\n')}
+${geocoded.join('\n')}
 `;
   }
 
