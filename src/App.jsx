@@ -18,9 +18,9 @@ export default function App() {
 
   return (
     <div className="flex flex-col w-full h-screen">
-      <Header sidebarOpen={useState(false)} />
+      <Header sidebarOpen={useState(false)} page={page} setPage={setPage} />
       <div className="flex-1 relative overflow-hidden">
-        { page === "account" ? (
+        {page === "account" ? (
           <AccountPage
             onBack={() => setPage("map")}
             page={page}

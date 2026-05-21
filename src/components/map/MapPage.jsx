@@ -3,7 +3,6 @@ import Map from "./Map.jsx";
 import SimulationToolbar from "./SimulationToolbar";
 import FilterDropdown from "./FilterDropdown";
 import FeaturePopup from "./FeaturePopup";
-import TogglePage from "../shared/TogglePage.jsx";
 import { useDisseminationAreas } from "../../lib/hooks/useDisseminationAreas";
 import { applySimulation } from "../../lib/scoring";
 import { useScreenWidth } from "../shared/widthHelper";
@@ -156,8 +155,6 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
                     setSidebarOpen={setSidebarOpen}
                 />
             </div>
-            
-            <TogglePage page={active} setPage={setPage} sidebarOpen={sidebarOpen} />
 
             {/* Desktop: slide from left */}
             {isDesktop ? (

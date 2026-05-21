@@ -45,7 +45,7 @@ const FilterDropdown = ({ toggles, buttonLabel = "Layers"}) => {
 
   return (
     <>
-      <div ref={rootRef} className="relative inline-block">
+      <div ref={rootRef} className="relative inline-block" style={{ fontFamily: "playfair display" }}>
         <button
           type="button"
           onClick={handleToggle}

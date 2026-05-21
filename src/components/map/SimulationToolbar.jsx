@@ -154,7 +154,7 @@ export function SimulationToolbar({
         return (
             <div className="p-4"
                 style={{ fontFamily: "playfair display", height: "100%", boxSizing: "border-box" }}>
-                <h2 className="text-xl font-bold mb-4">
+                <h2 className="text-xl font-bold mb-4 pl-5">
                     {active === "sim" ? "Simulation Toolbar" : "Map Data Display"}
                 </h2>
                 {active === "sim" ? simContent : daInfoContent}
@@ -163,8 +163,8 @@ export function SimulationToolbar({
     } else {
         return (
             <div className="flex flex-col h-full p-4" style={{ fontFamily: "playfair display" }}>
-                <div className="flex-1 p-4">
-                    <h2 className="text-xl font-bold mb-4">
+                <div className="flex-1 pl-10">
+                    <h2 className="text-xl font-bold mb-4 pl-5">
                         {active === "sim" ? "Simulation Toolbar" : "Map Data Display"}
                     </h2>
                     {active === "sim" ? simContent : daInfoContent}

@@ -18,7 +18,7 @@ export default function DAInfoPanel({ properties, placedAssets = [], active = 'm
             </h3>
 
             {/* Key Stats */}
-            <div className="mb-3">
+            <div className="mb-3" style={{ fontFamily: "playfair display" }}>
                 <h4 className="font-medium text-gray-700 mb-1">Key Stats</h4>
                 <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-gray-600">
                     <span>Density</span>
