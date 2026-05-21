@@ -1,8 +1,14 @@
 import { GeoJsonLayer } from '@deck.gl/layers';
 import { computeWeightedScore } from '../lib/scoring';
 
-function scoreToColor(feature, alpha) {
-  switch (feature.properties.normalized_da_score) {
+function getIsochroneScore(properties, isochroneMinutes){
+  const key = `walk_${isochroneMinutes}min_score`;
+  return properties[key] ?? properties.normalized_da_score ?? 5;
+}
+
+function scoreToColor(score, alpha) {
+  //switch (feature.properties.normalized_da_score) {
+  switch (score){
     case 1:  return [235, 50,  60,  alpha];
     case 2:  return [220, 70,  40,  alpha];
     case 3:  return [230, 110, 35,  alpha];
@@ -17,14 +23,16 @@ function scoreToColor(feature, alpha) {
   }
 }
 
-export function getDisseminationAreaLayer({ data, visible = true, onClick, scoreWeights } = {}) {
+export function getDisseminationAreaLayer({ data, visible = true, onClick, scoreWeights, isochroneMinutes } = {}) {
    return new GeoJsonLayer({
     id: 'dissemination-areas',
     data,
     filled: true,
     getFillColor: (feature) => {
-      const score = computeWeightedScore(feature.properties, scoreWeights);
-      return scoreToColor({ ...feature, properties: { ...feature.properties, normalized_da_score: score } }, 80);
+      const isoScore = getIsochroneScore(feature.properties, isochroneMinutes);
+      
+      const score = computeWeightedScore({...feature.properties, normalized_da_score: isoScore}, scoreWeights);
+      return scoreToColor(score, 80);
     },
     stroked: true,
     getLineColor: [128, 128, 128],
@@ -33,16 +41,17 @@ export function getDisseminationAreaLayer({ data, visible = true, onClick, score
     visible,
     onClick,
     updateTriggers: {
-      getFillColor: [data, scoreWeights],
+      getFillColor: [data, scoreWeights, isochroneMinutes],
     },
   });
 }
 
-export function getDAHighlightLayer({ visible = true, selectedDA } = {}) {
+export function getDAHighlightLayer({ visible = true, selectedDA, isochroneMinutes } = {}) {
   if (!selectedDA) return null;
 
   const highlightData = {type: 'FeatureCollection', features:[selectedDA]};
-  const [r, g, b] = scoreToColor(selectedDA, 255);
+  const isoScore = getIsochroneScore(selectedDA.properties, isochroneMinutes);
+  const [r, g, b] = scoreToColor(isoScore, 255);
 
   return [
     new GeoJsonLayer({

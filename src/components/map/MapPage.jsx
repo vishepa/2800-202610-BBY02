@@ -44,6 +44,8 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
         transitWeight: 1,
     });
 
+    const [isochroneMinutes, setIsochroneMinutes] = useState(10);
+
     useEffect(() => {
         if (!uid) return;
         if (hasSeen(uid, "welcome")) setShowWelcome(false);
@@ -152,6 +154,8 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
                     disseminationData={disseminationData}
                     selectedCategory={selectedCategory}
                     scoreWeights={scoreWeights}
+                    isochroneMinutes={isochroneMinutes}
+                    setIsochroneMinutes={setIsochroneMinutes}
                     placedAssets={placedAssets}
                     addPlacedAsset={addPlacedAsset}
                     showSimulation={simShownOnMap}
@@ -178,6 +182,8 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
                                 setSelectedCategory={setSelectedCategory}
                                 scoreWeights={scoreWeights}
                                 setScoreWeights={setScoreWeights}
+                                isochroneMinutes={isochroneMinutes}
+                                setIsochroneMinutes={setIsochroneMinutes}
                                 placedAssets={placedAssets}
                                 removePlacedAsset={removePlacedAsset}
                                 clearPlacedAssets={clearPlacedAssets}
@@ -212,6 +218,8 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
                                 setSelectedCategory={setSelectedCategory}
                                 scoreWeights={scoreWeights}
                                 setScoreWeights={setScoreWeights}
+                                isochroneMinutes={isochroneMinutes}
+                                setIsochroneMinutes={setIsochroneMinutes}
                                 placedAssets={placedAssets}
                                 removePlacedAsset={removePlacedAsset}
                                 clearPlacedAssets={clearPlacedAssets}

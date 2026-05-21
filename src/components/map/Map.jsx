@@ -37,6 +37,7 @@ export function Map({
     disseminationData,
     selectedCategory,
     scoreWeights,
+    isochroneMinutes,
     placedAssets,
     addPlacedAsset,
     showSimulation,
@@ -139,9 +140,11 @@ export function Map({
             visible: disseminationLayerVisible,
             onClick: info => {handleClick(info, 'dissemination-areas')},
             scoreWeights,
+            isochroneMinutes,
             }),
         ...(getDAHighlightLayer({
             selectedDA,
+            isochroneMinutes,
             visible: disseminationLayerVisible,
         }) ?? []),
         // Transit stops render below food assets/clusters so the food layer
@@ -174,7 +177,7 @@ export function Map({
         inPlacementMode, transitData, transitLayerVisible, activeRoutes,
         disseminationLayerVisible, disseminationData, handleClick, placedAssets, 
         showSimulation, setSelectedFoodAsset, setSidebarOpen, 
-        selectedDA, scoreWeights]);
+        selectedDA, scoreWeights, isochroneMinutes]);
 
     // search bar
     const handleAssetSelect = (asset) => {
