@@ -1,16 +1,10 @@
 // Always-visible layer toggle panel pinned to the top-right of the map.
 // The collapsible-button incarnation was retired so the toggles never
-// hide what the user just changed; sub-panels (like the food category
-// filter) slot in as `children` and unfold via `childrenOpen`.
+// hide what the user just changed.
 //
 // Filename kept as FilterDropdown for now to avoid churn in callers;
 // rename is fair game in a follow-up.
-const FilterDropdown = ({
-  toggles,
-  heritageMode = false,
-  children,
-  childrenOpen = false,
-}) => {
+const FilterDropdown = ({ toggles, heritageMode = false }) => {
   const visibleCount = toggles.filter((t) => t.visible).length;
 
   return (
@@ -21,8 +15,7 @@ const FilterDropdown = ({
           : "bg-white"
       }`}
     >
-      {/* Layers section — permanent. */}
-      <div className="px-4 pt-3 pb-2">
+      <div className="px-4 pt-3 pb-3">
         <div className="flex items-baseline justify-between mb-2">
           <span className="text-sm font-semibold">Layers</span>
           <span
@@ -52,33 +45,6 @@ const FilterDropdown = ({
           ))}
         </ul>
       </div>
-
-      {/* Unfolding sub-section. Uses the `grid-template-rows: 0fr → 1fr`
-          collapse trick so the animation runs off the child's natural
-          height — no need to pin a pixel max. The inner overflow-hidden
-          + min-h-0 pair keeps content from leaking while collapsed.
-          Children stay mounted while closed so any selection state
-          (e.g. active food categories) is preserved across toggles. */}
-      {children && (
-        <div
-          aria-hidden={!childrenOpen}
-          className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
-            childrenOpen
-              ? "grid-rows-[1fr] opacity-100"
-              : "grid-rows-[0fr] opacity-0"
-          }`}
-        >
-          <div className="overflow-hidden min-h-0">
-            <div
-              className={`border-t ${
-                heritageMode ? "border-[#5d4037]/30" : "border-gray-200"
-              }`}
-            >
-              {children}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

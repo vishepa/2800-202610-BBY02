@@ -2,7 +2,6 @@ import { useState, useCallback, useMemo, useEffect } from "react";
 import Map from "./Map.jsx";
 import SimulationToolbar from "./SimulationToolbar";
 import FilterDropdown from "./FilterDropdown";
-import FoodTypeFilter from "./FoodTypeFilter.jsx";
 import FeaturePopup from "./FeaturePopup";
 import TogglePage from "../shared/TogglePage.jsx";
 import { useDisseminationAreas } from "../../lib/hooks/useDisseminationAreas";
@@ -46,6 +45,12 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
     const [showSliderPopup, setShowSliderPopup] = useState(false);
     const [sliderPopupSeen, setSliderPopupSeen] = useState(false);
 
+    // null = every category visible; an array narrows the food-asset
+    // cluster index. Lifted here so the FoodTypeFilter UI (rendered
+    // inside SimulationToolbar) and the Map's data layer share one
+    // source of truth.
+    const [activeFoodCategories, setActiveFoodCategories] = useState(null);
+
     const [scoreWeights, setScoreWeights] = useState({
         incomeWeight: 1,
         programWeight: 1,
@@ -69,11 +74,6 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
     const [disseminationLayerVisible, setDisseminationLayerVisible] = useState(true);
 
     const [selectedCategory, setSelectedCategory] = useState(null); // null means "all types"
-    // null = every category visible; an array narrows the food-asset cluster
-    // index. Lifted to MapPage so the FoodTypeFilter UI (rendered next to
-    // FilterDropdown below) and the Map's data layer share one source of
-    // truth.
-    const [activeFoodCategories, setActiveFoodCategories] = useState(null);
     // placedAssets is lifted to App so a saved simulation can be restored
     // from the account page — see App.jsx.
     // const [selectedDA, setSelectedDA] = useState(null); // clicked dissemination area
@@ -85,8 +85,8 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
     // falls back to the untouched baseline data.
     const simShownOnMap = active === "sim" && simVisible;
     const disseminationData = useMemo(
-        () => (simShownOnMap ? applySimulation(baselineDA, placedAssets) : baselineDA),
-        [baselineDA, placedAssets, simShownOnMap],
+        () => (simShownOnMap ? applySimulation(baselineDA, placedAssets, scoreWeights, isochroneMinutes) : baselineDA),
+        [baselineDA, placedAssets, simShownOnMap, scoreWeights, isochroneMinutes],
     );
 
     // Brief "Vancouver, if planners had MapLibre in 1974." card. Fades in
@@ -266,6 +266,8 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
                                 simVisible={simVisible}
                                 setSimVisible={setSimVisible}
                                 selectedItem={selectedItem}
+                                activeFoodCategories={activeFoodCategories}
+                                setActiveFoodCategories={setActiveFoodCategories}
                             />
                         </div>
                     </div>
@@ -311,30 +313,22 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
                                 simVisible={simVisible}
                                 setSimVisible={setSimVisible}
                                 selectedItem={selectedItem}
+                                activeFoodCategories={activeFoodCategories}
+                                setActiveFoodCategories={setActiveFoodCategories}
                             />
                         </div>
                     </div>
                 </>
             )}
 
-            {/* Layer panel is always visible (no collapse). The food category
-                sub-filter is nested as children and unfolds when the food
-                layer is on; gated on !heritageMode too since that mode
-                forces the food layer off visually (Map.jsx). The state stays
-                mounted while collapsed so reselected categories survive a
-                layer-toggle flip. */}
+            {/* Always-visible layer toggle panel (no collapse button).
+                The food category filter that used to nest here now
+                lives inside SimulationToolbar — see that component
+                for the icon-grouped checkbox list. */}
             <div className="absolute top-0 right-0 z-30">
-                <FilterDropdown
-                    toggles={toggles}
-                    heritageMode={heritageMode}
-                    childrenOpen={foodLayerVisible && !heritageMode}
-                >
-                    <FoodTypeFilter
-                        activeCategories={activeFoodCategories}
-                        onChange={setActiveFoodCategories}
-                    />
-                </FilterDropdown>
+                <FilterDropdown toggles={toggles} heritageMode={heritageMode} />
             </div>
+
 
             {/* Heritage easter egg: centered intro card + persistent exit pill.
                 The card auto-dismisses after a few seconds; the pill stays
