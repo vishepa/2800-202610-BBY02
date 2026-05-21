@@ -40,6 +40,7 @@ export function Map({
     placedAssets,
     addPlacedAsset,
     showSimulation,
+    focusSignal,
     selectedItem,
     setSelectedDA,
     setSelectedFoodAsset,
@@ -62,6 +63,13 @@ export function Map({
     const inPlacementMode = active === 'sim' && selectedCategory !== null;
     const selectedDA = selectedItem?.type === 'da' ? selectedItem.data : null;
 
+    // Tracks whether MapLibre has finished loading its style — guards the
+    // focus effect below so we don't try to flyTo on an unloaded map.
+    const [mapLoaded, setMapLoaded] = useState(false);
+    // Last focusSignal value we've already flown to (so re-renders don't
+    // re-fly to the same load).
+    const lastFocusedRef = useRef(0);
+
     // Screen width constants
     const width = useScreenWidth();
     const isDesktop = width >= 760;
@@ -76,6 +84,11 @@ export function Map({
             bbox: [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()],
         });
     }, []);
+
+    const handleMapLoad = useCallback(() => {
+        setMapLoaded(true);
+        handleMapMove();
+    }, [handleMapMove]);
 
     const foodClusterIndex = useMemo(
         () => buildFoodClusterIndex(foodData, activeFoodCategories),
@@ -132,6 +145,52 @@ export function Map({
         const [lng, lat] = info.coordinate;
         addPlacedAsset(selectedCategory, lat, lng);
     }, [inPlacementMode, selectedCategory, addPlacedAsset]);
+
+    // When App bumps focusSignal (e.g. loading a saved simulation), fly the
+    // camera to the centroid of the placed assets at a close, fixed zoom.
+    // Gated on mapLoaded so we don't try to flyTo on a map whose style is
+    // still loading (e.g. right after remounting from the account page).
+    // We also wait for the next 'idle' event before firing the fly — that
+    // way the initial DA recompute + deck.gl layer setup finishes first,
+    // so the animation isn't competing for the main thread (otherwise the
+    // animation's wall-clock timer ticks while JS is blocked and the fly
+    // appears to "jump" near the end).
+    // lastFocusedRef tracks the most recent focusSignal we've consumed so
+    // unrelated re-renders (placedAssets edits, etc.) don't re-fly.
+    useEffect(() => {
+        if (!focusSignal) return;
+        if (focusSignal === lastFocusedRef.current) return;
+        if (!mapLoaded) return;
+        if (!placedAssets || placedAssets.length === 0) return;
+        const m = mapRef.current;
+        if (!m) return;
+        lastFocusedRef.current = focusSignal;
+
+        // Centroid of the placed assets.
+        let sumLng = 0, sumLat = 0;
+        for (const a of placedAssets) {
+            sumLng += a.lng;
+            sumLat += a.lat;
+        }
+        const center = [sumLng / placedAssets.length, sumLat / placedAssets.length];
+
+        // Fire once via either path, whichever fires first. The fallback
+        // setTimeout guards against the (rare) case where 'idle' never
+        // fires within a reasonable window.
+        let fired = false;
+        const fly = () => {
+            if (fired) return;
+            fired = true;
+            m.flyTo({ center, zoom: 14, duration: 2000, essential: true, curve: 1.42 });
+        };
+        m.once?.('idle', fly);
+        const fallbackId = setTimeout(fly, 1500);
+
+        return () => {
+            m.off?.('idle', fly);
+            clearTimeout(fallbackId);
+        };
+    }, [focusSignal, mapLoaded, placedAssets]);
 
     const LAYERS = useMemo( () => [
         getDisseminationAreaLayer({
@@ -196,7 +255,7 @@ export function Map({
                     mapStyle={MAP_STYLE}
                     minZoom={MIN_ZOOM}
                     maxZoom={MAX_ZOOM}
-                    onLoad={handleMapMove}
+                    onLoad={handleMapLoad}
                     onMove={handleMapMove}
                 >
                     <NavigationControl

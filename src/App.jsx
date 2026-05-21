@@ -10,9 +10,15 @@ export default function App() {
   // map ↔ account page switch and can be restored when loading a saved one.
   const [placedAssets, setPlacedAssets] = useState([]);
 
+  // Counter that increments every time a saved simulation is loaded. The
+  // Map watches this to fit its camera to the placed-asset bounds — a
+  // counter (not a boolean) lets the same simulation be re-focused.
+  const [focusSignal, setFocusSignal] = useState(0);
+
   // Restore a saved simulation onto the map and switch to the map view.
   const loadSimulation = useCallback((sim) => {
     setPlacedAssets(sim.placed_assets ?? []);
+    setFocusSignal(n => n + 1);
     setPage("map");
   }, []);
 
@@ -33,6 +39,7 @@ export default function App() {
             setPage={setPage}
             placedAssets={placedAssets}
             setPlacedAssets={setPlacedAssets}
+            focusSignal={focusSignal}
           />
         )}
       </div>

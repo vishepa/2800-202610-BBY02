@@ -23,7 +23,7 @@ function markSeen(userId, name) {
     localStorage.setItem(tutorialKey(userId, name), "1");
 }
 
-export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
+export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusSignal }) {
     const { user } = useAuth();
     const uid = user?.id;
 
@@ -130,6 +130,21 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
         setActive(mode);
     }, [simPopupSeen, uid]);
 
+    // Loading a saved simulation from the account page bumps focusSignal.
+    // Drop the user straight into Sim mode so the placed assets are visible.
+    // We intentionally bypass handleSetActive here so the one-time "Simulation
+    // Mode" tutorial popup doesn't fire — the user is loading a saved sim,
+    // they already know what Sim mode is.
+    useEffect(() => {
+        if (!focusSignal) return;
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- responding to a parent signal
+        setActive("sim");
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- responding to a parent signal
+        setSidebarOpen(true);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- responding to a parent signal
+        setSimVisible(true);
+    }, [focusSignal]);
+
     const width = useScreenWidth();
     const isDesktop = width >= 760;
 
@@ -155,6 +170,7 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets }) {
                     placedAssets={placedAssets}
                     addPlacedAsset={addPlacedAsset}
                     showSimulation={simShownOnMap}
+                    focusSignal={focusSignal}
                     selectedItem={selectedItem}
                     setSelectedDA={handleSelectDA}
                     setSelectedFoodAsset={handleSelectFoodAsset}
