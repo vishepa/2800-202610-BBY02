@@ -11,7 +11,7 @@ export default function DAInfoPanel({ properties, placedAssets = [], active = 'm
     );
 
     return (
-        <div className="text-sm" style={{ fontFamily: 'IBM Plex Mono, monospace' }}>
+        <div className="text-sm">
             {/* Header */}
             <h3 className="font-semibold text-base mb-3">
                 Area {properties.dauid}
