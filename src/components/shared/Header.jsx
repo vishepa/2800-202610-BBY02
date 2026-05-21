@@ -1,11 +1,12 @@
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { useScreenWidth } from "./widthHelper";
+import TogglePage from "./TogglePage.jsx";
 
 // Konami window: clicks more than this many ms apart restart the count.
 const CLICK_WINDOW_MS = 1200;
 const CLICKS_TO_TRIGGER = 5;
 
-export default function Header({ sidebarOpen, onSecretToggle, heritageMode }) {
+export default function Header({  sidebarOpen, page, setPage, onSecretToggle, heritageMode }) {
     const width = useScreenWidth();
     const clickCount = useRef(0);
     const lastClickAt = useRef(0);
@@ -60,6 +61,7 @@ export default function Header({ sidebarOpen, onSecretToggle, heritageMode }) {
             >
                 The Map
             </h1>
+            <TogglePage page={page} setPage={setPage} sidebarOpen={sidebarOpen} />
         </div>
     );
 }

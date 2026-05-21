@@ -31,12 +31,14 @@ export default function App() {
   return (
     <div className="flex flex-col w-full h-screen">
       <Header
-        sidebarOpen={useState(false)}
+        sidebarOpen={useState(false)} 
+        page={page} 
+        setPage={setPage}
         onSecretToggle={triggerHeritage}
         heritageMode={heritageMode}
       />
       <div className="flex-1 relative overflow-hidden">
-        { page === "account" ? (
+        {page === "account" ? (
           <AccountPage
             onBack={() => setPage("map")}
             page={page}

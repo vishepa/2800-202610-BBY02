@@ -173,7 +173,8 @@ export function SimulationToolbar({
                 <button
                     type="button"
                     onClick={() => setSimVisible(v => !v)}
-                    className="flex-1 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 font-semibold rounded-lg transition-colors"
+                    className="flex-1 py-2 bg-blue-100 hover:bg-blue-200 text-green-600 font-semibold rounded-lg transition-colors"
+                    style={{fontfamily : "playfair display"}}                
                 >
                     {simVisible ? "Hide" : "Show"} Simulation
                 </button>
@@ -182,6 +183,7 @@ export function SimulationToolbar({
                 type="button"
                 onClick={handleSaveClick}
                 className="mt-2 w-full py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors"
+                style={{fontfamily : "playfair display"}}
             >
                 Save Simulation
             </button>
@@ -201,8 +203,9 @@ export function SimulationToolbar({
 
     if (width >= 760) {
         return (
-            <div className="p-4">
-                <h2 className="text-xl font-bold mb-4">
+            <div className="p-4"
+                style={{ height: "100%", boxSizing: "border-box" }}>
+                <h2 className="text-xl font-bold mb-4 pl-5">
                     {active === "sim" ? "Simulation Toolbar" : "Map Data Display"}
                 </h2>
                 {active === "sim" ? simContent : daInfoContent}
@@ -211,8 +214,8 @@ export function SimulationToolbar({
     } else {
         return (
             <div className="flex flex-col h-full p-4">
-                <div className="flex-1 p-4">
-                    <h2 className="text-xl font-bold mb-4">
+                <div className="flex-1 pl-10">
+                    <h2 className="text-xl font-bold mb-4 pl-5">
                         {active === "sim" ? "Simulation Toolbar" : "Map Data Display"}
                     </h2>
                     {active === "sim" ? simContent : daInfoContent}

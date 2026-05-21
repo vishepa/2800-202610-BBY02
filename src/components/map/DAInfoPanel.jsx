@@ -76,7 +76,7 @@ export default function DAInfoPanel({ properties, placedAssets = [], active = 'm
             {/* AI Summary */}
             <div>
                 <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium text-gray-700">AI Insight</h4>
+                    <h4 className="font-medium text-gray-700" style={{ fontFamily: 'Playfair Display, serif' }}>AI Insight</h4>
                     <div className="flex gap-1">
                         <button
                             onClick={() => setPersona('resident')}
