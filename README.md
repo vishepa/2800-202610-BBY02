@@ -4,7 +4,7 @@
 
 ## Project Description
 
-A web-based interactive map that visualizes food accessibility across Vancouver's dissemination areas, helping residents and urban planners identify food deserts and simulate the impact of new food assets.
+Onion, maps food access across Vancouver at the dissemination-area level, combining food assets, transit, income, and walkability into a single vulnerability score. Users can adjust the weighting of each factor, set walking distances, and simulate the impact of new infrastructure by dropping new food assets onto the map and instantly seeing how the vulnerability scores change. Logged-in users can save and share scenarios, making it a great planning tool. 
 
 ---
 
