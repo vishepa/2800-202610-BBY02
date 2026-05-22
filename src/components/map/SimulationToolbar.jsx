@@ -214,10 +214,12 @@ export function SimulationToolbar({
                 {active === "sim" ? simContent : (
                     <div>
                         {daInfoContent}
-                        <FoodTypeFilter
-                            activeCategories={activeFoodCategories}
-                            onChange={setActiveFoodCategories}
-                        />
+                        <div className="mt-4 pt-4 border-t border-gray-200">
+                            <FoodTypeFilter
+                                activeCategories={activeFoodCategories}
+                                onChange={setActiveFoodCategories}
+                            />
+                        </div>
                     </div>
                 )}
             </div>
@@ -232,10 +234,12 @@ export function SimulationToolbar({
                     {active === "sim" ? simContent : (
                     <div>
                         {daInfoContent}
-                        <FoodTypeFilter
-                            activeCategories={activeFoodCategories}
-                            onChange={setActiveFoodCategories}
-                        />
+                        <div className="mt-4 pt-4 border-t border-gray-200">
+                            <FoodTypeFilter
+                                activeCategories={activeFoodCategories}
+                                onChange={setActiveFoodCategories}
+                            />
+                        </div>
                     </div>
                 )}
                 </div>
