@@ -74,6 +74,20 @@ A web-based interactive map that visualizes food accessibility across Vancouver'
 ├── .env                                            # Frontend environment variables (not committed)
 ├── .gitignore
 │
+├── docs/
+│   ├── api.md                                      # API endpoint documentation
+│   ├── architecture.md                             # Architecture overview
+│   └── testing-plan.md                             # Manual testing plan
+│
+├── public/
+│   ├── favicon.svg                                 # Browser tab icon
+│   ├── icons.svg                                   # SVG icon sprite
+│   ├── map.png                                     # Map preview image
+│   ├── user.png                                    # Default user avatar
+│   └── icons/
+│       ├── map-pins/                               # Map marker icons by food category
+│       └── sim-pins/                               # Simulation marker icons by food category
+│
 ├── server/
 │   ├── app.js                                      # Express entry point, route mounting
 │   ├── databaseConnection.js                       # PostgreSQL connection pool
