@@ -15,14 +15,6 @@ BEGIN
     WHEN 'Free Grocery Items'                                  THEN 9
     WHEN 'Public Markets'                                      THEN 8
     WHEN 'Specialty Food Stores'                               THEN 8
-    WHEN 'Specialty East Asian Food Stores'                    THEN 8
-    WHEN 'Specialty European Food Stores'                      THEN 8
-    WHEN 'Specialty Filipino Food Stores'                      THEN 8
-    WHEN 'Specialty Halal Food Stores'                         THEN 8
-    WHEN 'Specialty Japanese Food Stores'                      THEN 8
-    WHEN 'Specialty Latin American Food Stores'                THEN 8
-    WHEN 'Specialty Mediterranean and Middle Eastern Food Stores' THEN 7
-    WHEN 'Specialty South Asian Food Stores'                   THEN 8
     WHEN 'Small Food Stores'                                   THEN 7
     WHEN 'Small Cultural Food Business'                        THEN 7
     WHEN 'Free Meal'                                           THEN 6
@@ -31,33 +23,19 @@ BEGIN
     WHEN 'Youth Free and low cost meals'                       THEN 5
     WHEN 'Free Food Pantries'                                  THEN 4
     WHEN 'Free Food Pantries / Community Fridges'              THEN 4
-    WHEN 'Food Shopping and Delivery'                          THEN 4
     WHEN 'Indigenous Food Program'                             THEN 4
     WHEN 'Mobile or Seasonal Markets'                          THEN 3
-    WHEN 'Farmer''s Market Coupon Programs'                    THEN 3
     WHEN 'Community Shared Agriculture (CSA)'                  THEN 3
     WHEN 'Food Recovery and Waste Prevention'                  THEN 3
-    WHEN 'Community Kitchen Programs'                          THEN 2
-    WHEN 'Food Skills Workshops'                               THEN 2
-    WHEN 'Kitchen Access'                                      THEN 2
-    WHEN 'Youth Community Kitchens'                            THEN 2
     WHEN 'Community Gardens'                                   THEN 2
     WHEN 'Community Orchards'                                  THEN 2
-    WHEN 'Garden Skills and Education'                         THEN 2
     WHEN 'Indigenous Gardens'                                  THEN 2
     WHEN 'Other Garden Programs'                               THEN 2
-    WHEN 'Seed Libraries'                                      THEN 2
     WHEN 'Urban Farms'                                         THEN 2
-    WHEN 'Urban Forests'                                       THEN 2
     WHEN 'Yard Share Programs'                                 THEN 2
     WHEN 'Commissary Kitchens'                                 THEN 1
-    WHEN 'Community Centres'                                   THEN 1
-    WHEN 'Family Place'                                        THEN 1
-    WHEN 'Food Social Enterprise'                              THEN 1
-    WHEN 'Health Centres'                                      THEN 1
     WHEN 'Neighbourhood Food Networks'                         THEN 1
     WHEN 'Other Community-based Food Organizations'            THEN 1
-    WHEN 'Religious Organizations'                             THEN 1
     ELSE 0
   END;
 END;
@@ -100,7 +78,6 @@ BEGIN
         WHEN 'Small Food Stores'                                      THEN 'retail'
         WHEN 'Small Cultural Food Business'                           THEN 'retail'
         WHEN 'Public Markets'                                         THEN 'retail'
-        WHEN 'Food Shopping and Delivery'                             THEN 'retail'
         WHEN 'No Cost or Low Cost Grocery Items'                      THEN 'program'
         WHEN 'Free Grocery Items'                                     THEN 'program'
         WHEN 'Free Meal'                                              THEN 'program'
@@ -109,6 +86,13 @@ BEGIN
         WHEN 'Youth Free and low cost meals'                          THEN 'program'
         WHEN 'Free Food Pantries'                                     THEN 'program'
         WHEN 'Free Food Pantries / Community Fridges'                 THEN 'program'
+        WHEN 'Indigenous Food Program'                                THEN 'program'
+        -- Growing tier
+        WHEN 'Community Gardens'                                      THEN 'growing'
+        WHEN 'Community Orchards'                                     THEN 'growing'
+        WHEN 'Indigenous Gardens'                                     THEN 'growing'
+        WHEN 'Urban Farms'                                            THEN 'growing'
+        WHEN 'Urban Forests'                                          THEN 'growing'
         ELSE 'neutral'
     END;
 END;
@@ -145,8 +129,9 @@ JOIN food_assets fa
 LEFT JOIN temp_da_context ctx
     ON ctx.dauid = da.dauid
 WHERE iso.source_type = 'food_asset' 
-  AND iso.profile = 'foot-walking' -- Update here to change the mode of transportation: 'foot-walking', 'driving-car'
-  AND iso.range_seconds IN (300, 600, 900); -- Update here to change isochrone walking distance: 300 = 5 minutes, 600 = 10 minutes, 900 = 15 minutes
+  AND iso.profile = 'driving-car' -- Update here to change the mode of transportation: 'foot-walking', 'driving-car'
+  AND iso.range_seconds IN (300, 600, 900); -- Distance: 300 = 5 minutes, 600 = 10 minutes, 900 = 15 minutes
+
 
 CREATE TEMPORARY TABLE temp_da_raw_scores AS
 SELECT 
@@ -165,34 +150,51 @@ FROM(
 GROUP BY dauid, iso_range;
 
 
+ALTER TABLE dissemination_areas
+    ADD COLUMN IF NOT EXISTS drive_5min_score INTEGER,
+    ADD COLUMN IF NOT EXISTS drive_10min_score INTEGER,
+    ADD COLUMN IF NOT EXISTS drive_15min_score INTEGER;
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Steps 4 & 5: Display computed raw and normalized DA scores
 -- ─────────────────────────────────────────────────────────────────────────────
-SELECT
-    dauid,
-    iso_range,
-    raw_da_score,
-    CASE
-        WHEN raw_da_score = 0 THEN 0
-        ELSE ntile_score 
-    END AS normalized_da_score
-    --ROUND(1 + PERCENT_RANK() OVER (ORDER BY total_score ASC) * 9)::INT AS normalized_da_score
-FROM (
-    SELECT
-        da_ranges.dauid,
-        da_ranges.iso_range,
-        COALESCE(s.total_score, 0) AS raw_da_score,
-        NTILE(10) OVER (ORDER BY COALESCE(s.total_score, 0) ASC) AS ntile_score
-    FROM (
-        SELECT d.dauid, r.iso_range
-        FROM dissemination_areas d
-        CROSS JOIN (VALUES(300), (600), (900)) AS r(iso_range)
-    ) da_ranges
-    LEFT JOIN temp_da_raw_scores s
-        ON s.dauid = da_ranges.dauid
-        AND s.iso_range = da_ranges.iso_range
-) scored
+UPDATE dissemination_areas da
+SET 
+    drive_5min_score = scored.score_300,
+    drive_10min_score = scored.score_600,
+    drive_15min_score = scored.score_900
 
-ORDER BY dauid, iso_range;
+FROM (
+    SELECT 
+        dauid,
+        MAX(CASE WHEN iso_range = 300 THEN normalized_da_score END) AS score_300,
+        MAX(CASE WHEN iso_range = 600 THEN normalized_da_score END) AS score_600,
+        MAX(CASE WHEN iso_range = 900 THEN normalized_da_score END) AS score_900
+    FROM (
+        SELECT
+            dauid,
+            iso_range,
+            CASE
+                WHEN raw_da_score = 0 THEN 0
+                ELSE ntile_score 
+            END AS normalized_da_score
+        FROM (
+            SELECT
+                da_ranges.dauid,
+                da_ranges.iso_range,
+                COALESCE(s.total_score, 0) AS raw_da_score,
+                NTILE(10) OVER (ORDER BY COALESCE(s.total_score, 0) ASC) AS ntile_score
+            FROM (
+                SELECT d.dauid, r.iso_range
+                FROM dissemination_areas d
+                CROSS JOIN (VALUES(300), (600), (900)) AS r(iso_range)
+            ) da_ranges
+            LEFT JOIN temp_da_raw_scores s
+                ON s.dauid = da_ranges.dauid
+                AND s.iso_range = da_ranges.iso_range
+        ) inner_scored
+    ) scored_all
+    GROUP BY dauid
+) scored
+WHERE da.dauid = scored.dauid;
