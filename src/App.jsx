@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import MapPage from "./components/map/MapPage";
-import AccountPage from "./components/account/account";
+import AccountPage from "./components/account/Account";
 import Header from "./components/shared/Header.jsx";
 
 export default function App() {

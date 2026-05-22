@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useScreenWidth } from "../shared/widthHelper";
+import { useScreenWidth } from "../shared/useScreenWidth";
 import { useAuth } from "../shared/authentication/AuthContext.jsx";
 import MapSimButtonMobile from "./MapSimButtonMobile";
 import Tooltip from "./Tooltip";
@@ -10,7 +10,7 @@ import SaveSimulationModal from "./simulation/SaveSimulationModal";
 import DAInfoPanel from "./DAInfoPanel";
 import FoodInfoPanel from "./FoodInfoPanel";
 import TransitInfoPanel from "./TransitInfoPanel";
-import LoginSignupPopup from "../account/loginSignupPopup.jsx";
+import LoginSignupPopup from "../account/LoginSignupPopup.jsx";
 
 function SliderRow({ label, tooltip, value, onChange }) {
     const [showTip, setShowTip] = useState(false);

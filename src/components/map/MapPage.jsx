@@ -6,7 +6,7 @@ import FeaturePopup from "./FeaturePopup";
 import TogglePage from "../shared/TogglePage.jsx";
 import { useDisseminationAreas } from "../../lib/hooks/useDisseminationAreas";
 import { applySimulation } from "../../lib/scoring";
-import { useScreenWidth } from "../shared/widthHelper";
+import { useScreenWidth } from "../shared/useScreenWidth";
 import { useAuth } from "../shared/authentication/AuthContext";
 
 function tutorialKey(userId, name) {

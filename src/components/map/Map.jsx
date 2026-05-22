@@ -9,13 +9,13 @@ import {
     MAP_STYLE  
 } from '../../constants/mapDefaults.js';
 // import { TestMarker } from './testMarker';
-import { useScreenWidth } from '../shared/widthHelper.jsx';
+import { useScreenWidth } from '../shared/useScreenWidth.jsx';
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import DeckGLOverlay  from './DeckGLOverlay';
 // import { getTestLayer } from '../../layers/TestLayer';
 import { getFoodAssetLayers, buildFoodClusterIndex } from '../../layers/foodAssetLayer';
 import { getTransitAssetLayer } from '../../layers/transitLayer.js';
-import { getSimAssetLayers } from "../../layers/SimAssetLayer.js";
+import { getSimAssetLayers } from "../../layers/simAssetLayer.js";
 
 import { useTransitStops } from '../../lib/hooks/useTransitStops.js';
 import { useFoodAssets } from '../../lib/hooks/useFoodAssets';
