@@ -80,7 +80,7 @@ A web-based interactive map that visualizes food accessibility across Vancouver'
 │   ├── package.json                                # Backend dependencies and scripts
 │   ├── .env                                        # Backend environment variables (not committed)
 │   ├── lib/
-│   │   └── gemini.js                               # Groq/Llama AI summary generation and caching
+│   │   └── groq.js                                 # Groq/Llama AI summary generation and caching
 │   └── routes/
 │       ├── foodAssets.js                            # CRUD for food asset locations
 │       ├── transitStops.js                         # Transit stop data
@@ -118,20 +118,20 @@ A web-based interactive map that visualizes food accessibility across Vancouver'
     ├── layers/
     │   ├── foodAssetLayer.js                       # deck.gl food asset markers
     │   ├── vulnerabilityLayer.js                   # Vulnerability heatmap layer
-    │   ├── AffordabilityLayer.js                   # Affordability choropleth
+    │   ├── affordabilityLayer.js                   # Affordability choropleth
     │   ├── disseminationAreaLayer.js               # DA boundary polygons
     │   ├── transitLayer.js                         # Transit stop markers
-    │   ├── SimAssetLayer.js                        # Simulated asset markers
+    │   ├── simAssetLayer.js                        # Simulated asset markers
     │   └── testLayer.js                            # Dev testing layer
     └── components/
         ├── LayerToggleDropdown.jsx                 # Map layer visibility controls
         ├── account/
-        │   ├── account.jsx                         # Account/profile page
-        │   └── loginSignupPopup.jsx                # Login and signup modal
+        │   ├── Account.jsx                         # Account/profile page
+        │   └── LoginSignupPopup.jsx                # Login and signup modal
         ├── shared/
         │   ├── Header.jsx                          # App header and navigation
         │   ├── TogglePage.jsx                      # Map/Sim mode toggle
-        │   ├── widthHelper.jsx                     # Responsive screen width hook
+        │   ├── useScreenWidth.jsx                  # Responsive screen width hook
         │   └── authentication/
         │       ├── AuthContext.jsx                  # React auth context provider
         │       ├── Authentication.jsx               # Auth state management
@@ -338,7 +338,7 @@ This project is licensed under the MIT License. See the LICENSE file for details
 ### Groq API (Llama 3.3 70B)
 - **What**: The Groq API is used to generate natural language summaries of dissemination areas.
 - **How**: When a user clicks a dissemination area and requests a summary, the backend sends the area's demographic statistics and nearby food asset data to Groq's chat completion endpoint. The AI returns a 3-4 sentence summary tailored to either a "resident" or "planner" persona.
-- **Where in the code**: `server/lib/gemini.js` handles prompt construction and API calls (note: the file is named `gemini.js` for historical reasons but uses the Groq API, not Gemini). `server/routes/aiSummary.js` is the Express route. `src/lib/hooks/useAISummary.js` is the frontend hook.
+- **Where in the code**: `server/lib/groq.js` handles prompt construction and API calls. `server/routes/aiSummary.js` is the Express route. `src/lib/hooks/useAISummary.js` is the frontend hook.
 - **Caching**: Summaries are cached in memory on the server to avoid redundant API calls for the same area and persona.
 
 ### Supabase
