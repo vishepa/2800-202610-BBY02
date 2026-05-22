@@ -118,7 +118,6 @@ A web-based interactive map that visualizes food accessibility across Vancouver'
     ├── layers/
     │   ├── foodAssetLayer.js                       # deck.gl food asset markers
     │   ├── vulnerabilityLayer.js                   # Vulnerability heatmap layer
-    │   ├── affordabilityLayer.js                   # Affordability choropleth
     │   ├── disseminationAreaLayer.js               # DA boundary polygons
     │   ├── transitLayer.js                         # Transit stop markers
     │   ├── simAssetLayer.js                        # Simulated asset markers
