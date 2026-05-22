@@ -1,4 +1,4 @@
-# Vancouver Food Accessibility Map
+# Vancouver Food Accessibility Map - Onion Map
 
 ---
 
