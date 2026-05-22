@@ -102,20 +102,16 @@ A web-based interactive map that visualizes food accessibility across Vancouver'
 │       ├── disseminationAreaBoundaries.js           # DA polygon boundaries (GeoJSON)
 │       ├── disseminationAreaStatistics.js           # DA demographic/income stats
 │       ├── isochrones.js                           # Walking-distance isochrone polygons
-│       ├── vulnerabilityScores.js                  # Food vulnerability scoring
-│       ├── simulation.js                           # Simulation save/load
 │       └── aiSummary.js                            # AI summary endpoint
 │
 └── src/
     ├── Main.jsx                                    # React app entry, router setup
     ├── App.jsx                                     # Top-level layout, page switching
-    ├── App.css                                     # Global styles
     ├── index.css                                   # Tailwind base imports
     ├── constants/
     │   ├── mapDefaults.js                          # Default map center, zoom, bounds
     │   └── foodCategories.js                       # Food asset category definitions
     ├── lib/
-    │   ├── api.js                                  # Frontend API call helpers
     │   ├── scoring.js                              # Turf.js simulation scoring logic
     │   ├── disseminationFacts.js                   # DA data formatting utilities
     │   ├── heritage.js                             # Heritage mode easter egg logic
@@ -127,7 +123,6 @@ A web-based interactive map that visualizes food accessibility across Vancouver'
     │       └── useAISummary.js                      # Hook for AI summary requests
     ├── layers/
     │   ├── foodAssetLayer.js                       # deck.gl food asset markers
-    │   ├── vulnerabilityLayer.js                   # Vulnerability heatmap layer
     │   ├── disseminationAreaLayer.js               # DA boundary polygons
     │   ├── transitLayer.js                         # Transit stop markers
     │   └── simAssetLayer.js                        # Simulated asset markers
