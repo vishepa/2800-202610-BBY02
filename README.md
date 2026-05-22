@@ -97,10 +97,6 @@ A web-based interactive map that visualizes food accessibility across Vancouver'
     ├── App.jsx                                     # Top-level layout, page switching
     ├── App.css                                     # Global styles
     ├── index.css                                   # Tailwind base imports
-    ├── assets/
-    │   ├── hero.png
-    │   ├── react.svg
-    │   └── vite.svg
     ├── constants/
     │   ├── mapDefaults.js                          # Default map center, zoom, bounds
     │   └── foodCategories.js                       # Food asset category definitions
@@ -120,8 +116,7 @@ A web-based interactive map that visualizes food accessibility across Vancouver'
     │   ├── vulnerabilityLayer.js                   # Vulnerability heatmap layer
     │   ├── disseminationAreaLayer.js               # DA boundary polygons
     │   ├── transitLayer.js                         # Transit stop markers
-    │   ├── simAssetLayer.js                        # Simulated asset markers
-    │   └── testLayer.js                            # Dev testing layer
+    │   └── simAssetLayer.js                        # Simulated asset markers
     └── components/
         ├── LayerToggleDropdown.jsx                 # Map layer visibility controls
         ├── account/
@@ -147,7 +142,6 @@ A web-based interactive map that visualizes food accessibility across Vancouver'
             ├── TransitInfoPanel.jsx                # Transit stop detail panel
             ├── DeckGLOverlay.jsx                   # deck.gl overlay on MapLibre
             ├── Tooltip.jsx                         # Hover tooltip component
-            ├── TestMarker.jsx                      # Dev testing marker
             ├── MapSimButton.jsx                    # Simulation mode toggle (desktop)
             ├── MapSimButtonMobile.jsx              # Simulation mode toggle (mobile)
             ├── SimulationToolbar.jsx                # Simulation controls and sliders
