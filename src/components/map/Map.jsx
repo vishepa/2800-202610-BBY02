@@ -84,12 +84,12 @@ export function Map({
 
     const [foodViewport, setFoodViewport] = useState(null);
     const handleMapMove = useCallback(() => {
-        const m = mapRef.current;
-        if (!m) return;
-        const b = m.getBounds();
+        const map = mapRef.current;
+        if (!map) return;
+        const bounds = map.getBounds();
         setFoodViewport({
-            zoom: m.getZoom(),
-            bbox: [b.getWest(), b.getSouth(), b.getEast(), b.getNorth()],
+            zoom: map.getZoom(),
+            bbox: [bounds.getWest(), bounds.getSouth(), bounds.getEast(), bounds.getNorth()],
         });
     }, []);
 
@@ -216,12 +216,12 @@ export function Map({
     );
 
     const handleClusterClick = useCallback((cluster) => {
-        const m = mapRef.current;
-        if (!m || !foodClusterIndex) return;
+        const map = mapRef.current;
+        if (!map || !foodClusterIndex) return;
         const expansionZoom = foodClusterIndex.getClusterExpansionZoom(
             cluster.properties.cluster_id
         );
-        m.flyTo({
+        map.flyTo({
             center: cluster.geometry.coordinates,
             zoom: Math.min(expansionZoom, MAX_ZOOM),
         });
@@ -282,15 +282,15 @@ export function Map({
         if (focusSignal === lastFocusedRef.current) return;
         if (!mapLoaded) return;
         if (!placedAssets || placedAssets.length === 0) return;
-        const m = mapRef.current;
-        if (!m) return;
+        const map = mapRef.current;
+        if (!map) return;
         lastFocusedRef.current = focusSignal;
 
         // Centroid of the placed assets.
         let sumLng = 0, sumLat = 0;
-        for (const a of placedAssets) {
-            sumLng += a.lng;
-            sumLat += a.lat;
+        for (const asset of placedAssets) {
+            sumLng += asset.lng;
+            sumLat += asset.lat;
         }
         const center = [sumLng / placedAssets.length, sumLat / placedAssets.length];
 
@@ -301,13 +301,13 @@ export function Map({
         const fly = () => {
             if (fired) return;
             fired = true;
-            m.flyTo({ center, zoom: 14, duration: 2000, essential: true, curve: 1.42 });
+            map.flyTo({ center, zoom: 14, duration: 2000, essential: true, curve: 1.42 });
         };
-        m.once?.('idle', fly);
+        map.once?.('idle', fly);
         const fallbackId = setTimeout(fly, 1500);
 
         return () => {
-            m.off?.('idle', fly);
+            map.off?.('idle', fly);
             clearTimeout(fallbackId);
         };
     }, [focusSignal, mapLoaded, placedAssets]);

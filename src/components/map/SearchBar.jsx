@@ -59,10 +59,10 @@ function useFoodAssetSearch(onSelect) {
     }, 280);
   }, []);
 
-  const handleChange = (e) => {
-    const v = e.target.value;
-    setQuery(v);
-    search(v);
+  const handleChange = (event) => {
+    const value = event.target.value;
+    setQuery(value);
+    search(value);
   };
 
   const handleSelect = (asset) => {

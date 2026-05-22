@@ -119,8 +119,8 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
             return undefined;
         }
         setHeritageOverlayVisible(true);
-        const t = setTimeout(() => setHeritageOverlayVisible(false), 3500);
-        return () => clearTimeout(t);
+        const timeoutId = setTimeout(() => setHeritageOverlayVisible(false), 3500);
+        return () => clearTimeout(timeoutId);
     }, [heritageMode]);
 
     const handleSelectDA = useCallback((daFeature) => {
