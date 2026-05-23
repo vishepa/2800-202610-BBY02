@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useScreenWidth } from "../shared/widthHelper";
+import { useScreenWidth } from "../shared/useScreenWidth";
 import { useAuth } from "../shared/authentication/AuthContext.jsx";
 import MapSimButtonMobile from "./MapSimButtonMobile";
 import Tooltip from "./Tooltip";
@@ -10,7 +10,7 @@ import SaveSimulationModal from "./simulation/SaveSimulationModal";
 import DAInfoPanel from "./DAInfoPanel";
 import FoodInfoPanel from "./FoodInfoPanel";
 import TransitInfoPanel from "./TransitInfoPanel";
-import LoginSignupPopup from "../account/loginSignupPopup.jsx";
+import LoginSignupPopup from "../account/LoginSignupPopup.jsx";
 
 function SliderRow({ label, tooltip, value, onChange }) {
     const [showTip, setShowTip] = useState(false);
@@ -177,7 +177,7 @@ export function SimulationToolbar({
                     type="button"
                     onClick={() => setSimVisible(v => !v)}
                     className="flex-1 py-2 bg-blue-100 hover:bg-blue-200 text-green-600 font-semibold rounded-lg transition-colors"
-                    style={{fontfamily : "playfair display"}}                
+                    style={{ fontFamily: "Playfair Display, serif" }}
                 >
                     {simVisible ? "Hide" : "Show"} Simulation
                 </button>
@@ -186,7 +186,7 @@ export function SimulationToolbar({
                 type="button"
                 onClick={handleSaveClick}
                 className="mt-2 w-full py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors"
-                style={{fontfamily : "playfair display"}}
+                style={{ fontFamily: "Playfair Display, serif" }}
             >
                 Save Simulation
             </button>
@@ -214,10 +214,12 @@ export function SimulationToolbar({
                 {active === "sim" ? simContent : (
                     <div>
                         {daInfoContent}
-                        <FoodTypeFilter
-                            activeCategories={activeFoodCategories}
-                            onChange={setActiveFoodCategories}
-                        />
+                        <div className="mt-4 pt-4 border-t border-gray-200">
+                            <FoodTypeFilter
+                                activeCategories={activeFoodCategories}
+                                onChange={setActiveFoodCategories}
+                            />
+                        </div>
                     </div>
                 )}
             </div>
@@ -232,10 +234,12 @@ export function SimulationToolbar({
                     {active === "sim" ? simContent : (
                     <div>
                         {daInfoContent}
-                        <FoodTypeFilter
-                            activeCategories={activeFoodCategories}
-                            onChange={setActiveFoodCategories}
-                        />
+                        <div className="mt-4 pt-4 border-t border-gray-200">
+                            <FoodTypeFilter
+                                activeCategories={activeFoodCategories}
+                                onChange={setActiveFoodCategories}
+                            />
+                        </div>
                     </div>
                 )}
                 </div>

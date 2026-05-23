@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { query } from "../databaseConnection.js";
-import { generateDASummary, clearCacheEntry } from "../lib/gemini.js";
+import { generateDASummary, clearCacheEntry } from "../lib/groq.js";
 
 const router = Router();
 

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { useScreenWidth } from "./widthHelper";
+import { useScreenWidth } from "./useScreenWidth";
 import TogglePage from "./TogglePage.jsx";
 
 // Konami window: clicks more than this many ms apart restart the count.

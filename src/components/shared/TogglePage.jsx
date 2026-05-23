@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import accountIcon from "../../../public/user.png";
-import { useScreenWidth } from "./widthHelper";
+import mapIcon from "../../../public/map.png";
+import { useScreenWidth } from "./useScreenWidth";
 import { useAuth } from "./authentication/AuthContext.jsx";
-import LoginSignupPopup from "../account/loginSignupPopup.jsx";
+import LoginSignupPopup from "../account/LoginSignupPopup.jsx";
 
 // Two placements share the same auth/popup machinery:
 //   - "floating": fixed bottom-right circular button (mobile map view)
@@ -56,7 +57,7 @@ export default function TogglePage({
               : "bg-white border-gray-200 hover:bg-gray-50"
           }`}
         >
-          <img src={accountIcon} alt="" className="w-7 h-7 object-contain" />
+          <img src={page === "account" ? mapIcon : accountIcon} alt="" className="w-7 h-7 object-contain" />
         </button>
       </>
     );
@@ -72,7 +73,7 @@ export default function TogglePage({
         aria-label={ariaLabel}
         className="fixed bottom-6 right-6 z-[10] md:hidden w-16 h-16 rounded-full bg-white shadow-md flex items-center justify-center overflow-hidden"
       >
-        <img src={accountIcon} alt="" className="w-10 h-10 object-contain" />
+        <img src={page === "account" ? mapIcon : accountIcon} alt="" className="w-10 h-10 object-contain" />
       </button>
     </>
   );

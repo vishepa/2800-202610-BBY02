@@ -7,7 +7,6 @@ import disseminationAreaStatistics from './routes/disseminationAreaStatistics.js
 import transitStops from './routes/transitStops.js'
 import aiSummary from './routes/aiSummary.js'
 
-// TODO Testing this is a simpler implementation for the popup to work
 import disseminationArea from './routes/disseminationArea.js'
 
 
@@ -21,10 +20,6 @@ app.use('/api/isochrones', isochrones);
 app.use('/api/da-statistics', disseminationAreaStatistics);
 app.use('/api/transit-stops', transitStops);
 app.use('/api/ai/da-summary', aiSummary);
-// app.use('/api/vulnerability-scores', vulnerabilityScores);
-// app.use('/api/simulation', simulation);
-
-// TODO Testing this is a simpler implementation for the popup to work
 app.use('/api/dissemination-areas', disseminationArea);
 
 app.get('/api/test', (req, res) => {

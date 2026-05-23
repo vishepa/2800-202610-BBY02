@@ -6,7 +6,7 @@ import FeaturePopup from "./FeaturePopup";
 import TogglePage from "../shared/TogglePage.jsx";
 import { useDisseminationAreas } from "../../lib/hooks/useDisseminationAreas";
 import { applySimulation } from "../../lib/scoring";
-import { useScreenWidth } from "../shared/widthHelper";
+import { useScreenWidth } from "../shared/useScreenWidth";
 import { useAuth } from "../shared/authentication/AuthContext";
 
 function tutorialKey(userId, name) {
@@ -119,8 +119,8 @@ export default function MapPage({ setPage, placedAssets, setPlacedAssets, focusS
             return undefined;
         }
         setHeritageOverlayVisible(true);
-        const t = setTimeout(() => setHeritageOverlayVisible(false), 3500);
-        return () => clearTimeout(t);
+        const timeoutId = setTimeout(() => setHeritageOverlayVisible(false), 3500);
+        return () => clearTimeout(timeoutId);
     }, [heritageMode]);
 
     const handleSelectDA = useCallback((daFeature) => {
