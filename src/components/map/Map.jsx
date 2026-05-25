@@ -98,6 +98,12 @@ export function Map({
         handleMapMove();
     }, [handleMapMove]);
 
+    const handleFeatureHover = useCallback(({ object }) => {
+        const map = mapRef.current?.getMap?.();
+        if (!map) return;
+        map.getCanvas().style.cursor = object ? 'pointer' : '';
+    }, []);
+
     // Heatmap Heritage water tint: when the easter egg flips on, recolour
     // every water-fill layer in the Positron style to a desaturated blue-
     // grey that lands on the right "aged paper map" hue after the CSS
@@ -349,7 +355,7 @@ export function Map({
             zoom: foodViewport?.zoom,
             bbox: foodViewport?.bbox,
             visible: foodLayerVisible && !heritageMode,
-            onHover: ({ object, x, y }) => {/* sidebar update - add later */},
+            onHover: handleFeatureHover,
             onClick: ({ object, coordinate }) => {
                 if (!object || inPlacementMode) return;
                 setSelected({ object, coordinate, layerId: 'food-assets' });
