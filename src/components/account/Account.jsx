@@ -42,7 +42,7 @@ function AccountPage({ page, setPage, loadSimulation }) {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen flex flex-col">
+    <div className="bg-gray-100 h-full flex flex-col">
       <div className="flex flex-col md:flex-row flex-1 p-5 gap-5">
 
         {/* Profile */}

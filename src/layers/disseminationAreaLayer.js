@@ -47,6 +47,8 @@ export function getDisseminationAreaLayer({ data, visible = true, onClick, score
     pickable: true,
     visible,
     onClick,
+    autoHighlight: true,
+    highlightColor: [255, 255, 255, 120],
     updateTriggers: {
       getFillColor: [data, scoreWeights, heritageMode, isochroneMinutes],
       getLineColor: [heritageMode],
