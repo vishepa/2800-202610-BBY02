@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useAuth } from "../shared/authentication/AuthContext.jsx";
 
 export default function LoginSignupPopup({ onClose }) {
@@ -51,7 +52,8 @@ export default function LoginSignupPopup({ onClose }) {
     setSuccess("Account created! Check your email to confirm.");
   };
 
-  return (
+  // Rendered through a portal into <body> so the fixed-position backdrop always covers the full viewport.
+  return createPortal(
     /* Backdrop */
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
@@ -163,7 +165,8 @@ export default function LoginSignupPopup({ onClose }) {
           </p>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
