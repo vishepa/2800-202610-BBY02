@@ -96,6 +96,13 @@ export function Map({
     const handleMapLoad = useCallback(() => {
         setMapLoaded(true);
         handleMapMove();
+
+        const map = mapRef.current?.getMap?.();
+        if (!map) return;
+        map.getCanvas().style.cursor = 'default';
+
+        map.on('dragstart', () => { map.getCanvas().style.cursor = 'grabbing'; });
+        map.on('dragend',   () => { map.getCanvas().style.cursor = 'default'; });
     }, [handleMapMove]);
 
     const handleFeatureHover = useCallback(({ object }) => {
