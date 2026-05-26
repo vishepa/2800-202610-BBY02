@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { saveSimulation } from "../../../lib/simulations.js";
 
 // Modal for naming and persisting the current simulation (the set of
@@ -28,7 +29,8 @@ export default function SaveSimulationModal({ placedAssets, onClose, onSaved }) 
     }
   };
 
-  return (
+  // Rendered through a portal into <body> same aws the LoginSignupPopup, so the fixed-position backdrop always covers the full viewport.
+  return createPortal(
     /* Backdrop */
     <div
       className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50"
@@ -96,6 +98,7 @@ export default function SaveSimulationModal({ placedAssets, onClose, onSaved }) 
           </p>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
