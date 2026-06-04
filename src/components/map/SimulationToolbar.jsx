@@ -177,7 +177,6 @@ export function SimulationToolbar({
                     type="button"
                     onClick={() => setSimVisible(v => !v)}
                     className="flex-1 py-2 bg-blue-100 hover:bg-blue-200 text-green-600 font-semibold rounded-lg transition-colors"
-                    style={{ fontFamily: "Playfair Display, serif" }}
                 >
                     {simVisible ? "Hide" : "Show"} Simulation
                 </button>
@@ -186,7 +185,6 @@ export function SimulationToolbar({
                 type="button"
                 onClick={handleSaveClick}
                 className="mt-2 w-full py-2 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors"
-                style={{ fontFamily: "Playfair Display, serif" }}
             >
                 Save Simulation
             </button>
